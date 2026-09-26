@@ -48,4 +48,3 @@ Las APIs validan la identidad y separan los registros por usuario. Cada cotizaci
 No se calculan ahorros ni compatibilidad eléctrica sin información técnica validada. Requiere conexión para guardar. El catálogo no se sincroniza con Drive. El historial devuelve las 100 versiones más recientes. Las fuentes PDF estándar cubren texto latino.
 
 La fuente Manrope se distribuye con su licencia OFL en `public/fonts/OFL.txt`.
-

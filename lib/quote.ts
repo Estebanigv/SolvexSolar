@@ -1,0 +1,52 @@
+import raw from './catalog.json';
+import {z} from 'zod';
+export const systems=['ON GRID','ON GRID TRIFASICO','OFF GRID','HIBRIDO','HIBRIDO TRIFASICO'] as const;
+export const systemNames:Record<string,string>={'ON GRID':'On Grid monofásico','ON GRID TRIFASICO':'On Grid trifásico','OFF GRID':'Off Grid','HIBRIDO':'Híbrido monofásico','HIBRIDO TRIFASICO':'Híbrido trifásico'};
+export const productSchema=z.object({id:z.string().min(1).max(60),system:z.enum(systems),category:z.string().min(1).max(100),name:z.string().min(1).max(180),price:z.number().finite().min(0).max(1e10).nullable(),unit:z.string().min(1).max(50),source:z.string().max(200),watts:z.number().finite().min(0).max(2000).nullable()});
+export type Product=z.infer<typeof productSchema>;
+export const initialProducts=raw.products as Product[];
+export const installation=raw.installation;
+export const settingsSchema=z.object({name:z.string().min(1).max(100),legal:z.string().max(150),rut:z.string().max(30),address:z.string().max(250),email:z.union([z.literal(''),z.string().email()]),phone:z.string().max(40),validDays:z.number().int().min(1).max(365),taxMode:z.enum(['pending','included','net']),taxRate:z.number().min(0).max(100),terms:z.string().max(5000),warranty:z.string().max(3000),approved:z.boolean()});
+export type Settings=z.infer<typeof settingsSchema>;
+export const initialSettings:Settings={name:'Solvex Solar',legal:'',rut:'',address:'',email:'contacto@solvexsolar.cl',phone:'',validDays:15,taxMode:'pending',taxRate:19,terms:'',warranty:'',approved:false};
+export const quoteSchema=z.object({system:z.enum(systems),customer:z.object({name:z.string().max(150),email:z.union([z.literal(''),z.string().email()]),phone:z.string().max(40),region:z.string().max(100),commune:z.string().max(100),address:z.string().max(300),bill:z.number().finite().min(0).max(1e9)}),quantities:z.record(z.number().finite().min(0).max(100000)),extra:z.number().finite().min(0).max(1e10),extraLabel:z.string().max(300),discount:z.number().finite().min(0).max(1e10),installationOverride:z.number().finite().min(0).max(1e10).nullable(),installationNote:z.string().max(300),payment:z.string().min(1).max(100),notes:z.string().max(5000),technicalReviewed:z.boolean()});
+export type QuoteInput=z.infer<typeof quoteSchema>;
+export type Line={id:string;name:string;qty:number;unit:string;price:number|null;total:number|null;source:string;category:string};
+export type Calculation={lines:Line[];panels:number;kwp:number;subtotal:number;discount:number;net:number;tax:number|null;total:number;warnings:string[];complete:boolean;official:boolean};
+export type SavedQuote={id:string;folio:string;date:string;input:QuoteInput;settings:Settings;calculation:Calculation};
+export const money=(n:number)=>new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(n);
+export function newQuote():QuoteInput{return {system:'ON GRID',customer:{name:'',email:'',phone:'',region:'',commune:'',address:'',bill:0},quantities:{'0-10':8,'0-13':8,'0-26':1,'0-35':15,'0-37':15,'0-43':1,'0-45':1,'0-47':1},extra:0,extraLabel:'',discount:0,installationOverride:null,installationNote:'',payment:'Transferencia bancaria',notes:'',technicalReviewed:false}}
+export function calculate(input:QuoteInput,products:Product[],settings:Settings):Calculation{
+ const q=quoteSchema.parse(input); const warnings:string[]=[];
+ const selected=products.filter(p=>p.system===q.system&&(q.quantities[p.id]||0)>0);
+ const ids=new Set(products.map(p=>p.id));
+ if(Object.entries(q.quantities).some(([id,n])=>n>0&&!ids.has(id))) throw Error('La propuesta contiene un equipo que ya no está en el catálogo.');
+ const lines:Line[]=selected.map(p=>({id:p.id,name:p.name,qty:q.quantities[p.id],unit:p.unit,price:p.price,total:p.price===null?null:Math.round(p.price*q.quantities[p.id]),source:p.source,category:p.category}));
+ let complete=true;
+ for(const p of selected){if(p.price===null){complete=false;warnings.push(`Falta precio: ${p.name}.`)} if(p.unit.includes('confirmar'))warnings.push(`Confirmar la unidad de cobro de ${p.name}.`);if(['panel','unidad'].includes(p.unit)&&!Number.isInteger(q.quantities[p.id])){complete=false;warnings.push('Las cantidades de equipos, paneles y soportes deben ser números enteros.')}if(p.category==='PANEL FOTOVOLTAICO'&&!p.watts){complete=false;warnings.push(`Falta potencia del panel: ${p.name}.`)}}
+ const panels=selected.filter(p=>p.category==='PANEL FOTOVOLTAICO').reduce((s,p)=>s+q.quantities[p.id],0);
+ const kwp=selected.reduce((s,p)=>s+(p.watts||0)*q.quantities[p.id]/1000,0);
+ if(!panels){complete=false;warnings.push('Selecciona al menos un panel.');}
+ if(!selected.some(p=>p.category.includes('INVERSOR'))){complete=false;warnings.push('Selecciona un inversor.');}
+ if(q.system==='OFF GRID'&&!selected.some(p=>p.category.includes('BATER'))){complete=false;warnings.push('Selecciona almacenamiento para el sistema Off Grid.');}
+ const install=installation.find(i=>i.panels===panels);
+ let installationPrice=q.installationOverride??install?.price??null;
+ if(q.installationOverride!==null&&!q.installationNote.trim()){complete=false;warnings.push('Indica el motivo del valor manual de instalación.');}
+ if(installationPrice===null){complete=false;warnings.push(`No existe tarifa de instalación para ${panels} paneles. Ingresa un valor validado.`);}
+ // C prices already include tax and the workbook's 1.4 factor. Never apply either twice.
+ if(installationPrice!==null&&settings.taxMode==='net')installationPrice/=1+settings.taxRate/100;
+ lines.push({id:'installation',name:'Servicio de instalación',qty:1,unit:'servicio',price:installationPrice===null?null:Math.round(installationPrice),total:installationPrice===null?null:Math.round(installationPrice),source:q.installationOverride!==null?'Valor manual: '+q.installationNote:install?.source||'Sin tarifa',category:'INSTALACIÓN'});
+ if(q.extra>0){lines.push({id:'extra',name:q.extraLabel||'Costos adicionales',qty:1,unit:'servicio',price:q.extra,total:Math.round(q.extra),source:'Ingreso del ejecutivo',category:'ADICIONALES'});if(!q.extraLabel.trim())warnings.push('Describe qué cubren los costos adicionales.');}
+ const subtotal=lines.reduce((s,l)=>s+(l.total??0),0);
+ if(q.discount>subtotal){complete=false;warnings.push('El descuento supera el subtotal.');}
+ const discount=Math.min(subtotal,Math.round(q.discount));
+ const base=subtotal-discount;
+ const tax=settings.taxMode==='pending'?null:settings.taxMode==='net'?Math.round(base*settings.taxRate/100):base-Math.round(base/(1+settings.taxRate/100));
+ const total=settings.taxMode==='net'?base+(tax||0):base;
+ const net=settings.taxMode==='included'?base-(tax||0):base;
+ if(settings.taxMode==='pending')warnings.push('Confirmar si los precios del Excel incluyen IVA. No se ha agregado IVA a los valores de origen.');
+ if(!q.technicalReviewed)warnings.push('Pendiente de revisión técnica: modelos, compatibilidad, estructura y alcance.');
+ if(!settings.approved||!settings.legal||!settings.rut||!settings.terms||!settings.warranty)warnings.push('Faltan datos y condiciones comerciales aprobados de la empresa.');
+ if(!q.customer.name.trim()||!q.customer.email||!q.customer.phone.trim()||!q.customer.region.trim()||!q.customer.commune.trim()||q.customer.bill<=0)warnings.push('Completa los datos del cliente y su monto de boleta.');
+ return {lines,panels,kwp,subtotal,discount,net,tax,total,warnings,complete,official:complete&&warnings.length===0};
+}

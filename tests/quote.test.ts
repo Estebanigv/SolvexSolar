@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {calculate,newQuote,initialProducts,initialSettings,productSchema} from '../lib/quote';
+initialProducts.forEach(p=>productSchema.parse(p));
+const q=newQuote(); const a=calculate(q,initialProducts,initialSettings);
+assert.equal(a.panels,8); assert.equal(a.official,false); assert.equal(a.tax,null);
+assert.ok(a.lines.some(l=>l.category==='PANEL FOTOVOLTAICO'&&l.total!>0));
+const discounted=calculate({...q,discount:10000},initialProducts,initialSettings);
+assert.equal(a.total-discounted.total,10000);
+const missing=calculate({...q,quantities:{...q.quantities,'0-10':11}},initialProducts,initialSettings);
+assert.equal(missing.complete,false);
+const invalid=calculate({...q,discount:1e10},initialProducts,initialSettings);
+assert.equal(invalid.complete,false);
+console.log('Pruebas del catálogo de demostración: OK');

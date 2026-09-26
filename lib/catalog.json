@@ -1,0 +1,1671 @@
+{
+  "products": [
+    {
+      "id": "0-10",
+      "system": "ON GRID",
+      "category": "PANEL FOTOVOLTAICO",
+      "name": "Panel solar de ejemplo 585 W",
+      "price": 100000,
+      "unit": "panel",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": 585
+    },
+    {
+      "id": "0-11",
+      "system": "ON GRID",
+      "category": "PANEL FOTOVOLTAICO",
+      "name": "Panel solar de ejemplo 620 W",
+      "price": 100000,
+      "unit": "panel",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": 620
+    },
+    {
+      "id": "0-13",
+      "system": "ON GRID",
+      "category": "TIPO DE ESTRUCTURA",
+      "name": "Tipo de estructura de ejemplo 3",
+      "price": 50000,
+      "unit": "panel",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "0-14",
+      "system": "ON GRID",
+      "category": "TIPO DE ESTRUCTURA",
+      "name": "Tipo de estructura de ejemplo 4",
+      "price": 50000,
+      "unit": "panel",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "0-15",
+      "system": "ON GRID",
+      "category": "TIPO DE ESTRUCTURA",
+      "name": "Tipo de estructura de ejemplo 5",
+      "price": 50000,
+      "unit": "unidad por confirmar",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "0-16",
+      "system": "ON GRID",
+      "category": "TIPO DE ESTRUCTURA",
+      "name": "Tipo de estructura de ejemplo 6",
+      "price": 50000,
+      "unit": "unidad por confirmar",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "0-18",
+      "system": "ON GRID",
+      "category": "MATERIAL DE TECHO",
+      "name": "Material de techo de ejemplo 7",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "0-19",
+      "system": "ON GRID",
+      "category": "MATERIAL DE TECHO",
+      "name": "Material de techo de ejemplo 8",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "0-20",
+      "system": "ON GRID",
+      "category": "MATERIAL DE TECHO",
+      "name": "Material de techo de ejemplo 9",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "0-21",
+      "system": "ON GRID",
+      "category": "MATERIAL DE TECHO",
+      "name": "Material de techo de ejemplo 10",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "0-23",
+      "system": "ON GRID",
+      "category": "INVERSOR ON GRID",
+      "name": "Inversor on grid de ejemplo 11",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "0-24",
+      "system": "ON GRID",
+      "category": "INVERSOR ON GRID",
+      "name": "Inversor on grid de ejemplo 12",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "0-25",
+      "system": "ON GRID",
+      "category": "INVERSOR ON GRID",
+      "name": "Inversor on grid de ejemplo 13",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "0-26",
+      "system": "ON GRID",
+      "category": "INVERSOR ON GRID",
+      "name": "Inversor on grid de ejemplo 14",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "0-27",
+      "system": "ON GRID",
+      "category": "INVERSOR ON GRID",
+      "name": "Inversor on grid de ejemplo 15",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "0-28",
+      "system": "ON GRID",
+      "category": "INVERSOR ON GRID",
+      "name": "Inversor on grid de ejemplo 16",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "0-29",
+      "system": "ON GRID",
+      "category": "INVERSOR ON GRID",
+      "name": "Inversor on grid de ejemplo 17",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "0-30",
+      "system": "ON GRID",
+      "category": "INVERSOR ON GRID",
+      "name": "Inversor on grid de ejemplo 18",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "0-31",
+      "system": "ON GRID",
+      "category": "INVERSOR ON GRID",
+      "name": "Inversor on grid de ejemplo 19",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "0-32",
+      "system": "ON GRID",
+      "category": "INVERSOR ON GRID",
+      "name": "Inversor on grid de ejemplo 20",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "0-33",
+      "system": "ON GRID",
+      "category": "INVERSOR ON GRID",
+      "name": "Inversor on grid de ejemplo 21",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "0-35",
+      "system": "ON GRID",
+      "category": "BAJADA ÚNICA METRO LINEAL",
+      "name": "Bajada única metro lineal de ejemplo 22",
+      "price": 50000,
+      "unit": "metro",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "0-37",
+      "system": "ON GRID",
+      "category": "ACOMETIDA MONOFÁSICA",
+      "name": "Acometida monofásica de ejemplo 23",
+      "price": 50000,
+      "unit": "metro",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "0-39",
+      "system": "ON GRID",
+      "category": "AUMENTO DE EMPALME",
+      "name": "Aumento de empalme de ejemplo 24",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "0-41",
+      "system": "ON GRID",
+      "category": "TE1 MONOFÁSICO",
+      "name": "Te1 monofásico de ejemplo 25",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "0-43",
+      "system": "ON GRID",
+      "category": "INSCRIPCIÓN SEC TE4 + NETBILLING",
+      "name": "Inscripción sec te4 + netbilling de ejemplo 26",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "0-45",
+      "system": "ON GRID",
+      "category": "KIT DE ADHESIVOS",
+      "name": "Kit de adhesivos de ejemplo 27",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "0-47",
+      "system": "ON GRID",
+      "category": "TABLERO ELÉCTRICO",
+      "name": "Tablero eléctrico de ejemplo 28",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "0-49",
+      "system": "ON GRID",
+      "category": "ARRANQUE GENERADOR (HASTA 2 MT)",
+      "name": "Arranque generador (hasta 2 mt) de ejemplo 29",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "0-50",
+      "system": "ON GRID",
+      "category": "ARRANQUE GENERADOR (HASTA 2 MT)",
+      "name": "Arranque generador (hasta 2 mt) de ejemplo 30",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "0-52",
+      "system": "ON GRID",
+      "category": "MANTENCIONES",
+      "name": "Mantenciones de ejemplo 31",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "0-56",
+      "system": "ON GRID",
+      "category": "CARGADOR VEHICULAR MONOFASICO",
+      "name": "Cargador vehicular monofasico de ejemplo 32",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "1-10",
+      "system": "ON GRID TRIFASICO",
+      "category": "PANEL FOTOVOLTAICO",
+      "name": "Panel solar de ejemplo 585 W",
+      "price": 100000,
+      "unit": "panel",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": 585
+    },
+    {
+      "id": "1-11",
+      "system": "ON GRID TRIFASICO",
+      "category": "PANEL FOTOVOLTAICO",
+      "name": "Panel solar de ejemplo 620 W",
+      "price": 100000,
+      "unit": "panel",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": 620
+    },
+    {
+      "id": "1-13",
+      "system": "ON GRID TRIFASICO",
+      "category": "TIPO DE ESTRUCTURA",
+      "name": "Tipo de estructura de ejemplo 35",
+      "price": 50000,
+      "unit": "panel",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "1-14",
+      "system": "ON GRID TRIFASICO",
+      "category": "TIPO DE ESTRUCTURA",
+      "name": "Tipo de estructura de ejemplo 36",
+      "price": 50000,
+      "unit": "panel",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "1-15",
+      "system": "ON GRID TRIFASICO",
+      "category": "TIPO DE ESTRUCTURA",
+      "name": "Tipo de estructura de ejemplo 37",
+      "price": 50000,
+      "unit": "unidad por confirmar",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "1-16",
+      "system": "ON GRID TRIFASICO",
+      "category": "TIPO DE ESTRUCTURA",
+      "name": "Tipo de estructura de ejemplo 38",
+      "price": 50000,
+      "unit": "unidad por confirmar",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "1-18",
+      "system": "ON GRID TRIFASICO",
+      "category": "MATERIAL DE TECHO",
+      "name": "Material de techo de ejemplo 39",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "1-19",
+      "system": "ON GRID TRIFASICO",
+      "category": "MATERIAL DE TECHO",
+      "name": "Material de techo de ejemplo 40",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "1-20",
+      "system": "ON GRID TRIFASICO",
+      "category": "MATERIAL DE TECHO",
+      "name": "Material de techo de ejemplo 41",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "1-21",
+      "system": "ON GRID TRIFASICO",
+      "category": "MATERIAL DE TECHO",
+      "name": "Material de techo de ejemplo 42",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "1-23",
+      "system": "ON GRID TRIFASICO",
+      "category": "INVERSOR ON GRID TRIFASICO",
+      "name": "Inversor on grid trifasico de ejemplo 43",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "1-24",
+      "system": "ON GRID TRIFASICO",
+      "category": "INVERSOR ON GRID TRIFASICO",
+      "name": "Inversor on grid trifasico de ejemplo 44",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "1-25",
+      "system": "ON GRID TRIFASICO",
+      "category": "INVERSOR ON GRID TRIFASICO",
+      "name": "Inversor on grid trifasico de ejemplo 45",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "1-26",
+      "system": "ON GRID TRIFASICO",
+      "category": "INVERSOR ON GRID TRIFASICO",
+      "name": "Inversor on grid trifasico de ejemplo 46",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "1-27",
+      "system": "ON GRID TRIFASICO",
+      "category": "INVERSOR ON GRID TRIFASICO",
+      "name": "Inversor on grid trifasico de ejemplo 47",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "1-28",
+      "system": "ON GRID TRIFASICO",
+      "category": "INVERSOR ON GRID TRIFASICO",
+      "name": "Inversor on grid trifasico de ejemplo 48",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "1-29",
+      "system": "ON GRID TRIFASICO",
+      "category": "INVERSOR ON GRID TRIFASICO",
+      "name": "Inversor on grid trifasico de ejemplo 49",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "1-31",
+      "system": "ON GRID TRIFASICO",
+      "category": "BAJADA ÚNICA METRO LINEAL",
+      "name": "Bajada única metro lineal de ejemplo 50",
+      "price": 50000,
+      "unit": "metro",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "1-33",
+      "system": "ON GRID TRIFASICO",
+      "category": "ACOMETIDA TRIFÁSICA",
+      "name": "Acometida trifásica de ejemplo 51",
+      "price": 50000,
+      "unit": "metro",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "1-35",
+      "system": "ON GRID TRIFASICO",
+      "category": "BATERÍA RENA5000",
+      "name": "Batería rena5000 de ejemplo 52",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "1-36",
+      "system": "ON GRID TRIFASICO",
+      "category": "BATERÍA RENA5000",
+      "name": "Batería rena5000 de ejemplo 53",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "1-38",
+      "system": "ON GRID TRIFASICO",
+      "category": "INSCRIPCIÓN SEC TE4 + NETBILLING",
+      "name": "Inscripción sec te4 + netbilling de ejemplo 54",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "1-40",
+      "system": "ON GRID TRIFASICO",
+      "category": "KIT DE ADHESIVOS",
+      "name": "Kit de adhesivos de ejemplo 55",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "1-42",
+      "system": "ON GRID TRIFASICO",
+      "category": "TABLERO TRIFÁSICO",
+      "name": "Tablero trifásico de ejemplo 56",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "1-44",
+      "system": "ON GRID TRIFASICO",
+      "category": "ARRANQUE GENERADOR (HASTA 2 MT)",
+      "name": "Arranque generador (hasta 2 mt) de ejemplo 57",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "1-46",
+      "system": "ON GRID TRIFASICO",
+      "category": "MANTENCIONES",
+      "name": "Mantenciones de ejemplo 58",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "1-50",
+      "system": "ON GRID TRIFASICO",
+      "category": "ESTRUCTURA PASILLO",
+      "name": "Estructura pasillo de ejemplo 59",
+      "price": 50000,
+      "unit": "metro",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "1-51",
+      "system": "ON GRID TRIFASICO",
+      "category": "ESTRUCTURA PASILLO",
+      "name": "Estructura pasillo de ejemplo 60",
+      "price": 50000,
+      "unit": "metro",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "1-53",
+      "system": "ON GRID TRIFASICO",
+      "category": "ESCALERA DE ACCESO",
+      "name": "Escalera de acceso de ejemplo 61",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "1-55",
+      "system": "ON GRID TRIFASICO",
+      "category": "LOGISTICA",
+      "name": "Logistica de ejemplo 62",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "1-57",
+      "system": "ON GRID TRIFASICO",
+      "category": "CARGADOR VEHICULAR MONOFASICO",
+      "name": "Cargador vehicular monofasico de ejemplo 63",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "2-10",
+      "system": "OFF GRID",
+      "category": "TIPO DE ESTRUCTURA",
+      "name": "Tipo de estructura de ejemplo 64",
+      "price": 50000,
+      "unit": "panel",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "2-11",
+      "system": "OFF GRID",
+      "category": "TIPO DE ESTRUCTURA",
+      "name": "Tipo de estructura de ejemplo 65",
+      "price": 50000,
+      "unit": "panel",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "2-12",
+      "system": "OFF GRID",
+      "category": "TIPO DE ESTRUCTURA",
+      "name": "Tipo de estructura de ejemplo 66",
+      "price": 50000,
+      "unit": "unidad por confirmar",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "2-13",
+      "system": "OFF GRID",
+      "category": "TIPO DE ESTRUCTURA",
+      "name": "Tipo de estructura de ejemplo 67",
+      "price": 50000,
+      "unit": "unidad por confirmar",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "2-15",
+      "system": "OFF GRID",
+      "category": "MATERIAL DE TECHO",
+      "name": "Material de techo de ejemplo 68",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "2-16",
+      "system": "OFF GRID",
+      "category": "MATERIAL DE TECHO",
+      "name": "Material de techo de ejemplo 69",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "2-17",
+      "system": "OFF GRID",
+      "category": "MATERIAL DE TECHO",
+      "name": "Material de techo de ejemplo 70",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "2-18",
+      "system": "OFF GRID",
+      "category": "MATERIAL DE TECHO",
+      "name": "Material de techo de ejemplo 71",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "2-20",
+      "system": "OFF GRID",
+      "category": "PANEL FOTOVOLTAICO",
+      "name": "Panel solar de ejemplo 585 W",
+      "price": 100000,
+      "unit": "panel",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": 585
+    },
+    {
+      "id": "2-21",
+      "system": "OFF GRID",
+      "category": "PANEL FOTOVOLTAICO",
+      "name": "Panel solar de ejemplo 620 W",
+      "price": 100000,
+      "unit": "panel",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": 620
+    },
+    {
+      "id": "2-23",
+      "system": "OFF GRID",
+      "category": "INVERSOR OFF GRID",
+      "name": "Inversor off grid de ejemplo 74",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "2-24",
+      "system": "OFF GRID",
+      "category": "INVERSOR OFF GRID",
+      "name": "Inversor off grid de ejemplo 75",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "2-25",
+      "system": "OFF GRID",
+      "category": "INVERSOR OFF GRID",
+      "name": "Inversor off grid de ejemplo 76",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "2-26",
+      "system": "OFF GRID",
+      "category": "INVERSOR OFF GRID",
+      "name": "Inversor off grid de ejemplo 77",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "2-27",
+      "system": "OFF GRID",
+      "category": "INVERSOR OFF GRID",
+      "name": "Inversor off grid de ejemplo 78",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "2-28",
+      "system": "OFF GRID",
+      "category": "INVERSOR OFF GRID",
+      "name": "Inversor off grid de ejemplo 79",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "2-30",
+      "system": "OFF GRID",
+      "category": "BATERÍA SOLAR",
+      "name": "Batería solar de ejemplo 80",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "2-31",
+      "system": "OFF GRID",
+      "category": "BATERÍA SOLAR",
+      "name": "Batería solar de ejemplo 81",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "2-32",
+      "system": "OFF GRID",
+      "category": "BATERÍA SOLAR",
+      "name": "Batería solar de ejemplo 82",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "2-33",
+      "system": "OFF GRID",
+      "category": "BATERÍA SOLAR",
+      "name": "Batería solar de ejemplo 83",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "2-35",
+      "system": "OFF GRID",
+      "category": "BAJADA ÚNICA METRO LINEAL",
+      "name": "Bajada única metro lineal de ejemplo 84",
+      "price": 50000,
+      "unit": "metro",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "2-37",
+      "system": "OFF GRID",
+      "category": "ACOMETIDA MONOFÁSICA",
+      "name": "Acometida monofásica de ejemplo 85",
+      "price": 50000,
+      "unit": "metro",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "2-39",
+      "system": "OFF GRID",
+      "category": "TE1 MONOFÁSICO",
+      "name": "Te1 monofásico de ejemplo 86",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "2-41",
+      "system": "OFF GRID",
+      "category": "KIT DE ADHESIVOS",
+      "name": "Kit de adhesivos de ejemplo 87",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "2-43",
+      "system": "OFF GRID",
+      "category": "TABLERO ELÉCTRICO",
+      "name": "Tablero eléctrico de ejemplo 88",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "2-45",
+      "system": "OFF GRID",
+      "category": "ARRANQUE GENERADOR (HASTA 2 MT)",
+      "name": "Arranque generador (hasta 2 mt) de ejemplo 89",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "2-46",
+      "system": "OFF GRID",
+      "category": "ARRANQUE GENERADOR (HASTA 2 MT)",
+      "name": "Arranque generador (hasta 2 mt) de ejemplo 90",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "2-48",
+      "system": "OFF GRID",
+      "category": "MANTENCIONES",
+      "name": "Mantenciones de ejemplo 91",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "2-52",
+      "system": "OFF GRID",
+      "category": "CARGADOR VEHICULAR MONOFASICO",
+      "name": "Cargador vehicular monofasico de ejemplo 92",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "3-10",
+      "system": "HIBRIDO",
+      "category": "TIPO DE ESTRUCTURA",
+      "name": "Tipo de estructura de ejemplo 93",
+      "price": 50000,
+      "unit": "panel",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "3-11",
+      "system": "HIBRIDO",
+      "category": "TIPO DE ESTRUCTURA",
+      "name": "Tipo de estructura de ejemplo 94",
+      "price": 50000,
+      "unit": "panel",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "3-12",
+      "system": "HIBRIDO",
+      "category": "TIPO DE ESTRUCTURA",
+      "name": "Tipo de estructura de ejemplo 95",
+      "price": 50000,
+      "unit": "unidad por confirmar",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "3-13",
+      "system": "HIBRIDO",
+      "category": "TIPO DE ESTRUCTURA",
+      "name": "Tipo de estructura de ejemplo 96",
+      "price": 50000,
+      "unit": "unidad por confirmar",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "3-15",
+      "system": "HIBRIDO",
+      "category": "MATERIAL DE TECHO",
+      "name": "Material de techo de ejemplo 97",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "3-16",
+      "system": "HIBRIDO",
+      "category": "MATERIAL DE TECHO",
+      "name": "Material de techo de ejemplo 98",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "3-17",
+      "system": "HIBRIDO",
+      "category": "MATERIAL DE TECHO",
+      "name": "Material de techo de ejemplo 99",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "3-18",
+      "system": "HIBRIDO",
+      "category": "MATERIAL DE TECHO",
+      "name": "Material de techo de ejemplo 100",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "3-20",
+      "system": "HIBRIDO",
+      "category": "PANEL FOTOVOLTAICO",
+      "name": "Panel solar de ejemplo 585 W",
+      "price": 100000,
+      "unit": "panel",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": 585
+    },
+    {
+      "id": "3-21",
+      "system": "HIBRIDO",
+      "category": "PANEL FOTOVOLTAICO",
+      "name": "Panel solar de ejemplo 620 W",
+      "price": 100000,
+      "unit": "panel",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": 620
+    },
+    {
+      "id": "3-23",
+      "system": "HIBRIDO",
+      "category": "INVERSOR HIBRIDO",
+      "name": "Inversor hibrido de ejemplo 103",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "3-24",
+      "system": "HIBRIDO",
+      "category": "INVERSOR HIBRIDO",
+      "name": "Inversor hibrido de ejemplo 104",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "3-25",
+      "system": "HIBRIDO",
+      "category": "INVERSOR HIBRIDO",
+      "name": "Inversor hibrido de ejemplo 105",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "3-26",
+      "system": "HIBRIDO",
+      "category": "INVERSOR HIBRIDO",
+      "name": "Inversor hibrido de ejemplo 106",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "3-28",
+      "system": "HIBRIDO",
+      "category": "BATERÍA SOLAR",
+      "name": "Batería solar de ejemplo 107",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "3-29",
+      "system": "HIBRIDO",
+      "category": "BATERÍA SOLAR",
+      "name": "Batería solar de ejemplo 108",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "3-30",
+      "system": "HIBRIDO",
+      "category": "BATERÍA SOLAR",
+      "name": "Batería solar de ejemplo 109",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "3-31",
+      "system": "HIBRIDO",
+      "category": "BATERÍA SOLAR",
+      "name": "Batería solar de ejemplo 110",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "3-33",
+      "system": "HIBRIDO",
+      "category": "BAJADA ÚNICA METRO LINEAL",
+      "name": "Bajada única metro lineal de ejemplo 111",
+      "price": 50000,
+      "unit": "metro",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "3-35",
+      "system": "HIBRIDO",
+      "category": "ACOMETIDA MONOFÁSICA",
+      "name": "Acometida monofásica de ejemplo 112",
+      "price": 50000,
+      "unit": "metro",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "3-37",
+      "system": "HIBRIDO",
+      "category": "AUMENTO DE EMPALME",
+      "name": "Aumento de empalme de ejemplo 113",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "3-39",
+      "system": "HIBRIDO",
+      "category": "TE1 MONOFÁSICO",
+      "name": "Te1 monofásico de ejemplo 114",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "3-41",
+      "system": "HIBRIDO",
+      "category": "INSCRIPCIÓN SEC TE4 + NETBILLING",
+      "name": "Inscripción sec te4 + netbilling de ejemplo 115",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "3-43",
+      "system": "HIBRIDO",
+      "category": "KIT DE ADHESIVOS",
+      "name": "Kit de adhesivos de ejemplo 116",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "3-45",
+      "system": "HIBRIDO",
+      "category": "TABLERO ELÉCTRICO",
+      "name": "Tablero eléctrico de ejemplo 117",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "3-47",
+      "system": "HIBRIDO",
+      "category": "ARRANQUE GENERADOR (HASTA 2 MT)",
+      "name": "Arranque generador (hasta 2 mt) de ejemplo 118",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "3-48",
+      "system": "HIBRIDO",
+      "category": "ARRANQUE GENERADOR (HASTA 2 MT)",
+      "name": "Arranque generador (hasta 2 mt) de ejemplo 119",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "3-50",
+      "system": "HIBRIDO",
+      "category": "MANTENCIONES",
+      "name": "Mantenciones de ejemplo 120",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "3-54",
+      "system": "HIBRIDO",
+      "category": "CARGADOR VEHICULAR MONOFASICO",
+      "name": "Cargador vehicular monofasico de ejemplo 121",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "4-10",
+      "system": "HIBRIDO TRIFASICO",
+      "category": "TIPO DE ESTRUCTURA",
+      "name": "Tipo de estructura de ejemplo 122",
+      "price": 50000,
+      "unit": "panel",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "4-11",
+      "system": "HIBRIDO TRIFASICO",
+      "category": "TIPO DE ESTRUCTURA",
+      "name": "Tipo de estructura de ejemplo 123",
+      "price": 50000,
+      "unit": "panel",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "4-12",
+      "system": "HIBRIDO TRIFASICO",
+      "category": "TIPO DE ESTRUCTURA",
+      "name": "Tipo de estructura de ejemplo 124",
+      "price": 50000,
+      "unit": "unidad por confirmar",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "4-13",
+      "system": "HIBRIDO TRIFASICO",
+      "category": "TIPO DE ESTRUCTURA",
+      "name": "Tipo de estructura de ejemplo 125",
+      "price": 50000,
+      "unit": "unidad por confirmar",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "4-15",
+      "system": "HIBRIDO TRIFASICO",
+      "category": "MATERIAL DE TECHO",
+      "name": "Material de techo de ejemplo 126",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "4-16",
+      "system": "HIBRIDO TRIFASICO",
+      "category": "MATERIAL DE TECHO",
+      "name": "Material de techo de ejemplo 127",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "4-17",
+      "system": "HIBRIDO TRIFASICO",
+      "category": "MATERIAL DE TECHO",
+      "name": "Material de techo de ejemplo 128",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "4-18",
+      "system": "HIBRIDO TRIFASICO",
+      "category": "MATERIAL DE TECHO",
+      "name": "Material de techo de ejemplo 129",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "4-20",
+      "system": "HIBRIDO TRIFASICO",
+      "category": "PANEL FOTOVOLTAICO",
+      "name": "Panel solar de ejemplo 585 W",
+      "price": 100000,
+      "unit": "panel",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": 585
+    },
+    {
+      "id": "4-21",
+      "system": "HIBRIDO TRIFASICO",
+      "category": "PANEL FOTOVOLTAICO",
+      "name": "Panel solar de ejemplo 620 W",
+      "price": 100000,
+      "unit": "panel",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": 620
+    },
+    {
+      "id": "4-23",
+      "system": "HIBRIDO TRIFASICO",
+      "category": "INVERSOR HIBRIDO TRIFASICO",
+      "name": "Inversor hibrido trifasico de ejemplo 132",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "4-24",
+      "system": "HIBRIDO TRIFASICO",
+      "category": "INVERSOR HIBRIDO TRIFASICO",
+      "name": "Inversor hibrido trifasico de ejemplo 133",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "4-25",
+      "system": "HIBRIDO TRIFASICO",
+      "category": "INVERSOR HIBRIDO TRIFASICO",
+      "name": "Inversor hibrido trifasico de ejemplo 134",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "4-26",
+      "system": "HIBRIDO TRIFASICO",
+      "category": "INVERSOR HIBRIDO TRIFASICO",
+      "name": "Inversor hibrido trifasico de ejemplo 135",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "4-27",
+      "system": "HIBRIDO TRIFASICO",
+      "category": "INVERSOR HIBRIDO TRIFASICO",
+      "name": "Inversor hibrido trifasico de ejemplo 136",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "4-28",
+      "system": "HIBRIDO TRIFASICO",
+      "category": "INVERSOR HIBRIDO TRIFASICO",
+      "name": "Inversor hibrido trifasico de ejemplo 137",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "4-30",
+      "system": "HIBRIDO TRIFASICO",
+      "category": "BATERÍA HIGH VOLTAGE",
+      "name": "Batería high voltage de ejemplo 138",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "4-31",
+      "system": "HIBRIDO TRIFASICO",
+      "category": "BATERÍA HIGH VOLTAGE",
+      "name": "Batería high voltage de ejemplo 139",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "4-32",
+      "system": "HIBRIDO TRIFASICO",
+      "category": "BATERÍA HIGH VOLTAGE",
+      "name": "Batería high voltage de ejemplo 140",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "4-33",
+      "system": "HIBRIDO TRIFASICO",
+      "category": "BATERÍA HIGH VOLTAGE",
+      "name": "Batería high voltage de ejemplo 141",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "4-34",
+      "system": "HIBRIDO TRIFASICO",
+      "category": "BATERÍA HIGH VOLTAGE",
+      "name": "Batería high voltage de ejemplo 142",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "4-35",
+      "system": "HIBRIDO TRIFASICO",
+      "category": "BATERÍA HIGH VOLTAGE",
+      "name": "Batería high voltage de ejemplo 143",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "4-37",
+      "system": "HIBRIDO TRIFASICO",
+      "category": "BAJADA ÚNICA METRO LINEAL",
+      "name": "Bajada única metro lineal de ejemplo 144",
+      "price": 50000,
+      "unit": "metro",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "4-39",
+      "system": "HIBRIDO TRIFASICO",
+      "category": "ACOMETIDA TRIFÁSICA",
+      "name": "Acometida trifásica de ejemplo 145",
+      "price": 50000,
+      "unit": "metro",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "4-41",
+      "system": "HIBRIDO TRIFASICO",
+      "category": "TE1 TRIFÁSICO",
+      "name": "Te1 trifásico de ejemplo 146",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "4-43",
+      "system": "HIBRIDO TRIFASICO",
+      "category": "INSCRIPCIÓN SEC TE4 TRIFASICO + NETBILLING",
+      "name": "Inscripción sec te4 trifasico + netbilling de ejemplo 147",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "4-45",
+      "system": "HIBRIDO TRIFASICO",
+      "category": "KIT DE ADHESIVOS",
+      "name": "Kit de adhesivos de ejemplo 148",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "4-47",
+      "system": "HIBRIDO TRIFASICO",
+      "category": "TABLERO ELÉCTRICO",
+      "name": "Tablero eléctrico de ejemplo 149",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "4-49",
+      "system": "HIBRIDO TRIFASICO",
+      "category": "ARRANQUE GENERADOR (HASTA 2 MT)",
+      "name": "Arranque generador (hasta 2 mt) de ejemplo 150",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "4-50",
+      "system": "HIBRIDO TRIFASICO",
+      "category": "ARRANQUE GENERADOR (HASTA 2 MT)",
+      "name": "Arranque generador (hasta 2 mt) de ejemplo 151",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "4-52",
+      "system": "HIBRIDO TRIFASICO",
+      "category": "MANTENCIONES",
+      "name": "Mantenciones de ejemplo 152",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "4-56",
+      "system": "HIBRIDO TRIFASICO",
+      "category": "ESTRUCTURA PASILLO",
+      "name": "Estructura pasillo de ejemplo 153",
+      "price": 50000,
+      "unit": "metro",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "4-57",
+      "system": "HIBRIDO TRIFASICO",
+      "category": "ESTRUCTURA PASILLO",
+      "name": "Estructura pasillo de ejemplo 154",
+      "price": 50000,
+      "unit": "metro",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "4-59",
+      "system": "HIBRIDO TRIFASICO",
+      "category": "ESCALERA DE ACCESO",
+      "name": "Escalera de acceso de ejemplo 155",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    },
+    {
+      "id": "4-61",
+      "system": "HIBRIDO TRIFASICO",
+      "category": "LOGISTICA",
+      "name": "Logistica de ejemplo 156",
+      "price": 50000,
+      "unit": "unidad",
+      "source": "Catálogo ficticio para desarrollo",
+      "watts": null
+    }
+  ],
+  "installation": [
+    {
+      "panels": 1,
+      "price": 50000,
+      "source": "Tarifa ficticia para desarrollo"
+    },
+    {
+      "panels": 2,
+      "price": 100000,
+      "source": "Tarifa ficticia para desarrollo"
+    },
+    {
+      "panels": 3,
+      "price": 150000,
+      "source": "Tarifa ficticia para desarrollo"
+    },
+    {
+      "panels": 4,
+      "price": 200000,
+      "source": "Tarifa ficticia para desarrollo"
+    },
+    {
+      "panels": 5,
+      "price": 250000,
+      "source": "Tarifa ficticia para desarrollo"
+    },
+    {
+      "panels": 6,
+      "price": 300000,
+      "source": "Tarifa ficticia para desarrollo"
+    },
+    {
+      "panels": 7,
+      "price": 350000,
+      "source": "Tarifa ficticia para desarrollo"
+    },
+    {
+      "panels": 8,
+      "price": 400000,
+      "source": "Tarifa ficticia para desarrollo"
+    },
+    {
+      "panels": 9,
+      "price": 450000,
+      "source": "Tarifa ficticia para desarrollo"
+    },
+    {
+      "panels": 10,
+      "price": 500000,
+      "source": "Tarifa ficticia para desarrollo"
+    },
+    {
+      "panels": 12,
+      "price": 600000,
+      "source": "Tarifa ficticia para desarrollo"
+    },
+    {
+      "panels": 14,
+      "price": 700000,
+      "source": "Tarifa ficticia para desarrollo"
+    },
+    {
+      "panels": 16,
+      "price": 800000,
+      "source": "Tarifa ficticia para desarrollo"
+    },
+    {
+      "panels": 18,
+      "price": 900000,
+      "source": "Tarifa ficticia para desarrollo"
+    },
+    {
+      "panels": 20,
+      "price": 1000000,
+      "source": "Tarifa ficticia para desarrollo"
+    },
+    {
+      "panels": 22,
+      "price": 1100000,
+      "source": "Tarifa ficticia para desarrollo"
+    },
+    {
+      "panels": 24,
+      "price": 1200000,
+      "source": "Tarifa ficticia para desarrollo"
+    },
+    {
+      "panels": 26,
+      "price": 1300000,
+      "source": "Tarifa ficticia para desarrollo"
+    },
+    {
+      "panels": 28,
+      "price": 1400000,
+      "source": "Tarifa ficticia para desarrollo"
+    },
+    {
+      "panels": 30,
+      "price": 1500000,
+      "source": "Tarifa ficticia para desarrollo"
+    },
+    {
+      "panels": 32,
+      "price": 1600000,
+      "source": "Tarifa ficticia para desarrollo"
+    }
+  ]
+}
