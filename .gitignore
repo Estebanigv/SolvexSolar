@@ -45,3 +45,6 @@ next-env.d.ts
 /.codex/
 /outputs/
 /work/
+
+# Generated OCR engine and language data, copied from pinned npm dependencies.
+/public/ocr/

@@ -1,0 +1,47 @@
+@media screen {
+ .bill-capture-actions {display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+ .bill-capture-actions button {min-height:46px;flex:1;font-size:13px}
+ .bill-capture-actions button:first-child {background:#0e5264;color:white}
+ .bill-capture-hint {font-size:12px;color:#486774;line-height:1.7;margin:12px 0}
+ .bill-document {display:flex;align-items:center;gap:12px;padding:12px;border:1px solid #bad0d9;background:white;border-radius:8px;margin-top:10px;flex-wrap:wrap}
+ .bill-thumbnail {display:grid;place-items:center;width:52px;height:62px;flex-shrink:0;background:#e7f0f3;color:#0e5264;border-radius:5px;overflow:hidden;border:1px solid #cddce3}
+ .bill-thumbnail img {width:100%;height:100%;object-fit:contain}
+ .bill-document-name {flex:1;min-width:110px}
+ .bill-document-name strong {display:block;font-size:12px;color:#143e50}
+ .bill-document-name span {display:block;font-size:11px;color:#536e7d;overflow-wrap:anywhere;margin-top:3px}
+ .bill-document-actions {display:flex;gap:2px}.bill-document-actions button {width:40px;height:44px;padding:0}
+ .bill-secondary-actions {display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0}
+ .bill-secondary-actions button {min-height:44px;font-size:12px;padding-inline:9px}
+ .bill-reading {display:flex;align-items:center;gap:10px;padding:13px;background:#dcecf0;border:1px solid #a7c4cf;border-radius:7px;font-size:12px;line-height:1.6;margin-top:16px}
+ .bill-reading>svg {flex-shrink:0}.bill-reading>span {flex:1}.bill-reading button {padding:5px;font-size:12px;min-height:44px}
+ .bill-review-panel {margin-top:22px;padding-top:20px;border-top:1px solid #b4ccd6}
+ .bill-review-panel h4 {font-size:18px;font-weight:750;color:#0b4053}
+ .bill-review-panel>p {font-size:12px;line-height:1.7;color:#446371;margin-top:8px}
+ .bill-period {padding:10px 12px;background:white;border:1px solid #c4d7df;border-radius:6px}
+ .bill-read-warnings {padding:12px;background:#fff8e9;border:1px solid #dcc894;border-radius:7px;margin-top:14px}
+ .bill-read-warnings p {display:flex;gap:8px;font-size:12px;line-height:1.65;color:#72561a}
+ .bill-read-warnings p+p {margin-top:8px}.bill-read-warnings svg {flex-shrink:0;margin-top:3px}
+ .bill-detected-fields {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:20px}
+ .bill-detected-field {min-width:0}
+ .bill-field-check {display:flex!important;flex-direction:row!important;align-items:center;gap:8px;font-size:12px!important;font-weight:650;color:#244b5e;margin-bottom:8px}
+ .bill-field-check [data-slot=checkbox] {flex-shrink:0}
+ .bill-detected-field input {background:white!important;font-size:13px}
+ .bill-detected-field small {display:block;color:#557080;font-size:11px;margin-top:5px;overflow-wrap:anywhere}
+ .bill-detected-field details {margin-top:5px;border:0;padding:0}
+ .bill-detected-field summary {font-size:11px;font-weight:500;color:#416475;padding:4px 0;min-height:30px}
+ .bill-detected-field details p {font-size:11px;background:white;padding:8px;border-radius:5px;overflow-wrap:anywhere;white-space:pre-wrap}
+ .bill-contact-note {margin-block:20px!important}
+ .bill-apply {width:100%;min-height:46px;background:#0e5264;color:white;font-size:13px;white-space:normal}
+ .bill-applied {display:flex;gap:12px;align-items:flex-start;margin-top:18px;padding:16px;border:1px solid #b8cda1;background:#f1f7e8;border-radius:8px;color:#3f652c}
+ .bill-applied>svg {flex-shrink:0}.bill-applied strong {font-size:13px}.bill-applied p {font-size:12px;color:#48673d;margin-top:5px}
+ .bill-image-preview {display:grid;place-items:center;overflow:auto;min-height:200px;max-height:65dvh}
+ .bill-image-preview img {max-width:100%;max-height:60dvh;object-fit:contain}
+}
+@media screen and (max-width:639px) {
+ .bill-detected-fields {grid-template-columns:minmax(0,1fr)}
+ .bill-capture-actions {flex-direction:column}
+ .bill-document-actions {width:100%;justify-content:flex-end}
+ .bill-reading {flex-wrap:wrap}.bill-reading button {margin-left:auto}
+ .bill-secondary-actions {flex-direction:column;align-items:stretch}
+ .bill-field-check {min-height:30px}
+}

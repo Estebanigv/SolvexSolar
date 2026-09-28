@@ -1,0 +1,27 @@
+import assert from 'node:assert/strict';
+import {extractBill,applyBillValues,billNumber} from '../lib/bill-extraction';
+import {newQuote} from '../lib/quote';
+// Synthetic fixtures only. Never commit customer bills or OCR transcripts.
+const front=`COPELEC\nSr. (a) Cliente Ejemplo (Cliente)\nDirección de suministro: Calle Ejemplo 123\nDepto 4 Ciudad Prueba\nTipo de tarifa contratada: BT1\nFecha de emisión: 15 Ago 2026\nMonto del período 10 Junio - 10 Julio\nTotal a pagar\n$ 150.000\nE-mail de aviso: pagos@empresa.example\nAtención 800 100 200`;
+const back=`Consumo total del mes =\n420 kWh\nAnterior 25.000 kWh\nActual 25.420 kWh\nElectricidad consumida 420 kWh\nTotal Boleta 150.000`;
+const extraction=extractBill([front,back]);
+assert.equal(extraction.values.consumptionKwh,'420');
+assert.equal(extraction.values.bill,'150000');
+assert.equal(extraction.values.billingDays,'30');
+assert.equal(extraction.values.tariff,'BT1');
+assert.equal(extraction.values.name,'Cliente Ejemplo');
+assert.equal(extraction.values.commune,'Ciudad Prueba');
+assert.equal(extraction.values.address,'Calle Ejemplo 123 Depto 4 Ciudad Prueba');
+assert.equal(extractBill(['Lectura actual 12345 kWh\nAnterior 12000 kWh']).values.consumptionKwh,undefined);
+assert.equal(extractBill([back,'Consumo total del mes = 800 kWh']).values.consumptionKwh,undefined);
+assert.equal(extractBill([front,'Total a pagar $ 190.000']).values.bill,undefined);
+assert.equal(extractBill(['Días facturados: 0']).values.billingDays,undefined);
+assert.equal(extractBill(['Período de lectura: 20/12/2025 - 20/01/2026']).values.billingDays,'31');
+assert.equal(extractBill(['Período de lectura: 31/02/2026 - 05/03/2026']).values.billingDays,undefined);
+assert.equal(billNumber('1.250,5'),1250.5);assert.equal(billNumber('221.494'),221494);assert.equal(billNumber('785'),785);assert.equal(billNumber('NaN'),null);
+assert.equal(billNumber('1,250'),1.25);
+const quote=newQuote();quote.customer.name='Nombre existente';quote.customer.email='cliente@example.com';
+const patch=applyBillValues(quote,{consumptionKwh:'420',billingDays:'30'});
+assert.equal(patch.customer?.name,'Nombre existente');assert.equal(patch.customer?.email,'cliente@example.com');assert.equal(patch.energy?.billReviewed,false);
+assert.throws(()=>applyBillValues(quote,{billingDays:'0'}));assert.throws(()=>applyBillValues(quote,{bill:'-4'}));assert.throws(()=>applyBillValues(quote,{name:''}));
+console.log('Lectura de boletas: campos, fechas, conflictos, datos existentes y revisión: OK');

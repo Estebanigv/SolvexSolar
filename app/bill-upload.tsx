@@ -1,55 +1,62 @@
 "use client";
 import {useEffect, useRef, useState} from 'react';
-import {Upload, FileText, Eye, Trash2, CheckCircle2} from 'lucide-react';
+import {Upload, Camera, FileText, Eye, Trash2, RotateCw, ScanText, LoaderCircle, X} from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription} from '@/components/ui/dialog';
 import {validateBillFile} from '@/lib/bill-file';
+import type {BillDocument} from '@/lib/bill-reader';
+import type {BillExtraction} from '@/lib/bill-extraction';
+import type {QuoteInput} from '@/lib/quote';
+import {BillReview} from './bill-review';
 import dynamic from 'next/dynamic';
+const BillPdfPreview=dynamic(()=>import('./bill-pdf-preview'),{ssr:false,loading:()=> <p role="status">Cargando visor de boletas…</p>});
 
-const BillPdfPreview = dynamic(() => import('./bill-pdf-preview'), {ssr:false, loading:()=> <p role="status">Cargando visor de boletas…</p>});
-
-type Attachment = {file: File; url: string; mime: string};
-
-// Owned by the quote, so navigation between steps retains the document.
-export function useBillAttachment(onDocumentChange: () => void) {
-  const [attachment, setAttachment] = useState<Attachment | null>(null);
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const generation = useRef(0);
-  useEffect(() => () => {generation.current++}, []);
-  useEffect(() => () => {if (attachment) URL.revokeObjectURL(attachment.url)}, [attachment]);
-  async function select(file?: File) {
-    if (!file) return;
-    const id = ++generation.current;
-    setLoading(true); setError('');
-    try {
-      const mime = await validateBillFile(file);
-      if (id !== generation.current) return;
-      setAttachment({file, mime, url: URL.createObjectURL(new Blob([file], {type: mime}))});
-      onDocumentChange();
-    } catch (e) {
-      if (id === generation.current) setError((e as Error).message);
-    } finally {
-      if (id === generation.current) setLoading(false);
-    }
-  }
-  function clear() {
-    generation.current++; setAttachment(null); setLoading(false); setError(''); onDocumentChange();
-  }
-  return {attachment, error, loading, select, clear};
+export function useBillAttachment(onDocumentChange:()=>void){
+ const [attachments,setAttachments]=useState<BillDocument[]>([]),[error,setError]=useState(''),[loading,setLoading]=useState(false),[reading,setReading]=useState(false),[progress,setProgress]=useState(''),[result,setResult]=useState<(BillExtraction&{id:number})|null>(null);
+ const list=useRef<BillDocument[]>([]),generation=useRef(0),selection=useRef(0),control=useRef<AbortController|null>(null),urls=useRef(new Set<string>()),change=useRef(onDocumentChange);change.current=onDocumentChange;
+ useEffect(()=>()=>{selection.current++;generation.current++;control.current?.abort();urls.current.forEach(url=>URL.revokeObjectURL(url));urls.current.clear()},[]);
+ function cancel(){generation.current++;control.current?.abort();setReading(false);setProgress('Lectura cancelada. Puedes volver a intentarlo o completar los datos manualmente.');setResult(null)}
+ async function read(documents=list.current){
+  cancel();if(!documents.length)return;const id=++generation.current;const controller=new AbortController();control.current=controller;setReading(true);setError('');setProgress('Preparando documentos…');
+  const timeout=setTimeout(()=>controller.abort(),180000);
+  try{const {readBills}=await import('@/lib/bill-reader');controller.signal.throwIfAborted();const extraction=await readBills(documents,controller.signal,message=>{if(id===generation.current)setProgress(message)});if(id===generation.current){setResult({...extraction,id});setProgress('Lectura terminada. Revisa los datos antes de aplicarlos.')}}
+  catch{if(id===generation.current)setError(controller.signal.aborted?'La lectura tardó demasiado. Intenta una cara a la vez o una imagen más nítida.':'No se pudo iniciar el lector. Comprueba la conexión para cargarlo o completa los datos manualmente.')}
+  finally{clearTimeout(timeout);if(id===generation.current)setReading(false)}
+ }
+ function changeList(next:BillDocument[]){list.current=next;setAttachments(next);change.current();void read(next)}
+ async function select(files:File[],replace=false){
+  if(!files.length)return;const id=++selection.current;setLoading(true);setError('');
+  try{
+   const base=replace?[]:list.current;if(base.length+files.length>2)throw Error('Puedes adjuntar hasta dos archivos: frente y reverso, o un PDF de hasta seis páginas.');
+   if([...base.map(x=>x.file),...files].reduce((sum,file)=>sum+file.size,0)>20*1024*1024)throw Error('El total de documentos no puede superar 20 MB.');
+   const formats=await Promise.all(files.map(validateBillFile));if(id!==selection.current)return;
+   const added=files.map((file,i)=>{const url=URL.createObjectURL(new Blob([file],{type:formats[i]}));urls.current.add(url);return {id:crypto.randomUUID(),file,url,mime:formats[i],rotation:0}});
+   if(replace)list.current.forEach(doc=>{URL.revokeObjectURL(doc.url);urls.current.delete(doc.url)});
+   changeList([...base,...added]);
+  }catch(e){if(id===selection.current)setError((e as Error).message)}finally{if(id===selection.current)setLoading(false)}
+ }
+ function remove(id:string){const old=list.current.find(d=>d.id===id);if(old){URL.revokeObjectURL(old.url);urls.current.delete(old.url)}changeList(list.current.filter(d=>d.id!==id))}
+ function rotate(id:string){changeList(list.current.map(d=>d.id===id?{...d,rotation:(d.rotation+90)%360}:d))}
+ function clear(){selection.current++;cancel();urls.current.forEach(url=>URL.revokeObjectURL(url));urls.current.clear();list.current=[];setAttachments([]);setError('');setLoading(false);setProgress('');change.current()}
+ return {attachments,error,loading,reading,progress,result,select,remove,rotate,clear,cancel,read};
 }
 
-export function BillUpload({bill}: {bill: ReturnType<typeof useBillAttachment>}) {
-  const input = useRef<HTMLInputElement>(null);
-  const [preview, setPreview] = useState(false);
-  const {attachment, error, loading} = bill;
-  return <section className="bill-upload" aria-labelledby="bill-upload-title">
-    <div className="bill-upload-heading"><span className="bill-symbol"><FileText size={24}/></span><div><h3 id="bill-upload-title">Boleta de electricidad del cliente</h3><p>Adjunta el documento y registra su consumo en kWh.</p></div></div>
-    <input ref={input} className="sr-only" tabIndex={-1} type="file" accept=".pdf,.jpg,.jpeg,.png" aria-label="Seleccionar boleta de electricidad" onChange={e => {void bill.select(e.target.files?.[0]); e.target.value = ''}}/>
-    {attachment ? <div className="bill-selected"><CheckCircle2 size={20}/><div><strong>{attachment.file.name}</strong><span>{(attachment.file.size / 1024).toLocaleString('es-CL', {maximumFractionDigits: 0})} KB · Disponible en esta sesión</span></div><div className="bill-file-actions"><Button variant="outline" onClick={() => setPreview(true)}><Eye/>Ver boleta</Button><Button variant="ghost" aria-label="Quitar boleta" onClick={() => {setPreview(false); bill.clear()}}><Trash2/></Button></div></div> : <p className="bill-empty">PDF, JPG o PNG · Máximo 10 MB</p>}
-    <Button className="bill-choose" disabled={loading} onClick={() => input.current?.click()}><Upload/>{loading ? 'Revisando archivo…' : attachment ? 'Cambiar boleta' : 'Adjuntar boleta'}</Button>
-    {error && <p className="field-error" role="alert">{error}</p>}
-    <p className="bill-local-note">El archivo permanece en este navegador hasta recargar. Los datos se ingresan manualmente; todavía no hay lectura automática ni guardado del documento.</p>
-    <Dialog open={preview && !!attachment} onOpenChange={setPreview}><DialogContent className="bill-preview-dialog"><DialogHeader><DialogTitle>Boleta del cliente</DialogTitle><DialogDescription>{attachment?.file.name}</DialogDescription></DialogHeader>{attachment && (attachment.mime === 'application/pdf' ? <><BillPdfPreview key={attachment.url} file={attachment.file}/><a href={attachment.url} target="_blank" rel="noopener noreferrer">Abrir PDF original</a></> : <img src={attachment.url} alt="Boleta de electricidad adjunta"/>)}</DialogContent></Dialog>
-  </section>;
+export function BillUpload({bill,quote,onApply}:{bill:ReturnType<typeof useBillAttachment>;quote:QuoteInput;onApply:(patch:Partial<QuoteInput>)=>void}){
+ const input=useRef<HTMLInputElement>(null),camera=useRef<HTMLInputElement>(null),replace=useRef(false);const [preview,setPreview]=useState<string|null>(null);
+ const {attachments,error,loading,reading}=bill;const selected=attachments.find(d=>d.id===preview);
+ function pick(replaceAll=false){replace.current=replaceAll;input.current?.click()}
+ return <section className="bill-upload" aria-labelledby="bill-upload-title">
+  <div className="bill-upload-heading"><span className="bill-symbol"><ScanText size={24}/></span><div><h3 id="bill-upload-title">Escanea la boleta del cliente</h3><p>Fotografía ambas caras o adjunta el PDF. El lector propondrá los datos del cliente y su consumo.</p></div></div>
+  <input ref={input} className="sr-only" tabIndex={-1} type="file" multiple accept=".pdf,.jpg,.jpeg,.png" aria-label="Seleccionar frente y reverso de la boleta" onChange={e=>{void bill.select(Array.from(e.target.files??[]),replace.current);e.target.value=''}}/>
+  <input ref={camera} className="sr-only" tabIndex={-1} type="file" accept="image/jpeg,image/png" capture="environment" aria-label="Fotografiar boleta con cámara" onChange={e=>{void bill.select(Array.from(e.target.files??[]));e.target.value=''}}/>
+  <div className="bill-capture-actions"><Button disabled={loading||attachments.length>=2} onClick={()=>camera.current?.click()}><Camera/>Tomar foto</Button><Button variant="outline" disabled={loading||attachments.length>=2} onClick={()=>pick()}><Upload/>{attachments.length?'Agregar reverso':'Adjuntar boleta'}</Button></div>
+  <p className="bill-capture-hint">Hasta 2 archivos · PDF, JPG o PNG · 10 MB por archivo. En el celular, “Tomar foto” abre la cámara si el dispositivo lo permite.</p>
+  {attachments.map((doc,i)=><div className="bill-document" key={doc.id}><button className="bill-thumbnail" type="button" onClick={()=>setPreview(doc.id)} aria-label={`Ver documento ${i+1}`}>{doc.mime==='application/pdf'?<FileText size={27}/>:<img src={doc.url} alt={`Foto ${i+1} de la boleta`} style={{transform:`rotate(${doc.rotation}deg)`}}/>}</button><div className="bill-document-name"><strong>Documento {i+1}</strong><span>{doc.file.name}</span></div><div className="bill-document-actions"><Button variant="ghost" aria-label={`Ver documento ${i+1}`} onClick={()=>setPreview(doc.id)}><Eye/></Button>{doc.mime!=='application/pdf'&&<Button variant="ghost" aria-label={`Girar documento ${i+1}`} onClick={()=>bill.rotate(doc.id)} disabled={loading}><RotateCw/></Button>}<Button variant="ghost" aria-label={`Quitar documento ${i+1}`} onClick={()=>bill.remove(doc.id)} disabled={loading}><Trash2/></Button></div></div>)}
+  {attachments.length>0&&<div className="bill-secondary-actions"><Button variant="link" disabled={loading} onClick={()=>pick(true)}>Reemplazar documentos</Button>{!reading&&<Button variant="outline" disabled={loading} onClick={()=>void bill.read()}><ScanText/>Volver a leer</Button>}</div>}
+  {bill.progress&&<div className="bill-reading" role="status" aria-live="polite">{reading&&<LoaderCircle size={18} className="animate-spin"/>}<span>{bill.progress}</span>{reading&&<Button variant="ghost" onClick={bill.cancel}><X/>Cancelar</Button>}</div>}
+  {error&&<p className="field-error" role="alert">{error}</p>}
+  {bill.result&&!reading&&<BillReview key={bill.result.id} result={bill.result} quote={quote} onApply={onApply} disabled={loading}/>}
+  <p className="bill-local-note">La lectura se realiza en este dispositivo. Las fotos y el PDF no se envían a un servicio de OCR ni se guardan al recargar. Usa buena luz y procura que la boleta quede plana.</p>
+  <Dialog open={!!selected} onOpenChange={open=>!open&&setPreview(null)}><DialogContent className="bill-preview-dialog"><DialogHeader><DialogTitle>Boleta del cliente</DialogTitle><DialogDescription>{selected?.file.name}</DialogDescription></DialogHeader>{selected&&(selected.mime==='application/pdf'?<BillPdfPreview key={selected.url} file={selected.file}/>:<div className="bill-image-preview"><img src={selected.url} alt="Boleta de electricidad adjunta" style={{transform:`rotate(${selected.rotation}deg)`}}/></div>)}</DialogContent></Dialog>
+ </section>;
 }
