@@ -12,6 +12,20 @@ Plataforma comercial para preparar propuestas fotovoltaicas, con React y TypeScr
 - Historial de versiones, vista previa, descarga PDF e impresión.
 - WhatsApp y correo abren un mensaje preparado; el PDF se adjunta manualmente. No incluye envío automático.
 
+## Consumo y estudio solar
+
+En **Cliente y revisión → Perfil energético**, registrar los kWh y días reales de la boleta, distribuidora y tarifa. El equivalente a 30 días se calcula como `kWh / días × 30`; no se obtiene dividiendo el monto en CLP ni se presenta como consumo anual. Confirmar la revisión de la boleta. Los campos acompañan al documento y al payload de cotización; las cotizaciones antiguas siguen siendo compatibles. La extracción automática desde archivos queda pendiente de la boleta de ejemplo y no se simula.
+
+**Generación solar:** `GET /api/energy/solar` consulta PVGIS 5.3 / JRC (Comisión Europea), base PVGIS-ERA5. Recibe `latitude`, `longitude`, `peakPower` (kWp), `tilt` (0–90°), `azimuth` (convención PVGIS: 0 sur, 180 norte, -90 este, 90 oeste) y `loss` (0–50%). Utiliza un proveedor fijo, validación de entrada y respuesta, tiempo máximo de consulta de 12 segundos y caché del proveedor de 24 horas. No requiere claves. No envía nombres, boletas ni datos de contacto. Devuelve generación anual y mensual en kWh, período meteorológico, fuente y parámetros. `400` indica parámetros inválidos; `422`, ubicación/configuración sin datos; `502/503`, respuesta incompleta o fuente no disponible. No se devuelven estimaciones ficticias como respaldo.
+
+Ejemplo: `/api/energy/solar?latitude=-33.45&longitude=-70.66&peakPower=4.4&tilt=30&azimuth=180&loss=14`.
+
+Los valores iniciales de 30° y 14% son supuestos editables, no parámetros validados del proyecto. El cálculo usa módulos de silicio cristalino y montaje libre; no modela baterías, sombras cercanas, limitaciones del inversor ni ahorro. La estimación queda fuera del PDF comercial mientras no exista un método aprobado. Al cambiar los parámetros se invalida el resultado visible.
+
+**Consumo por comuna:** todavía no conectado. Al revisar la CNE el 28-09-2026, el enlace de API de Energía Abierta estaba en mantenimiento y la descarga comunal devolvía una página de error. No se inventan promedios regionales ni se usa radiación como consumo. El [catálogo oficial](https://energiaabierta.cne.cl/categorias-estadistica/electricidad?_sft_etiquetas-estadistica=consumo) sigue enlazado. El [Explorador de Energía de Chile](https://api.exploradorenergia.cl/) requiere solicitar registro; esta implementación utiliza la alternativa pública PVGIS y no afirma estar conectada a la CNE.
+
+Fuente y parámetros: [documentación oficial de PVGIS](https://joint-research-centre.ec.europa.eu/photovoltaic-geographical-information-system-pvgis/using-pvgis-5/api-non-interactive-service_en).
+
 ## Vercel
 
 Importar este repositorio con el directorio raíz `./` y el framework **Next.js**. `vercel.json` fija `npm run build` y la salida `.next`; `package.json` fija Node.js `22.x`. No seleccionar Vite ni utilizar `dist` como salida.

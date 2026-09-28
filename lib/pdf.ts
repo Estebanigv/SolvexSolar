@@ -1,4 +1,5 @@
 import {PDFDocument,StandardFonts,rgb} from 'pdf-lib';
+import {consumptionSummary} from './energy';
 import type {SavedQuote} from './quote';
 import {money,systemNames} from './quote';
 export async function quotePdf(q:SavedQuote,logoBytes?:ArrayBuffer){
@@ -14,7 +15,9 @@ export async function quotePdf(q:SavedQuote,logoBytes?:ArrayBuffer){
  const text=(s:string,size=10,isBold=false,color=navy)=>{for(const paragraph of clean(s).split('\n')){let line='';for(const word of paragraph.split(/\s+/)){const candidate=line?line+' '+word:word;if((isBold?bold:regular).widthOfTextAtSize(candidate,size)>525&&line){space(size+6);draw(line,35,y-size,size,isBold,color);y-=size+6;line=word;}else line=candidate;}space(size+6);draw(line,35,y-size,size,isBold,color);y-=size+6;}};
  const heading=(s:string)=>{space(38);y-=13;page.drawRectangle({x:35,y:y-2,width:3,height:16,color:lime});draw(s,46,y,13,true);y-=28;};
  newPage();text('PROYECTO FOTOVOLTAICO',11,true,grey);text(systemNames[q.input.system],24,true);text(`${q.calculation.kwp.toLocaleString('es-CL',{maximumFractionDigits:3})} kWp · ${q.calculation.panels} paneles`,16,true);y-=15;
- text(`Cliente: ${q.input.customer.name||'Por completar'}`,12,true);text(`Correo: ${q.input.customer.email||'Por completar'} | Teléfono: ${q.input.customer.phone||'Por completar'}`);text(`Ubicación: ${[q.input.customer.address,q.input.customer.commune,q.input.customer.region].filter(Boolean).join(', ')||'Por completar'}`);text(`Fecha: ${new Date(q.date).toLocaleDateString('es-CL')} | Vigencia propuesta: ${q.settings.validDays} días`);text(`Boleta mensual informada: ${money(q.input.customer.bill)}`);
+ text(`Cliente: ${q.input.customer.name||'Por completar'}`,12,true);text(`Correo: ${q.input.customer.email||'Por completar'} | Teléfono: ${q.input.customer.phone||'Por completar'}`);text(`Ubicación: ${[q.input.customer.address,q.input.customer.commune,q.input.customer.region].filter(Boolean).join(', ')||'Por completar'}`);text(`Fecha: ${new Date(q.date).toLocaleDateString('es-CL')} | Vigencia propuesta: ${q.settings.validDays} días`);text(`Monto de la boleta informado: ${money(q.input.customer.bill)}`);
+ const consumption=consumptionSummary(q.input.energy);
+ if(consumption&&q.input.energy){heading('CONSUMO INFORMADO');text(`${q.input.energy.consumptionKwh} kWh en ${q.input.energy.billingDays} días. ${q.input.energy.billReviewed?'Revisado con la boleta.':'Pendiente de revisión.'}`);text([q.input.energy.distributor,q.input.energy.tariff].filter(Boolean).join(' | '));text(`Equivalente a 30 días: ${consumption.equivalent30DaysKwh.toLocaleString('es-CL',{maximumFractionDigits:1})} kWh. No es una proyección anual.`,9,false,grey);}
  heading('EQUIPOS Y SERVICIOS');
  for(const l of q.calculation.lines){space(54);text(l.name,10,true);text(`${l.qty} ${l.unit} x ${l.price===null?'Sin precio':money(l.price)} = ${l.total===null?'Por confirmar':money(l.total)}`,10,false,grey);y-=8;}
  space(150);heading('INVERSIÓN');text(`Subtotal: ${money(q.calculation.subtotal)}`);text(`Descuento: ${money(q.calculation.discount)}`);

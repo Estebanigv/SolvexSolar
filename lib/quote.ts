@@ -1,5 +1,6 @@
 import raw from './catalog.json';
 import {z} from 'zod';
+import {energyInputSchema,consumptionSummary} from './energy';
 export const systems=['ON GRID','ON GRID TRIFASICO','OFF GRID','HIBRIDO','HIBRIDO TRIFASICO'] as const;
 export const systemNames:Record<string,string>={'ON GRID':'On Grid monofásico','ON GRID TRIFASICO':'On Grid trifásico','OFF GRID':'Off Grid','HIBRIDO':'Híbrido monofásico','HIBRIDO TRIFASICO':'Híbrido trifásico'};
 export const productSchema=z.object({id:z.string().min(1).max(60),system:z.enum(systems),category:z.string().min(1).max(100),name:z.string().min(1).max(180),price:z.number().finite().min(0).max(1e10).nullable(),unit:z.string().min(1).max(50),source:z.string().max(200),watts:z.number().finite().min(0).max(2000).nullable()});
@@ -9,7 +10,7 @@ export const installation=raw.installation;
 export const settingsSchema=z.object({name:z.string().min(1).max(100),legal:z.string().max(150),rut:z.string().max(30),address:z.string().max(250),email:z.union([z.literal(''),z.string().email()]),phone:z.string().max(40),validDays:z.number().int().min(1).max(365),taxMode:z.enum(['pending','included','net']),taxRate:z.number().min(0).max(100),terms:z.string().max(5000),warranty:z.string().max(3000),approved:z.boolean()});
 export type Settings=z.infer<typeof settingsSchema>;
 export const initialSettings:Settings={name:'Solvex Solar',legal:'',rut:'',address:'',email:'contacto@solvexsolar.cl',phone:'',validDays:15,taxMode:'pending',taxRate:19,terms:'',warranty:'',approved:false};
-export const quoteSchema=z.object({system:z.enum(systems),customer:z.object({name:z.string().max(150),email:z.union([z.literal(''),z.string().email()]),phone:z.string().max(40),region:z.string().max(100),commune:z.string().max(100),address:z.string().max(300),bill:z.number().finite().min(0).max(1e9)}),quantities:z.record(z.number().finite().min(0).max(100000)),extra:z.number().finite().min(0).max(1e10),extraLabel:z.string().max(300),discount:z.number().finite().min(0).max(1e10),installationOverride:z.number().finite().min(0).max(1e10).nullable(),installationNote:z.string().max(300),payment:z.string().min(1).max(100),notes:z.string().max(5000),technicalReviewed:z.boolean()});
+export const quoteSchema=z.object({energy:energyInputSchema.optional(),system:z.enum(systems),customer:z.object({name:z.string().max(150),email:z.union([z.literal(''),z.string().email()]),phone:z.string().max(40),region:z.string().max(100),commune:z.string().max(100),address:z.string().max(300),bill:z.number().finite().min(0).max(1e9)}),quantities:z.record(z.number().finite().min(0).max(100000)),extra:z.number().finite().min(0).max(1e10),extraLabel:z.string().max(300),discount:z.number().finite().min(0).max(1e10),installationOverride:z.number().finite().min(0).max(1e10).nullable(),installationNote:z.string().max(300),payment:z.string().min(1).max(100),notes:z.string().max(5000),technicalReviewed:z.boolean()});
 export type QuoteInput=z.infer<typeof quoteSchema>;
 export type Line={id:string;name:string;qty:number;unit:string;price:number|null;total:number|null;source:string;category:string};
 export type Calculation={lines:Line[];panels:number;kwp:number;subtotal:number;discount:number;net:number;tax:number|null;total:number;warnings:string[];complete:boolean;official:boolean};
@@ -47,6 +48,8 @@ export function calculate(input:QuoteInput,products:Product[],settings:Settings)
  if(settings.taxMode==='pending')warnings.push('Confirmar si los precios del Excel incluyen IVA. No se ha agregado IVA a los valores de origen.');
  if(!q.technicalReviewed)warnings.push('Pendiente de revisión técnica: modelos, compatibilidad, estructura y alcance.');
  if(!settings.approved||!settings.legal||!settings.rut||!settings.terms||!settings.warranty)warnings.push('Faltan datos y condiciones comerciales aprobados de la empresa.');
+ if(!consumptionSummary(q.energy))warnings.push('Ingresa el consumo en kWh y los días del período de la boleta.');
+ else if(!q.energy?.billReviewed)warnings.push('Verifica los datos energéticos con la boleta del cliente.');
  if(!q.customer.name.trim()||!q.customer.email||!q.customer.phone.trim()||!q.customer.region.trim()||!q.customer.commune.trim()||q.customer.bill<=0)warnings.push('Completa los datos del cliente y su monto de boleta.');
  return {lines,panels,kwp,subtotal,discount,net,tax,total,warnings,complete,official:complete&&warnings.length===0};
 }
