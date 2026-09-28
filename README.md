@@ -1,108 +1,88 @@
 # Solvex Solar — Cotizador
 
-Plataforma comercial para preparar propuestas fotovoltaicas, con React y TypeScript. Incluye Next.js nativo para Vercel y comandos separados de Vinext para Sites/Cloudflare.
+Plataforma privada de propuestas fotovoltaicas. Next.js 16 en Vercel, Supabase Auth, Postgres y Storage. Cotización en cuatro etapas: cliente y boleta, equipos, instalación, revisión y envío.
 
-> **Este repositorio público incluye datos de demostración.** Los precios comerciales, documentos privados, registros de clientes, credenciales e identidad del alojamiento de la empresa no se publican aquí. La plataforma privada conserva su catálogo real.
+## Datos privados y catálogo
 
-## Experiencia
+El repositorio público contiene únicamente un catálogo ficticio para pruebas. El catálogo comercial recibido y el tarifario de instalación se cargan en `public.workspace_config` de Supabase, protegidos con RLS. No copiar precios reales, boletas, transcripciones OCR, correos de clientes ni credenciales al repositorio.
 
-- Navegación lateral y cotización en tres etapas: sistema, instalación y cliente.
-- Selección visual de cinco tipos de sistema, catálogo editable y total en tiempo real.
-- Resumen accesible en celular, validaciones y confirmación antes de reiniciar.
-- Historial de versiones, vista previa, descarga PDF e impresión.
-- WhatsApp y correo abren un mensaje preparado; el PDF se adjunta manualmente. No incluye envío automático.
+La aplicación carga productos, tarifas y condiciones desde la base privada. Los datos legales, IVA, modelos, garantías y condiciones pendientes deben validarse antes de aprobar documentos. El cálculo de instalación usa el tarifario guardado en la base; no vuelve a aplicar los factores incluidos en el Excel. Las fichas técnicas siguen pendientes de vinculación individual y validación de discrepancias.
 
-## Consumo y estudio solar
+## Supabase y permisos
 
-En **Cliente y revisión → Perfil energético**, registrar los kWh y días reales de la boleta, distribuidora y tarifa. El equivalente a 30 días se calcula como `kWh / días × 30`; no se obtiene dividiendo el monto en CLP ni se presenta como consumo anual. Confirmar la revisión de la boleta. Los campos acompañan al documento y al payload de cotización; las cotizaciones antiguas siguen siendo compatibles. La extracción automática desde archivos queda pendiente de la boleta de ejemplo y no se simula.
+Proyecto: `solvex-solar` (`oymuqllnmocfzmghbmcp`), organización `yqfpmervkqmynjjbudwf`, región São Paulo.
 
-**Generación solar:** `GET /api/energy/solar` consulta PVGIS 5.3 / JRC (Comisión Europea), base PVGIS-ERA5. Recibe `latitude`, `longitude`, `peakPower` (kWp), `tilt` (0–90°), `azimuth` (convención PVGIS: 0 sur, 180 norte, -90 este, 90 oeste) y `loss` (0–50%). Utiliza un proveedor fijo, validación de entrada y respuesta, tiempo máximo de consulta de 12 segundos y caché del proveedor de 24 horas. No requiere claves. No envía nombres, boletas ni datos de contacto. Devuelve generación anual y mensual en kWh, período meteorológico, fuente y parámetros. `400` indica parámetros inválidos; `422`, ubicación/configuración sin datos; `502/503`, respuesta incompleta o fuente no disponible. No se devuelven estimaciones ficticias como respaldo.
+- `profiles`: cuentas vinculadas a Supabase Auth. Roles `pending`, `sales`, `admin`, `disabled`.
+- `workspace_config`: catálogo, tarifas de instalación, configuración de empresa y revisión compartida.
+- `clients`: datos de clientes y ejecutivo responsable.
+- `quotes`: versiones inmutables, con copia de cliente, equipos, precios, cálculo y condiciones.
+- Storage `boletas`: bucket privado, PDF/JPG/PNG, máximo 10 MB por archivo y dos posiciones por cotización.
 
-Ejemplo: `/api/energy/solar?latitude=-33.45&longitude=-70.66&peakPower=4.4&tilt=30&azimuth=180&loss=14`.
+Un ejecutivo consulta y modifica su cartera. Administración consulta el conjunto, edita el catálogo y autoriza otras cuentas. Un usuario pendiente o deshabilitado no tiene acceso a datos comerciales. Los permisos se consultan en la base, no en metadatos editables del usuario ni en encabezados del navegador. La sesión se verifica con Supabase y se renueva con Proxy; las respuestas privadas usan `Cache-Control: private, no-store`.
 
-Los valores iniciales de 30° y 14% son supuestos editables, no parámetros validados del proyecto. El cálculo usa módulos de silicio cristalino y montaje libre; no modela baterías, sombras cercanas, limitaciones del inversor ni ahorro. La estimación queda fuera del PDF comercial mientras no exista un método aprobado. Al cambiar los parámetros se invalida el resultado visible.
+Los guardados de cotización y cliente son atómicos. Un conflicto de revisión del catálogo devuelve 409 sin dejar clientes huérfanos. El catálogo y el guardado de propuestas comparten un bloqueo transaccional. Las cuentas no pueden modificar su propio rol. Las propuestas guardadas no se sobreescriben: se crea una nueva revisión.
 
-**Consumo por comuna:** todavía no conectado. Al revisar la CNE el 28-09-2026, el enlace de API de Energía Abierta estaba en mantenimiento y la descarga comunal devolvía una página de error. No se inventan promedios regionales ni se usa radiación como consumo. El [catálogo oficial](https://energiaabierta.cne.cl/categorias-estadistica/electricidad?_sft_etiquetas-estadistica=consumo) sigue enlazado. El [Explorador de Energía de Chile](https://api.exploradorenergia.cl/) requiere solicitar registro; esta implementación utiliza la alternativa pública PVGIS y no afirma estar conectada a la CNE.
+### Primera cuenta administradora
 
-Fuente y parámetros: [documentación oficial de PVGIS](https://joint-research-centre.ec.europa.eu/photovoltaic-geographical-information-system-pvgis/using-pvgis-5/api-non-interactive-service_en).
+1. En Supabase Dashboard → Authentication → Users, crear la cuenta real con el correo autorizado. La contraseña la define su titular en un canal privado; no se almacena en código ni se publica en el chat.
+2. Una cuenta nueva recibe el rol `pending`. Verificar su identidad/correo antes de habilitarla.
+3. Desde SQL Editor, asignar `admin` a la cuenta autorizada (sustituir el marcador, no usar un correo inventado):
 
-## Vercel
+```sql
+update public.profiles p set role = 'admin'
+from auth.users u
+where p.id = u.id and lower(u.email) = lower('CORREO_AUTORIZADO')
+  and u.email_confirmed_at is not null;
+```
 
-Importar este repositorio con el directorio raíz `./` y el framework **Next.js**. `vercel.json` fija `npm run build` y la salida `.next`; `package.json` fija Node.js `22.x`. No seleccionar Vite ni utilizar `dist` como salida.
+4. Ingresar en `/acceso`. En **Usuarios**, autorizar al resto del equipo una vez creadas sus cuentas en Supabase Auth.
 
-El build anterior ejecutaba Vinext y generaba archivos para Cloudflare Workers. Ese resultado no sirve como salida de Next.js en Vercel.
+El alta, recuperación de contraseña e invitaciones se gestionan en Supabase Auth por ahora; no hay registro público ni invitaciones automáticas desde esta interfaz. Para enviar correos de acceso a personas externas al equipo del proyecto, configurar SMTP propio y las URL permitidas siguiendo la [documentación de Supabase](https://supabase.com/docs/guides/auth/auth-smtp). No desactivar la validación de correo para evitar ese requisito.
 
-En Vercel se puede configurar una propuesta, calcular importes, revisar el documento, descargar PDF e imprimir. **El acceso privado, el guardado del catálogo y el historial todavía no están integrados en Vercel.** Los cambios permanecen en pantalla y se pierden al recargar o cerrar. La interfaz muestra este límite y deshabilita el guardado. Las APIs responden `503 PERSISTENCE_NOT_CONFIGURED`; no guardan en memoria ni simulan una operación exitosa.
+### Conexión
 
-Para una instalación comercial en Vercel falta conectar:
+`lib/supabase/config.ts` incluye la URL y una clave **publishable** del proyecto. Es una clave pública destinada al navegador; la protección efectiva es Auth + RLS. No otorga acceso administrativo. Puede reemplazarse por las variables de Vercel:
 
-1. Un proveedor de autenticación que verifique identidad y usuarios autorizados.
-2. Una base de datos persistente con el esquema de `db/schema.ts` (o una migración equivalente), aislamiento por usuario y control de revisiones.
-3. El catálogo y las condiciones comerciales validados, cargados de forma privada.
+```text
+NEXT_PUBLIC_SUPABASE_URL=https://PROJECT.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+```
 
-La sesión de ChatGPT y el enlace D1 del sitio anterior **no se transfieren con GitHub**. Los encabezados `oai-authenticated-user-*` no se aceptan como identidad en Next.js. No habilitar acceso público a las APIs para eludir esta protección ni colocar secretos en variables `NEXT_PUBLIC_*`.
+La aplicación no utiliza claves `service_role` o secretas. Nunca incorporarlas a Git o variables `NEXT_PUBLIC_*`.
 
-La decisión del entorno se toma en la compilación. `next.config.ts` utiliza un adaptador que bloquea almacenamiento no configurado; los comandos de Sites conservan sus enlaces originales. Esta corrección no migra la base de datos privada ni constituye una instalación comercial completa.
+Las migraciones versionadas están en `supabase/migrations/`. No incluyen el catálogo comercial ni una cuenta administradora. Para otro proyecto, aplicar las migraciones y cargar el catálogo privado validado por separado. No ejecutar la importación nuevamente sobre una configuración en uso.
 
-## Desarrollo con Next.js
+## Clientes, cotizaciones y boletas
 
-Requiere Node.js 22.x.
+En el primer paso se puede seleccionar un cliente existente o registrar uno nuevo. **Guardar cliente** conserva la ficha sin exigir una propuesta completa. **Guardar en historial** conserva una versión de la cotización y su cliente; los cambios sin guardar siguen siendo temporales.
+
+La cámara del celular (si el navegador es compatible) y la carga de PDF/JPG/PNG permiten adjuntar frente y reverso. PDF.js lee texto; Tesseract.js lee fotos y páginas escaneadas en español, ajustando orientación y revisando hasta seis páginas por PDF. El OCR se realiza en el dispositivo. La revisión permite corregir y seleccionar campos sin sobrescribir automáticamente datos existentes. No se toman contactos de atención o pagos de la distribuidora como contactos del cliente. No se garantiza extracción completa de todos los formatos.
+
+Tras guardar una cotización, **Guardar boletas en esta cotización** respalda los archivos en el bucket privado. Antes de pulsarlo, los archivos solo están en memoria y desaparecen al recargar. El envío a Storage ocurre directamente desde el navegador autenticado, evitando el límite de cuerpo de las funciones de Vercel. En el historial, **Consultar boletas guardadas** genera enlaces privados que caducan en 60 segundos. Una nueva versión tiene su propio respaldo; no se sustituyen los archivos de versiones anteriores.
+
+`npm run prebuild` y `npm run predev` generan `public/ocr/` con las dependencias de motor e idioma fijadas en el lockfile. La primera lectura necesita conexión para descargar esos recursos del mismo sitio.
+
+## Energía y documentos
+
+Los kWh y días proceden de la boleta y requieren revisión. El equivalente a 30 días es `kWh / días × 30`; no representa todo el año. La API `/api/energy/solar` utiliza PVGIS/JRC para estimar generación según ubicación, potencia y parámetros técnicos. No obtiene el consumo individual de una distribuidora ni acredita ahorro. La conexión CNE de consumo agregado sigue pendiente.
+
+PDF, impresión y compartir archivo conservan los datos de la versión seleccionada. WhatsApp y correo abren un mensaje preparado; el PDF se adjunta manualmente. No hay envío automático. Ahorro, retorno, compatibilidad y condiciones requieren aprobación técnica/comercial.
+
+## Desarrollo y verificación
+
+Node.js 22.x. Vercel usa Next.js, `npm run build` y `.next`.
 
 ```sh
 npm ci
-npm run dev
-```
-
-```sh
 npm test
 npm run build
 npm run start
 ```
 
-Con el servidor de producción iniciado, en otra terminal:
+Con la app iniciada, ejecutar `TEST_BASE_URL=http://127.0.0.1:3000 node tests/next-smoke.mjs` (ajustar la sintaxis de la variable a la terminal). Comprueba acceso privado, bloqueo de APIs y encabezados falsificados. `supabase/tests/access.sql` verifica aislamiento, roles, revocación y transacciones con registros sintéticos dentro de un `ROLLBACK`. Las comprobaciones no incorporan datos reales a las pruebas.
 
-```sh
-node tests/next-smoke.mjs
-```
+Para una prueba autenticada con una cuenta temporal expresamente autorizada, `tests/authenticated-smoke.mjs` toma `TEST_CREDENTIALS_FILE` (JSON local ignorado con `id`, `email`, `password`) y `TEST_BASE_URL`. Solo acepta el dominio ficticio de pruebas, crea cliente/cotización sintéticos y verifica catálogo, cálculo, historial y cierre de sesión. El operador debe revocar y eliminar después esa cuenta y sus registros; no usar cuentas reales ni comprometer el archivo de credenciales.
 
-La comprobación HTTP valida página, logo y rechazo de lectura/guardado, incluso con encabezados de identidad falsificados. `TEST_BASE_URL` permite comprobar otra dirección.
+La revisión de seguridad no informó problemas de RLS. El aviso de protección contra contraseñas filtradas corresponde a una función disponible desde el plan Pro; se mantuvo el plan gratuito autorizado. [Detalle y configuración de Supabase](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection).
 
-## Sites / Cloudflare
-
-Se conserva este entorno como alternativa separada:
-
-```sh
-npm run dev:sites
-npm run build:sites
-npm run start:sites
-```
-
-Estos comandos requieren Sites, su autenticación y Cloudflare D1. La identidad local simulada es únicamente para desarrollo. Para aplicar la migración local después de compilar con Sites:
-
-```sh
-node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0000_spotty_dexter_bennett.sql
-```
-
-## Datos y publicación
-
-`lib/catalog.json` contiene productos y tarifas ficticios para desarrollo. `lib/documents.ts` contiene una lista genérica de pendientes. Integrar datos comerciales solamente en un entorno privado autorizado. No sustituir el catálogo real de una instalación existente con esta demostración.
-
-La configuración `.openai/hosting.json` conserva los enlaces lógicos de almacenamiento y omite el identificador del sitio privado. Registrar una instalación propia mediante Sites antes de publicar allí. En Vercel, la integración Git puede desplegar cada actualización de `main`.
-
-En Sites, las APIs validan la identidad y separan los registros por usuario. Cada cotización conserva una copia de sus precios y condiciones; se recalcula en el servidor. La instalación ya incluye los factores del tarifario, y nunca se aplica un segundo margen. El IVA y las condiciones deben validarse antes de emitir documentos reales.
-
-## Límites
-
-El cotizador sigue cuatro etapas: cliente y boleta, equipos, instalación, revisión y envío. Los equipos precargados no se marcan como revisados al abrir la pantalla; cada etapa se confirma al continuar con sus datos completos. La revisión técnica se realiza al final.
-
-En el primer paso se pueden capturar fotos con la cámara del celular o adjuntar hasta dos archivos (frente y reverso): PDF, JPG o PNG de hasta 10 MB cada uno. Se comprueban extensión, tipo y firma. La lectura empieza al adjuntar: PDF.js extrae la capa de texto y Tesseract.js procesa fotos y páginas escaneadas en español, con orientación automática y revisión de hasta seis páginas por PDF. Los documentos permanecen en memoria del navegador; no se envían al servidor, a PVGIS ni a un proveedor de OCR. Se conservan al cambiar de etapa y desaparecen al recargar o comenzar una nueva cotización.
-
-El lector propone exclusivamente campos reconocidos por etiquetas de la boleta y muestra el texto de origen. Los consumos ambiguos y los totales contradictorios quedan pendientes. Antes de completar el formulario, el usuario selecciona, corrige y aplica los campos; por defecto no se sobrescriben valores existentes. El consumo y la duración deben confirmarse contra el documento. Nunca se copian teléfonos, correos ni datos de pago de la distribuidora al contacto del cliente. La precisión depende de la foto y del formato: no se garantiza lectura completa de todas las distribuidoras.
-
-`npm run prebuild` y `npm run predev` preparan en `public/ocr/` el motor y el idioma español desde dependencias fijadas. Ese directorio es generado e ignorado por Git. Los recursos se sirven desde el mismo sitio; la primera lectura necesita conexión para descargarlos. No incorporar boletas reales, transcripciones OCR ni capturas con datos de clientes a Git. Las pruebas utilizan exclusivamente textos sintéticos. La cámara requiere un navegador y dispositivo compatibles con `capture="environment"`; siempre está disponible la carga de archivos.
-
-PVGIS estima generación solar a partir de ubicación y parámetros técnicos en el paso de revisión. No obtiene consumos individuales ni acredita ahorros. La integración CNE de consumo agregado sigue pendiente. Las fichas recibidas del proyecto original todavía no se vinculan al catálogo de demostración; falta validar las discrepancias entre nombres de archivo y especificaciones antes de asociarlas en el entorno privado.
-
-No se calculan ahorros ni compatibilidad eléctrica sin información técnica validada. Requiere conexión para guardar. El catálogo no se sincroniza con Drive. El historial devuelve las 100 versiones más recientes. Las fuentes PDF estándar cubren texto latino.
-
-La fuente Manrope se distribuye con su licencia OFL en `public/fonts/OFL.txt`.
+Los comandos `dev:sites`, `build:sites` y `start:sites` conservan el adaptador anterior de Sites/D1. La identidad de Sites solo se acepta en ese entorno; nunca en Vercel.

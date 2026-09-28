@@ -10,4 +10,6 @@ const missing=calculate({...q,quantities:{...q.quantities,'0-10':11}},initialPro
 assert.equal(missing.complete,false);
 const invalid=calculate({...q,discount:1e10},initialProducts,initialSettings);
 assert.equal(invalid.complete,false);
+const customRates=calculate(q,initialProducts,initialSettings,[{panels:8,price:123456,source:'Tarifa sintética de base de datos'}]);
+assert.equal(customRates.lines.find(l=>l.id==='installation')?.total,123456);
 console.log('Pruebas del catálogo de demostración: OK');

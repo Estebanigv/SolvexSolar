@@ -6,7 +6,9 @@ export const systemNames:Record<string,string>={'ON GRID':'On Grid monofásico',
 export const productSchema=z.object({id:z.string().min(1).max(60),system:z.enum(systems),category:z.string().min(1).max(100),name:z.string().min(1).max(180),price:z.number().finite().min(0).max(1e10).nullable(),unit:z.string().min(1).max(50),source:z.string().max(200),watts:z.number().finite().min(0).max(2000).nullable()});
 export type Product=z.infer<typeof productSchema>;
 export const initialProducts=raw.products as Product[];
-export const installation=raw.installation;
+export const installationSchema=z.array(z.object({panels:z.number().int().positive(),price:z.number().finite().nonnegative(),source:z.string().max(300)}));
+export type InstallationRates=z.infer<typeof installationSchema>;
+export const installation:InstallationRates=raw.installation;
 export const settingsSchema=z.object({name:z.string().min(1).max(100),legal:z.string().max(150),rut:z.string().max(30),address:z.string().max(250),email:z.union([z.literal(''),z.string().email()]),phone:z.string().max(40),validDays:z.number().int().min(1).max(365),taxMode:z.enum(['pending','included','net']),taxRate:z.number().min(0).max(100),terms:z.string().max(5000),warranty:z.string().max(3000),approved:z.boolean()});
 export type Settings=z.infer<typeof settingsSchema>;
 export const initialSettings:Settings={name:'Solvex Solar',legal:'',rut:'',address:'',email:'contacto@solvexsolar.cl',phone:'',validDays:15,taxMode:'pending',taxRate:19,terms:'',warranty:'',approved:false};
@@ -14,10 +16,10 @@ export const quoteSchema=z.object({energy:energyInputSchema.optional(),system:z.
 export type QuoteInput=z.infer<typeof quoteSchema>;
 export type Line={id:string;name:string;qty:number;unit:string;price:number|null;total:number|null;source:string;category:string};
 export type Calculation={lines:Line[];panels:number;kwp:number;subtotal:number;discount:number;net:number;tax:number|null;total:number;warnings:string[];complete:boolean;official:boolean};
-export type SavedQuote={id:string;folio:string;date:string;input:QuoteInput;settings:Settings;calculation:Calculation};
+export type SavedQuote={id:string;clientId?:string;folio:string;date:string;input:QuoteInput;settings:Settings;calculation:Calculation};
 export const money=(n:number)=>new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(n);
 export function newQuote():QuoteInput{return {system:'ON GRID',customer:{name:'',email:'',phone:'',region:'',commune:'',address:'',bill:0},quantities:{'0-10':8,'0-13':8,'0-26':1,'0-35':15,'0-37':15,'0-43':1,'0-45':1,'0-47':1},extra:0,extraLabel:'',discount:0,installationOverride:null,installationNote:'',payment:'Transferencia bancaria',notes:'',technicalReviewed:false}}
-export function calculate(input:QuoteInput,products:Product[],settings:Settings):Calculation{
+export function calculate(input:QuoteInput,products:Product[],settings:Settings,installationRates:InstallationRates=installation):Calculation{
  const q=quoteSchema.parse(input); const warnings:string[]=[];
  const selected=products.filter(p=>p.system===q.system&&(q.quantities[p.id]||0)>0);
  const ids=new Set(products.map(p=>p.id));
@@ -30,7 +32,7 @@ export function calculate(input:QuoteInput,products:Product[],settings:Settings)
  if(!panels){complete=false;warnings.push('Selecciona al menos un panel.');}
  if(!selected.some(p=>p.category.includes('INVERSOR'))){complete=false;warnings.push('Selecciona un inversor.');}
  if(q.system==='OFF GRID'&&!selected.some(p=>p.category.includes('BATER'))){complete=false;warnings.push('Selecciona almacenamiento para el sistema Off Grid.');}
- const install=installation.find(i=>i.panels===panels);
+ const install=installationRates.find(i=>i.panels===panels);
  let installationPrice=q.installationOverride??install?.price??null;
  if(q.installationOverride!==null&&!q.installationNote.trim()){complete=false;warnings.push('Indica el motivo del valor manual de instalación.');}
  if(installationPrice===null){complete=false;warnings.push(`No existe tarifa de instalación para ${panels} paneles. Ingresa un valor validado.`);}

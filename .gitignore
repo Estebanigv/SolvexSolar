@@ -48,3 +48,4 @@ next-env.d.ts
 
 # Generated OCR engine and language data, copied from pinned npm dependencies.
 /public/ocr/
+/supabase/.temp/

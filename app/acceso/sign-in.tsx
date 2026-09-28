@@ -1,0 +1,12 @@
+"use client";
+import {useState,type FormEvent} from 'react';
+import {LockKeyhole,ArrowRight,LoaderCircle} from 'lucide-react';
+import {browserDatabase} from '@/lib/supabase/client';
+export default function Login({pending=false}:{pending?:boolean}){
+  const [email,setEmail]=useState(''),[password,setPassword]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState('');
+  async function submit(e:FormEvent){e.preventDefault();setBusy(true);setError('');
+    try{const {error}=await browserDatabase().auth.signInWithPassword({email:email.trim(),password});if(error){setError('No pudimos iniciar sesión. Revisa tu correo y contraseña, o consulta al administrador.');return}window.location.assign('/')}
+    catch{setError('No hay conexión con el servicio de acceso. Inténtalo nuevamente.')}finally{setBusy(false)}
+  }
+  return <main className="auth-shell"><section className="auth-intro"><img src="/logo.jpg" alt="Solvex Solar"/><span>PLATAFORMA COMERCIAL</span><h1>Tu equipo.<br/>Cada proyecto.<br/><em>Un mismo lugar.</em></h1><p>Clientes, equipos y propuestas solares en el espacio privado de Solvex Solar.</p><div><LockKeyhole size={18}/> Acceso para usuarios autorizados</div></section><section className="auth-card"><span className="auth-eyebrow">BIENVENIDO A SOLVEX SOLAR</span><h2>Ingresa a tu espacio</h2><p>Usa la cuenta que te asignó la empresa.</p>{pending&&<div className="auth-notice" role="status">Tu sesión es válida, pero falta autorizar tu acceso. Solicita la activación al administrador.</div>}<form onSubmit={submit}><label htmlFor="login-email">Correo electrónico</label><input id="login-email" type="email" autoComplete="username" required value={email} onChange={e=>setEmail(e.target.value)}/><label htmlFor="login-password">Contraseña</label><input id="login-password" type="password" autoComplete="current-password" required value={password} onChange={e=>setPassword(e.target.value)}/>{error&&<p className="field-error" role="alert">{error}</p>}<button disabled={busy} type="submit">{busy?<LoaderCircle className="animate-spin" size={18}/>:<ArrowRight size={18}/>} {busy?'Ingresando…':'Ingresar'}</button></form><p className="auth-help">¿Necesitas una cuenta o recuperar tu acceso? Contacta al administrador de Solvex Solar.</p></section></main>;
+}

@@ -56,7 +56,7 @@ export function BillUpload({bill,quote,onApply}:{bill:ReturnType<typeof useBillA
   {bill.progress&&<div className="bill-reading" role="status" aria-live="polite">{reading&&<LoaderCircle size={18} className="animate-spin"/>}<span>{bill.progress}</span>{reading&&<Button variant="ghost" onClick={bill.cancel}><X/>Cancelar</Button>}</div>}
   {error&&<p className="field-error" role="alert">{error}</p>}
   {bill.result&&!reading&&<BillReview key={bill.result.id} result={bill.result} quote={quote} onApply={onApply} disabled={loading}/>}
-  <p className="bill-local-note">La lectura se realiza en este dispositivo. Las fotos y el PDF no se envían a un servicio de OCR ni se guardan al recargar. Usa buena luz y procura que la boleta quede plana.</p>
+  <p className="bill-local-note">La lectura se realiza en este dispositivo. Las fotos y el PDF no se envían a un servicio de OCR. Para conservarlos, guarda la cotización y pulsa “Guardar boletas en esta cotización”. Sin ese respaldo, se pierden al recargar. Usa buena luz y procura que la boleta quede plana.</p>
   <Dialog open={!!selected} onOpenChange={open=>!open&&setPreview(null)}><DialogContent className="bill-preview-dialog"><DialogHeader><DialogTitle>Boleta del cliente</DialogTitle><DialogDescription>{selected?.file.name}</DialogDescription></DialogHeader>{selected&&(selected.mime==='application/pdf'?<BillPdfPreview key={selected.url} file={selected.file}/>:<div className="bill-image-preview"><img src={selected.url} alt="Boleta de electricidad adjunta" style={{transform:`rotate(${selected.rotation}deg)`}}/></div>)}</DialogContent></Dialog>
  </section>;
 }

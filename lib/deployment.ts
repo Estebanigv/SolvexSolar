@@ -1,5 +1,5 @@
-// A build-time constant supplied by next.config.ts, never a request header.
-export const isDemoDeployment = process.env.NEXT_PUBLIC_APP_RUNTIME === 'nextjs';
+// Persistence is now provided by Supabase on Next.js and by D1 on Sites.
+export const isDemoDeployment = false;
 
 export function demoUnavailable() {
   return Response.json({

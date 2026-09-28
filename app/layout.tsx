@@ -4,6 +4,7 @@ import "./workspace.css";
 import "./responsive.css";
 import "./quote-flow.css";
 import "./bill-reader.css";
+import "./auth.css";
 
 export const metadata: Metadata = {
   title: "Solvex Solar | Cotizador",
