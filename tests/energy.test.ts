@@ -18,6 +18,9 @@ async function run() {
   const q = {...newQuote(), energy: bill, technicalReviewed: true,
     customer: {name: 'Prueba', email: 'prueba@example.com', phone: '+56911111111', region: 'Metropolitana', commune: 'Santiago', address: '', bill: 50000}};
   assert.equal(workflowReadiness(q, initialProducts, calculate(q, initialProducts, initialSettings)).customer, true);
+  const unreviewed = {...q, technicalReviewed: false};
+  assert.equal(workflowReadiness(unreviewed, initialProducts, calculate(q, initialProducts, initialSettings)).customer, true, 'Customer data can be completed before the final technical review');
+  assert.equal(workflowReadiness(unreviewed, initialProducts, calculate(q, initialProducts, initialSettings)).review, false);
   assert.equal(workflowReadiness({...q, energy: {...bill, billReviewed: false}}, initialProducts, calculate(q, initialProducts, initialSettings)).customer, false);
   assert.ok(calculate({...q, energy: undefined}, initialProducts, initialSettings).warnings.some(w => w.includes('kWh')));
 

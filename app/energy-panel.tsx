@@ -9,8 +9,8 @@ import {consumptionSummary, newEnergyInput, solarSourceUrl, type EnergyInput, ty
 const number = (value: number) => value.toLocaleString('es-CL', {maximumFractionDigits: 1});
 const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 
-export function EnergyPanel({value, peakPower, onChange}: {
-  value?: EnergyInput; peakPower: number; onChange: (value: EnergyInput) => void;
+export function EnergyPanel({value, peakPower, onChange, mode = 'consumption'}: {
+  mode?: 'consumption' | 'solar'; value?: EnergyInput; peakPower: number; onChange: (value: EnergyInput) => void;
 }) {
   const energy = value ?? newEnergyInput();
   const consumption = consumptionSummary(energy);
@@ -46,8 +46,8 @@ export function EnergyPanel({value, peakPower, onChange}: {
       if (controller.current === control) setLoading(false);
     }
   }
-  return <section className="energy-panel" aria-labelledby="energy-title">
-    <div className="energy-heading"><span className="energy-icon"><Activity size={20}/></span><div><h3 id="energy-title">Perfil energético</h3><p>El consumo de la boleta es la base del estudio.</p></div><span className="energy-badge">{energy.billReviewed && consumption ? 'Boleta revisada' : 'Por completar'}</span></div>
+  return <section className="energy-panel" aria-label={mode === 'consumption' ? 'Perfil energético del cliente' : 'Estudio de generación solar'}>
+    {mode === 'consumption' && <><div className="energy-heading"><span className="energy-icon"><Activity size={20}/></span><div><h3 id="energy-title">Perfil energético</h3><p>El consumo de la boleta es la base del estudio.</p></div><span className="energy-badge">{energy.billReviewed && consumption ? 'Boleta revisada' : 'Por completar'}</span></div>
     <div className="field-grid energy-fields">
       <label>Consumo de la boleta (kWh)<Input type="number" min={0} max={1e8} step="any" value={energy.consumptionKwh ?? ''} placeholder="Ej. 350" onChange={e => edit({consumptionKwh: e.target.value === '' ? null : Math.max(0, Number(e.target.value))})}/></label>
       <label>Días del período facturado<Input type="number" min={1} max={366} step={1} value={energy.billingDays ?? ''} placeholder="Ej. 30" onChange={e => edit({billingDays: e.target.value === '' ? null : Math.min(366, Math.max(1, Math.round(Number(e.target.value))))})}/></label>
@@ -56,7 +56,8 @@ export function EnergyPanel({value, peakPower, onChange}: {
     </div>
     {consumption && <div className="consumption-result" role="status"><div><span>Consumo diario</span><strong>{number(consumption.dailyKwh)} <small>kWh/día</small></strong></div><div><span>Equivalente a 30 días</span><strong>{number(consumption.equivalent30DaysKwh)} <small>kWh</small></strong></div><p>Normalizado desde {energy.billingDays} días. Una boleta no representa todo el año; solicita 12 meses para revisar la estacionalidad.</p></div>}
     <label className="bill-review"><Checkbox disabled={!consumption} checked={energy.billReviewed} onCheckedChange={v => edit({billReviewed: v === true})}/>Verifiqué estos datos en la boleta del cliente.</label>
-    <details className="solar-study"><summary><Sun size={18}/><span>Estimar generación solar por ubicación<small>Consulta pública de PVGIS · Comisión Europea</small></span></summary>
+    </>}
+    {mode === 'solar' && <details open className="solar-study"><summary><Sun size={18}/><span>Estimar generación solar por ubicación<small>Consulta pública de PVGIS · Comisión Europea</small></span></summary>
       <div className="solar-study-body">
         <p>Usa las coordenadas del proyecto y ajusta los supuestos según el techo. La potencia seleccionada es <strong>{peakPower.toLocaleString('es-CL', {maximumFractionDigits: 3})} kWp</strong>.</p>
         <div className="field-grid energy-fields">
@@ -79,7 +80,7 @@ export function EnergyPanel({value, peakPower, onChange}: {
         </div>}
         {!current && <a className="energy-source" href={solarSourceUrl} target="_blank" rel="noreferrer">Fuente: PVGIS / JRC <ExternalLink size={13}/></a>}
       </div>
-    </details>
-    <p className="energy-reference">Consumo por comuna: integración CNE pendiente de una fuente operativa. Los datos agregados de una zona no reemplazan el consumo del cliente. <a href="https://energiaabierta.cne.cl/categorias-estadistica/electricidad?_sft_etiquetas-estadistica=consumo" target="_blank" rel="noreferrer">Ver catálogo oficial</a>.</p>
+    </details>}
+    {mode === 'solar' && <p className="energy-reference">Consumo por comuna: integración CNE pendiente de una fuente operativa. Los datos agregados de una zona no reemplazan el consumo del cliente. <a href="https://energiaabierta.cne.cl/categorias-estadistica/electricidad?_sft_etiquetas-estadistica=consumo" target="_blank" rel="noreferrer">Ver catálogo oficial</a>.</p>}
   </section>;
 }

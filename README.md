@@ -93,6 +93,12 @@ En Sites, las APIs validan la identidad y separan los registros por usuario. Cad
 
 ## Límites
 
+El cotizador sigue cuatro etapas: cliente y boleta, equipos, instalación, revisión y envío. Los equipos precargados no se marcan como revisados al abrir la pantalla; cada etapa se confirma al continuar con sus datos completos. La revisión técnica se realiza al final.
+
+En el primer paso se puede adjuntar una boleta PDF, JPG o PNG de hasta 10 MB, previsualizarla, reemplazarla o quitarla. Se comprueban extensión, tipo y firma. El archivo permanece únicamente en memoria del navegador durante la sesión y se conserva al cambiar de etapa; no se envía a PVGIS, al servidor ni al PDF comercial. Recargar o comenzar una nueva cotización elimina el adjunto. No se implementó OCR: el consumo y los días se registran manualmente y requieren confirmación del usuario contra la boleta.
+
+PVGIS estima generación solar a partir de ubicación y parámetros técnicos en el paso de revisión. No obtiene consumos individuales ni acredita ahorros. La integración CNE de consumo agregado sigue pendiente. Las fichas recibidas del proyecto original todavía no se vinculan al catálogo de demostración; falta validar las discrepancias entre nombres de archivo y especificaciones antes de asociarlas en el entorno privado.
+
 No se calculan ahorros ni compatibilidad eléctrica sin información técnica validada. Requiere conexión para guardar. El catálogo no se sincroniza con Drive. El historial devuelve las 100 versiones más recientes. Las fuentes PDF estándar cubren texto latino.
 
 La fuente Manrope se distribuye con su licencia OFL en `public/fonts/OFL.txt`.

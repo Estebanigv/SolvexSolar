@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import "./workspace.css";
 import "./responsive.css";
+import "./quote-flow.css";
 
 export const metadata: Metadata = {
   title: "Solvex Solar | Cotizador",

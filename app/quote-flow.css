@@ -1,0 +1,141 @@
+/* Brand hierarchy: petrol shell, teal active step, lime actions and white work paper. */
+@media screen {
+  .app-main {background:#e7eef2}
+  .page-heading h1 {color:#082f40;font-size:30px;font-weight:800;letter-spacing:-1px}
+  .heading-sub {font-size:14px;color:#435f70}
+  .page-heading {padding-block:28px 24px}
+  .workspace>.screen-only>.notice {background:#fff8e7;border-color:#e0cf99;color:#614a18}
+  .notice p {color:#665626}
+  [data-slot=sidebar-inner], [data-slot=sidebar][data-mobile=true] {background:#073442}
+  .side-tabs [role=tab][data-state=active] {background:#195466!important;border-color:#b5d67b70!important;box-shadow:0 5px 15px #001e3250,inset 0 1px 0 #ffffff18!important}
+  .side-tabs [role=tab][data-state=active]>svg:first-child {color:#c1dc65}
+  .stage-navigation {display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));height:auto!important;padding:0!important;gap:10px!important;border:0;background:transparent!important;margin-bottom:24px}
+  .stage-navigation [role=tab] {position:relative;display:flex!important;flex-direction:row;justify-content:flex-start!important;align-items:center;gap:10px;height:78px;padding:12px!important;min-width:0;border:1px solid #bdcdd7!important;border-radius:9px!important;background:#f8fafb!important;color:#385666}
+  .stage-navigation [role=tab][data-state=active] {background:#0e5264!important;color:white!important;border-color:#0e5264!important;box-shadow:0 6px 16px #0e52642b!important}
+  .stage-navigation [role=tab]:hover:not([data-state=active]) {background:white!important;border-color:#7f9cab!important}
+  .stage-navigation .stage-number {display:grid;width:30px;height:30px;background:#e2ebef;border:1px solid #bdcdd7;color:#365465;font-size:13px;font-weight:750}
+  .stage-navigation [data-state=active] .stage-number {background:#c1dc65;color:#183d36;border-color:#c1dc65}
+  .stage-copy strong {font-size:13px;font-weight:750}
+  .stage-copy small {font-size:11px;color:#4f6978}
+  .stage-navigation [data-state=active] .stage-copy small {color:#e0eef1}
+  .stage-navigation [data-complete=true]:not([data-state=active]) {border-color:#9bb9a3!important;background:#f3f8ef!important}
+  .stage-navigation .stage-check {display:block;color:#53753c;flex-shrink:0;margin-left:auto}
+  .stage-navigation [data-state=active] .stage-check {color:#c1dc65}
+  .stage-workspace .card {padding:26px;border:1px solid #c3d2db;border-radius:12px;box-shadow:0 10px 30px -17px #163e5560}
+  .stage-workspace .section-heading {flex-wrap:nowrap;align-items:center;border-bottom:1px solid #cddbe2;padding-bottom:20px;margin-bottom:24px;gap:14px}
+  .section-heading .step {display:grid;place-items:center;flex-shrink:0;width:40px;height:40px;background:#0e5264;color:#fff;font-size:17px;font-weight:750;border-radius:10px}
+  .stage-workspace .section-heading h2 {font-size:22px;color:#0a3546;line-height:1.3;letter-spacing:-.6px}
+  .section-caption {color:#496675;font-size:13px;margin-top:5px}
+  .stage-actions button {font-size:13px;height:46px}
+  .stage-actions button:last-child {background:#0e5264;color:#fff}
+  .stage-actions>span {color:#425f6f;font-size:12px;font-weight:600}
+  .form-subtitle {font-size:16px;color:#123f51;margin:26px 0 16px;letter-spacing:-.25px}
+  .field-grid label {color:#294d60;font-weight:600;font-size:13px}
+  .workspace input, .workspace textarea, .workspace .select-control {border-color:#b8cad5}
+  .summary {border-color:#bbced9;box-shadow:0 10px 28px -15px #113f5260}
+  .summary-head {background:#0b4053;min-height:190px}
+  .summary-title {color:#e0eef1}
+  .summary-head h2 {color:white;font-weight:800}
+  .summary-head small {color:#c1dc65}
+  .summary-head>p {color:#d0e4ea;font-size:12px}
+  .solar-emblem {opacity:.28;color:#c1dc65}
+  .total-box {background:#eaf2f5;border:1px solid #cadbe2;padding:16px 12px}
+  .total-box p,.total-box>span {color:#496574}
+  .primary,.mobile-quote-bar button {background:#c1dc65!important;color:#173d35!important;font-weight:750!important}
+  .workflow-track>span {height:6px;background:#dbe5ec}
+  .workflow-track>span[data-complete=true] {background:#72973c}
+  .workflow-track>span[data-current=true] {background:#0e5264}
+  .system-option {background:#f2f6f8;border-color:#c5d5de}
+  .system-option[data-selected=true] {background:#e3efdc;border-color:#73984a;box-shadow:0 0 0 1px #73984a30}
+  .system-option[data-selected=true] strong {color:#284f2f}
+  .product-choice {background:#edf3f6;border-color:#cddce4}
+  .product-icon {background:#d7e7ed;color:#0e5264;border-radius:8px}
+  .bill-upload {padding:22px;background:#edf5f6;border:1px solid #99bcc7;border-radius:10px}
+  .bill-upload-heading {display:flex;gap:14px;align-items:center}
+  .bill-symbol {display:grid;place-items:center;flex-shrink:0;width:46px;height:46px;background:#0e5264;color:#e4f1c0;border-radius:10px}
+  .bill-upload h3 {font-size:17px;color:#0b4053;letter-spacing:-.3px;line-height:1.4}
+  .bill-upload-heading p {font-size:13px;color:#476875;margin-top:4px}
+  .bill-empty {font-size:12px;color:#476875;margin:18px 0 12px}
+  .bill-choose {background:#0e5264!important;color:white!important;min-height:44px;font-size:13px}
+  .bill-local-note {font-size:12px!important;line-height:1.65;color:#466675;margin-top:14px;max-width:75ch}
+  .bill-selected {display:flex;gap:10px;align-items:center;margin:18px 0;padding:13px;background:white;border:1px solid #c3d9de;border-radius:7px;flex-wrap:wrap}
+  .bill-selected>svg {color:#52753b;flex-shrink:0}
+  .bill-selected>div:not(.bill-file-actions) {min-width:0;flex:1 1 120px}
+  .bill-selected strong {display:block;font-size:13px;overflow-wrap:anywhere;word-break:break-word}
+  .bill-selected span {display:block;color:#567281;font-size:11px}
+  .bill-file-actions {display:flex;gap:6px}
+  .bill-file-actions button {height:44px;font-size:12px}
+  .bill-preview-dialog {width:min(920px,calc(100vw - 24px))!important;max-width:920px!important}
+  .bill-preview-dialog iframe {width:100%;height:65dvh;border:1px solid #c5d5dd;border-radius:6px}
+  .bill-preview-dialog img {width:100%;max-height:65dvh;object-fit:contain}
+  .bill-preview-dialog [data-slot=dialog-header] {padding-right:30px;overflow-wrap:anywhere}
+  .bill-preview-dialog>a {font-size:13px;text-decoration:underline}
+  .pdf-paper {max-height:60dvh;overflow:auto;background:#dbe5ea;border:1px solid #bdced8;border-radius:6px;padding:8px}
+  .pdf-paper canvas {display:block;width:100%;height:auto;background:white}
+  .pdf-pagination {display:flex;justify-content:center;align-items:center;gap:18px;margin-top:12px;font-size:12px}
+  .pdf-pagination button {width:44px;height:44px}
+  .pdf-loading {display:flex;align-items:center;gap:8px;font-size:13px;padding:12px}
+  .stage-navigation {scroll-margin-top:80px}
+  .energy-icon {background:#daeaef;color:#0e5264;border-color:#bcd2dc}
+  .consumption-result {background:#e5f0f3;border-color:#b6ced9}
+  .solar-study {border-color:#a9c4cf;margin-top:0}
+  .solar-study>summary {background:#e7f1f3;color:#104659}
+  .solar-study>summary small {color:#496a77}
+  .solar-consult {background:#0e5264;color:white;border-color:#0e5264}
+  .solar-consult:hover {background:#0b4053;color:white}
+  .review-checklist {border:1px solid #c9d8e0;border-radius:9px;overflow:hidden;margin-bottom:24px}
+  .review-checklist>button {display:flex;width:100%;text-align:left;align-items:center;gap:12px;background:#f6f9fa;padding:16px;border-bottom:1px solid #d5e0e6}
+  .review-checklist>button:last-child {border-bottom:0}
+  .review-checklist>button:hover {background:#eaf2f5}
+  .review-checklist>button>span:nth-child(2) {flex:1;min-width:0}
+  .review-checklist strong {font-size:13px;display:block}
+  .review-checklist small {font-size:12px;color:#516c7b;display:block;margin-top:2px}
+  .review-state {color:#977022;flex-shrink:0}
+  .review-state[data-complete=true] {color:#4f782e}
+  .review-card>.energy-panel {border-top:0;padding-top:0;margin-top:0}
+  .review-card>label {margin-top:20px}
+  .review-delivery {display:flex;gap:13px;align-items:center;background:#0b4053;color:white;border-radius:9px;padding:18px;margin-top:24px}
+  .review-delivery>svg {color:#c1dc65;flex-shrink:0}
+  .review-delivery h3 {font-size:14px;color:white}
+  .review-delivery p {color:#d7e7ee;font-size:12px;margin-top:4px}
+  .equipment-docs-note {display:flex;align-items:flex-start;gap:12px;background:#f5f8f1;border:1px solid #cbd9bd;padding:17px;margin-top:24px;border-radius:8px}
+  .equipment-docs-note>svg {flex-shrink:0;color:#597838}
+  .equipment-docs-note strong {font-size:13px;color:#34582d}
+  .equipment-docs-note p {font-size:12px;color:#526746;line-height:1.7;margin-top:4px}
+  .equipment-docs-note button {padding:0;height:36px;font-size:12px;color:#254c37}
+  .technical-status {padding:20px;background:#edf4f6;border:1px solid #c4d7df;border-radius:10px;margin:20px 0}
+  .technical-status>svg {color:#0e5264;margin-bottom:12px}
+  .technical-status h3 {font-size:16px}
+  .technical-status p {font-size:13px;line-height:1.75;margin-top:10px;color:#486675}
+}
+@media screen and (min-width:1600px) {.stage-navigation [role=tab] {padding:16px!important}.stage-copy strong{font-size:14px}}
+@media screen and (max-width:1279px) {.stage-copy strong{font-size:12px}.stage-navigation [role=tab]{gap:8px}.stage-navigation .stage-check{display:none}}
+@media screen and (max-width:767px) {
+  .stage-navigation {gap:6px!important}
+  .stage-navigation [role=tab] {height:auto;min-height:98px;flex-direction:column;justify-content:flex-start!important;padding:10px 5px!important;gap:7px}
+  .stage-copy {align-items:center;text-align:center}
+  .stage-copy strong {font-size:11px;line-height:1.35}
+  .stage-copy small {font-size:10px}
+  .stage-navigation .stage-number {width:26px;height:26px;font-size:12px}
+  .page-heading h1 {font-size:27px;max-width:24ch}
+  .heading-sub {font-size:13px}
+  .stage-workspace .card {padding:21px 18px}
+  .stage-workspace .section-heading h2 {font-size:20px}
+  .bill-upload {padding:18px}
+  .bill-upload-heading {gap:11px;align-items:flex-start}
+  .bill-symbol {width:38px;height:38px;border-radius:8px}
+  .bill-upload h3 {font-size:16px}
+  .bill-choose {width:100%}
+  .bill-selected {padding:12px}
+  .bill-file-actions {width:100%;margin-top:4px}
+  .bill-file-actions button:first-child {flex:1}
+  .section-heading .step {width:34px;height:34px;font-size:15px;border-radius:8px}
+  .stage-workspace .section-heading {gap:10px}
+}
+@media screen and (max-width:359px) {
+  .stage-workspace .card {padding:18px 12px}
+  .bill-upload {padding:14px}
+  .stage-navigation {gap:4px!important}
+  .stage-copy strong {font-size:10px}.stage-copy small {font-size:9px}
+  .stage-workspace .section-heading h2 {font-size:18px}
+}
