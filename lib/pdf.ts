@@ -31,7 +31,7 @@ export async function quotePdf(q:SavedQuote,logoBytes?:ArrayBuffer){
  if(netbillingScope(q.input,q.settings))text(netbillingScope(q.input,q.settings));
  space(225);heading('GARANTÍAS');text(q.settings.warranty||'Garantías por modelo y garantía de instalación pendientes de confirmación.');
  const adviser=assignedAdviser(q.input,q.settings);if(adviser){heading('TU CONTACTO COMERCIAL');text(adviser.name,11,true);text(`${adviser.email} | ${adviser.phone}`);}
- heading('DATOS DE LA EMPRESA');text(q.settings.legal||q.settings.name,11,true);if(q.settings.rut)text('RUT: '+q.settings.rut);if(q.settings.address)text(q.settings.address);text([q.settings.email,q.settings.phone].filter(Boolean).join(' | '));
+ heading('DATOS DE LA EMPRESA');text(q.settings.legal||q.settings.name,11,true);if(q.settings.rut)text('RUT: '+q.settings.rut);text([q.settings.email,q.settings.phone].filter(Boolean).join(' | '));
  text('No se incluyen estimaciones de ahorro, generación o retorno sin parámetros técnicos validados.',9,false,grey);
  return new Uint8Array(await pdf.save());
 }
