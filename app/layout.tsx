@@ -1,3 +1,4 @@
+import {AppInstallProvider} from "./install-app";
 import type { Metadata } from "next";
 import "./globals.css";
 import "./workspace.css";
@@ -5,6 +6,7 @@ import "./responsive.css";
 import "./quote-flow.css";
 import "./bill-reader.css";
 import "./auth.css";
+import "./install-app.css";
 
 export const metadata: Metadata = {
   title: "Solvex Solar | Cotizador",
@@ -16,6 +18,7 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",
+    apple: "/app-icon-192.png",
   },
 };
 
@@ -26,7 +29,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className="antialiased">{children}</body>
+      <body className="antialiased"><AppInstallProvider>{children}</AppInstallProvider></body>
     </html>
   );
 }
