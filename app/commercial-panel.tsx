@@ -12,6 +12,7 @@ export function CommercialFields({quote,settings,onChange}:{quote:QuoteInput;set
   <label>Comercial asignado<Select value={quote.adviserId||'none'} onValueChange={id=>onChange({adviserId:id==='none'?'':id})}><SelectTrigger aria-label="Comercial asignado"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="none">Contacto general de la empresa</SelectItem>{advisers.map(a=><SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}</SelectContent></Select></label>
  </div>{adviser&&<p className="help-text">{adviser.email} · {adviser.phone}</p>}
  {quote.proposalType==='preliminary'?<p className="notice">{preliminaryNote}</p>:<label className="check-label"><Checkbox checked={quote.technicalReviewed} onCheckedChange={v=>onChange({technicalReviewed:v===true})}/>El comercial y el instalador revisaron modelos, compatibilidad, estructura y alcance tras la visita técnica.</label>}
+ <h3>Documento para el cliente</h3><label className="check-label"><Checkbox checked={quote.showItemDetails!==false} onCheckedChange={v=>onChange({showItemDetails:v===true})}/>Mostrar detalle de equipos y servicios</label><p className="help-text">{quote.showItemDetails===false?'El documento mostrará el resumen del proyecto y los totales, sin desglosar los ítems.':'El documento incluirá los equipos, cantidades e importes por ítem.'} Se aplica a la vista previa, impresión y PDF compartido.</p>
  </section>;
 }
 

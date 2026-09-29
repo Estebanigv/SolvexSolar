@@ -11,7 +11,7 @@ export const received = [
 ];
 export const remaining = [
  {title:'Metodología de ahorro',text:'Confirmar cómo se obtuvieron los ahorros mensuales del Excel, tarifa, ubicación, autoconsumo y excedentes. Incluye casos en que el ahorro supera la boleta.'},
- {title:'Datos comerciales pendientes',text:'Falta dirección de la empresa y plazos de ejecución. Confirmar quién autoriza descuentos y cotizaciones finales.'},
+ {title:'Datos comerciales pendientes',text:'Confirmar quién autoriza descuentos y cotizaciones finales.'},
  {title:'Garantías y fichas por producto',text:'Confirmar garantía de baterías y asociar fichas vigentes a los modelos elegidos tras la visita. No se atribuye garantía de 15 años a baterías o inversores.'},
  {title:'Accesos del equipo',text:'Los contactos están disponibles para las propuestas. Las cuentas y permisos de acceso se administran en Usuarios; no se habilitan automáticamente desde el documento.'},
 ];
