@@ -109,4 +109,29 @@ assert.equal(mixedPlaces.values.commune,undefined);
 assert.equal(mixedPlaces.values.region,undefined);
 assert.equal(extractBill(['Dirección de suministro: AVENIDA SANTIAGO 42']).values.commune,undefined);
 assert.equal(extractBill(['Sucursal: CALLE 100, PUENTE ALTO']).values.region,undefined);
+// Synthetic Enel layout: abbreviated label, grave accent, hyphenated commune, parentheses.
+const enel=extractBill([`www.enel.cl
+Sr. (a) Persona de Prueba
+Dirección de envìo: CALLE POSTAL 500 - COLINA
+Dirección suministro: CALLE FICTICIA S/N MZN 31 D - COLINA
+Ruta: 100-0000
+Tipo de tarifa contratada: BT1-T1
+Total a pagar: $ 172.336`, `Electricidad Consumida (660kWh) $ 155.314
+Período de lectura:08/08/2026 - 07/09/2026
+Actual 28693,000
+Anterior -28033,000
+Consumo total del periodo= 660 kWh
+Total a pagar $172.336`]);
+assert.equal(enel.values.address,'CALLE FICTICIA S/N MZN 31 D');
+assert.equal(enel.values.commune,'Colina');
+assert.equal(enel.values.region,'Metropolitana de Santiago');
+assert.equal(enel.values.distributor,'ENEL');
+assert.equal(enel.values.consumptionKwh,'660');
+assert.equal(enel.values.billingDays,'30');
+assert.equal(enel.values.bill,'172336');
+assert.equal(enel.values.tariff,'BT1-T1');
+assert.equal(extractBill(['Dirección de envìo: CALLE FICTICIA S/N - COLINA']).values.address,'CALLE FICTICIA S/N');
+assert.equal(extractBill(['Electricidad Consumida (660 kWh)']).values.consumptionKwh,'660');
+assert.equal(extractBill(['Consumo total del período= 660 kWh']).values.consumptionKwh,'660');
+assert.equal(extractBill(['Consumo de referencia: 500 kWh']).values.consumptionKwh,undefined);
 console.log('Lectura de boletas: campos, fechas, conflictos, datos existentes y revisión: OK');

@@ -12,12 +12,12 @@ export function locationFromAddress(address:string){
   // Only match the final municipality in a customer address, not arbitrary mentions of cities.
   const clean=address.trim().replace(/[,.\s]+$/,'');
   const key=locationKey(clean);
-  const matches=territories.filter(item=>key.endsWith(', '+locationKey(item.commune))||key.endsWith(','+locationKey(item.commune))||key.endsWith(' '+locationKey(item.commune))).sort((a,b)=>b.commune.length-a.commune.length);
+  const matches=territories.filter(item=>[', ', ',', ' ', ' - ', ' – ', ' — '].some(separator=>key.endsWith(separator+locationKey(item.commune)))).sort((a,b)=>b.commune.length-a.commune.length);
   const place=matches[0];if(!place)return null;
   const start=key.length-locationKey(place.commune).length;
   // Names and accents preserve length after normalizing the whitespace here.
   const normalized=clean.replace(/\s+/g,' ');
-  const street=normalized.slice(0,start).replace(/[,\s]+$/,'');
-  if(!/\d/.test(street))return null;
+  const street=normalized.slice(0,start).replace(/[,\s–—-]+$/,'');
+  if(!/\d|\bS\s*\/\s*N\b/i.test(street))return null;
   return {place,street};
 }

@@ -39,11 +39,11 @@ export function extractBill(pages:string[]):BillExtraction {
   const textMatch=(key:BillField,pattern:RegExp)=>{const matches=[...flat.matchAll(new RegExp(pattern.source,pattern.flags+'g'))].filter(m=>m[1].trim().length>1);const unique=new Set(matches.map(m=>normalize(m[1].trim())));if(unique.size>1){conflicts.add(key);warnings.push(`Se detectaron valores distintos para ${billFields.find(f=>f.key===key)!.label.toLowerCase()}. Revisa que los documentos sean de la misma boleta.`);}else if(matches.length)set(key,matches[0][1],matches[0][0])};
   textMatch('name',/(?:Sr\.?\s*\(a\)|Titular\s*:|Nombre del cliente\s*:)\s*([^\n]{2,100})/i);
   if(values.name) values.name=values.name.replace(/\s*\(\s*Cliente\s*\).*$/i,'').trim();
-  textMatch('address',/Direcci[oó]n de suministro\s*:\s*([^\n]{3,180})/i);
-  if(!values.address&&!conflicts.has('address'))textMatch('address',/Direcci[oó]n de env[ií]o\s*:\s*([^\n]{3,180})/i);
+  textMatch('address',/Direcci[oó]n\s+(?:de\s+)?suministro\s*:\s*([^\n]{3,180})/i);
+  if(!values.address&&!conflicts.has('address'))textMatch('address',/Direcci[oó]n\s+(?:de\s+)?env[iíì]o\s*:\s*([^\n]{3,180})/i);
   textMatch('email',/(?:Correo(?: electr[oó]nico)?|E-?mail)\s+(?:del\s+)?cliente\s*:\s*([^\s\n]+@[^\s\n]+)/i);
   textMatch('phone',/(?:Tel[eé]fono|Celular)\s+(?:del\s+)?cliente\s*:\s*(\+?\d[\d ()-]{6,25})/i);
-  const addressBlock=flat.match(/Direcci[oó]n de (?:suministro|env[ií]o)\s*:\s*([^\n]+)\n(?:Datos de mi suministro\n)?((?:Depto\.?|Dpto\.?|Casa|Oficina)\s+[^\n]+)/i);
+  const addressBlock=flat.match(/Direcci[oó]n\s+(?:de\s+)?(?:suministro|env[iíì]o)\s*:\s*([^\n]+)\n(?:Datos de mi suministro\n)?((?:Depto\.?|Dpto\.?|Casa|Oficina)\s+[^\n]+)/i);
   if(addressBlock&&values.address&&!/\b(?:Depto|Dpto|Casa|Oficina)\b/i.test(values.address)) values.address+=' '+addressBlock[2];
   textMatch('commune',/\bComuna\s*:\s*([^\n]{2,70})/i);
   textMatch('region',/\bRegi[oó]n\s*:\s*([^\n]{2,70})/i);
@@ -65,7 +65,7 @@ export function extractBill(pages:string[]):BillExtraction {
   if(amounts.length===1)set('bill',String(amounts[0]),amountCandidates[0].source);
   else if(amounts.length>1)warnings.push('Se detectaron totales diferentes. Revisa el monto a pagar; podría haber saldo anterior o documentos distintos.');
   if([...flat.matchAll(/Saldo anterior(?:\s*\([^\n)]*\))?\s*[:=]?\s*\$?\s*(\d[\d.,]*)/gi)].some(m=>(billNumber(m[1])??0)>0))warnings.push('El total a pagar incluye saldo anterior. No lo uses como gasto mensual ni como base directa del ahorro; el consumo se calcula con los kWh y días del período.');
-  const usageCandidates=[...flat.matchAll(/(?:Consumo total del mes|Electricidad consumida|Consumo (?:del per[ií]odo|facturado|mensual))\s*[:=]?\s*(\d[\d.,]*)\s*k\s*w\s*h\b/gi)].map(m=>({n:billNumber(m[1]),source:m[0]})).filter(x=>x.n!==null&&x.n>=0&&x.n<=1e8);
+  const usageCandidates=[...flat.matchAll(/(?:Consumo total del (?:mes|per[ií]odo)|Electricidad consumida|Consumo (?:del per[ií]odo|facturado|mensual))\s*[:=]?\s*\(?\s*(\d[\d.,]*)\s*k\s*w\s*h\b/gi)].map(m=>({n:billNumber(m[1]),source:m[0]})).filter(x=>x.n!==null&&x.n>=0&&x.n<=1e8);
   const usages=[...new Set(usageCandidates.map(x=>x.n))];
   if(usages.length===1)set('consumptionKwh',String(usages[0]),usageCandidates[0].source);
   else if(usages.length>1)warnings.push('Las lecturas muestran consumos distintos. Selecciona el consumo facturado del período; no una lectura acumulada del medidor.');
