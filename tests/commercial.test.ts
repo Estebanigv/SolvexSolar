@@ -37,3 +37,13 @@ assert.equal(roiReference(q,{...calc,panels:99},reference),null);
 assert.equal(roiReference(q,{...calc,complete:false},reference),null);
 assert.equal(roiReference(q,{...calc,total:0},reference),null);
 console.log('Condiciones comerciales: descuentos, IVA, pagos, etapas, contactos y referencia ROI: OK');
+
+// International WhatsApp URLs, local Chilean mobile numbers and invalid destinations.
+import {whatsappNumber,whatsappUrl} from '../lib/document-share';
+assert.equal(whatsappNumber('+56 9 1234 5678'),'56912345678');
+assert.equal(whatsappNumber('9 1234 5678'),'56912345678');
+assert.equal(whatsappNumber('0056 9 1234 5678'),'56912345678');
+assert.equal(whatsappNumber(''), '');
+assert.equal(whatsappNumber('abc123'),null);
+assert.equal(whatsappUrl('123','Hola'),null);
+assert.equal(whatsappUrl('','Hola & propuesta'),'https://wa.me/?text=Hola%20%26%20propuesta');

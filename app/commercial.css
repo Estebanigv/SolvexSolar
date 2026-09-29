@@ -6,3 +6,9 @@
 .roi-reference .field-grid strong,.payment-summary .field-grid strong{display:block;font-size:20px;margin-top:7px;color:#103b48}
 .proposal .payment-summary{break-inside:avoid}
 @media(max-width:640px){.commercial-options,.roi-reference,.payment-summary{padding:16px}.roi-reference .field-grid,.payment-summary .field-grid{grid-template-columns:1fr}.roi-reference .field-grid>div,.payment-summary .field-grid>div{display:flex;justify-content:space-between;align-items:center;gap:12px}.roi-reference .field-grid strong,.payment-summary .field-grid strong{font-size:18px;margin:0}}
+
+.document-share-dialog{max-width:560px;max-height:90dvh;overflow-y:auto;overflow-wrap:anywhere}
+.document-share-steps{display:grid;gap:14px;padding:18px;border:1px solid #d5e3e5;border-radius:12px;background:#f3f8f8}
+.document-share-steps ol{list-style:decimal;padding-left:22px;line-height:1.7;font-size:14px}
+.document-share-steps label{display:grid;gap:8px;font-size:14px}.document-download{display:flex;justify-content:center;align-items:center;gap:8px;padding:12px;border-radius:8px;background:#123e49;color:white;text-decoration:none;font-weight:600}
+.document-download.secondary{background:white;color:#123e49;border:1px solid #b5ccd2}.document-download:focus-visible{outline:3px solid #adc82e;outline-offset:3px}
