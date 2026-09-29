@@ -15,6 +15,7 @@ import {usesSupabase} from '@/lib/supabase/config';
 import {MemberBar,ClientPicker,Members,SaveBills,OpenBills,type MemberProfile} from './workspace-access';
 import {AppNavigation} from './navigation';
 import {EnergyPanel} from './energy-panel';
+import {autoFillBill,clearAutomaticBillValues,type BillValues} from '@/lib/bill-extraction';
 import {BillUpload, useBillAttachment} from './bill-upload';
 import {CommercialFields,PaymentSummary,RoiReference} from './commercial-panel';
 import {assignedAdviser,netbillingScope,preliminaryNote,proposalTitle} from '@/lib/commercial';
@@ -49,7 +50,9 @@ export default function QuoteApp(){
  const calculation=useMemo(()=>{try{return calculate(emailInvalid?{...quote,customer:{...quote.customer,email:''}}:quote,products,settings,installation)}catch{return null}},[quote,products,settings,emailInvalid,installation]);
  const ready=workflowReadiness(quote,products,calculation);
  const update=(patch:Partial<QuoteInput>)=>{setQuote(q=>({...q,...patch,technicalReviewed:patch.technicalReviewed??false}));setConfirmed(previous=>previous.filter(id=>id!=='review' && !(id==='customer'&&('customer' in patch||('energy' in patch&&['consumptionKwh','billingDays','distributor','tariff','billReviewed'].some(key=>patch.energy?.[key as keyof typeof patch.energy]!==quote.energy?.[key as keyof typeof quote.energy])))) && !(id==='system'&&('system' in patch||'quantities' in patch)) && !(id==='installation'&&['system','quantities','installationOverride','installationNote','extra','extraLabel','discount','discountPercent'].some(key=>key in patch))));setSaved(null)};
- const bill=useBillAttachment(()=>update({energy:{...(quote.energy??newEnergyInput()),billReviewed:false}}));
+ const automaticBillValues=useRef<BillValues>({});
+ const currentQuote=useRef(quote);currentQuote.current=quote;
+ const bill=useBillAttachment(()=>{update(clearAutomaticBillValues(currentQuote.current,automaticBillValues.current));automaticBillValues.current={}},extraction=>{const merged=autoFillBill(currentQuote.current,extraction,automaticBillValues.current);automaticBillValues.current=merged.automatic;update(merged.patch);return merged.result});
  const complete={customer:ready.customer&&confirmed.includes('customer'),system:ready.system&&confirmed.includes('system'),installation:ready.installation&&confirmed.includes('installation'),review:ready.review&&['customer','system','installation'].every(id=>confirmed.includes(id))};
  function continueStep(){if(ready[step as keyof typeof ready])setConfirmed(previous=>Array.from(new Set([...previous,step])));moveStep(stages[Math.min(stageIndex+1,stages.length-1)].id)}
  const editCustomer=(k:keyof QuoteInput['customer'],v:string|number)=>update({customer:{...quote.customer,[k]:v}});

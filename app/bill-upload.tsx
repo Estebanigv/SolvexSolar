@@ -11,15 +11,16 @@ import {BillReview} from './bill-review';
 import dynamic from 'next/dynamic';
 const BillPdfPreview=dynamic(()=>import('./bill-pdf-preview'),{ssr:false,loading:()=> <p role="status">Cargando visor de boletas…</p>});
 
-export function useBillAttachment(onDocumentChange:()=>void){
+export function useBillAttachment(onDocumentChange:()=>void,onRead:(result:BillExtraction)=>BillExtraction){
  const [attachments,setAttachments]=useState<BillDocument[]>([]),[error,setError]=useState(''),[loading,setLoading]=useState(false),[reading,setReading]=useState(false),[progress,setProgress]=useState(''),[result,setResult]=useState<(BillExtraction&{id:number})|null>(null);
  const list=useRef<BillDocument[]>([]),generation=useRef(0),selection=useRef(0),control=useRef<AbortController|null>(null),urls=useRef(new Set<string>()),change=useRef(onDocumentChange);change.current=onDocumentChange;
+ const completeRead=useRef(onRead);completeRead.current=onRead;
  useEffect(()=>()=>{selection.current++;generation.current++;control.current?.abort();urls.current.forEach(url=>URL.revokeObjectURL(url));urls.current.clear()},[]);
  function cancel(){generation.current++;control.current?.abort();setReading(false);setProgress('Lectura cancelada. Puedes volver a intentarlo o completar los datos manualmente.');setResult(null)}
  async function read(documents=list.current){
   cancel();if(!documents.length)return;const id=++generation.current;const controller=new AbortController();control.current=controller;setReading(true);setError('');setProgress('Preparando documentos…');
   const timeout=setTimeout(()=>controller.abort(),180000);
-  try{const {readBills}=await import('@/lib/bill-reader');controller.signal.throwIfAborted();const extraction=await readBills(documents,controller.signal,message=>{if(id===generation.current)setProgress(message)});if(id===generation.current){setResult({...extraction,id});setProgress('Lectura terminada. Revisa los datos antes de aplicarlos.')}}
+  try{const {readBills}=await import('@/lib/bill-reader');controller.signal.throwIfAborted();const extraction=await readBills(documents,controller.signal,message=>{if(id===generation.current)setProgress(message)});if(id===generation.current){const completed=completeRead.current(extraction);setResult({...completed,id});setProgress(completed.autoApplied?.length?`Lectura terminada. ${completed.autoApplied.length} datos cargados automáticamente.`:'Lectura terminada. Revisa los campos pendientes o los datos que ya estaban ingresados.')}}
   catch{if(id===generation.current)setError(controller.signal.aborted?'La lectura tardó demasiado. Intenta una cara a la vez o una imagen más nítida.':'No se pudo iniciar el lector. Comprueba la conexión para cargarlo o completa los datos manualmente.')}
   finally{clearTimeout(timeout);if(id===generation.current)setReading(false)}
  }
@@ -46,7 +47,7 @@ export function BillUpload({bill,quote,onApply}:{bill:ReturnType<typeof useBillA
  const {attachments,error,loading,reading}=bill;const selected=attachments.find(d=>d.id===preview);
  function pick(replaceAll=false){replace.current=replaceAll;input.current?.click()}
  return <section className="bill-upload" aria-labelledby="bill-upload-title">
-  <div className="bill-upload-heading"><span className="bill-symbol"><ScanText size={24}/></span><div><h3 id="bill-upload-title">Escanea la boleta del cliente</h3><p>Fotografía ambas caras o adjunta el PDF. El lector propondrá los datos del cliente y su consumo.</p></div></div>
+  <div className="bill-upload-heading"><span className="bill-symbol"><ScanText size={24}/></span><div><h3 id="bill-upload-title">Escanea la boleta del cliente</h3><p>Fotografía ambas caras o adjunta el PDF. Los datos detectados se cargan automáticamente y actualizan el consumo del cliente.</p></div></div>
   <input ref={input} className="sr-only" tabIndex={-1} type="file" multiple accept=".pdf,.jpg,.jpeg,.png" aria-label="Seleccionar frente y reverso de la boleta" onChange={e=>{void bill.select(Array.from(e.target.files??[]),replace.current);e.target.value=''}}/>
   <input ref={camera} className="sr-only" tabIndex={-1} type="file" accept="image/jpeg,image/png" capture="environment" aria-label="Fotografiar boleta con cámara" onChange={e=>{void bill.select(Array.from(e.target.files??[]));e.target.value=''}}/>
   <div className="bill-capture-actions"><Button disabled={loading||attachments.length>=2} onClick={()=>camera.current?.click()}><Camera/>Tomar foto</Button><Button variant="outline" disabled={loading||attachments.length>=2} onClick={()=>pick()}><Upload/>{attachments.length?'Agregar reverso':'Adjuntar boleta'}</Button></div>
