@@ -58,4 +58,38 @@ const differentClients=extractBill(['Titular: Persona Uno','Titular: Persona Dos
 assert.equal(differentClients.values.name,undefined);
 const differentPeriods=extractBill(['Días facturados: 30','Días facturados: 60']);
 assert.equal(differentPeriods.values.billingDays,undefined);
+// Anonymized layout regression: EEPA legal name, municipality in address and arrears.
+const eepaFront=`EMPRESA ELÉCTRICA PUENTE ALTO S.A
+CASA MATRIZ: Calle Oficina 100, Santiago.
+Sr. (a) PERSONA DE PRUEBA
+Dirección de envío: CALLE FICTICIA 321 , PUENTE ALTO
+Dirección de suministro: CALLE FICTICIA 321 , PUENTE ALTO
+Tipo de tarifa contratada: BT1
+Consumo de referencia: 304 Kwh
+Total a pagar $ 207.850
+Monto del Periodo 25/08/2026 - 24/09/2026, incluye saldo anterior.
+Último pago vía Pago Pagina Web Eepa`;
+const eepaBack=`Período de lectura: 25/08/2026 - 24/09/2026 Fecha estimada próxima lectura 24/10/2026
+Electricidad consumida 369 Kwh $ 89.862
+Actual 2443
+Anterior 2074
+Consumo total del mes = 369 kWh
+Total Boleta $ 102.009
+Saldo Anterior $ 105.850
+Total a pagar $ 207.850`;
+const eepa=extractBill([eepaFront,eepaBack]);
+assert.equal(eepa.values.commune,'PUENTE ALTO');
+assert.equal(eepa.values.distributor,'EEPA');
+assert.equal(eepa.values.bill,'207850');
+assert.equal(eepa.values.consumptionKwh,'369');
+assert.equal(eepa.values.billingDays,'30');
+assert.equal(eepa.values.region,undefined,'Do not invent a region absent from the document');
+assert.equal(eepa.values.email,undefined);
+assert.ok(eepa.warnings.some(w=>w.includes('incluye saldo anterior')));
+assert.equal(extractBill([eepaFront]).values.billingDays,'30');
+assert.equal(extractBill([eepaFront,eepaBack.replace('Total a pagar $ 207.850','')]).values.bill,'207850');
+assert.equal(extractBill([eepaFront,'Total a pagar $ 300.000']).values.bill,undefined);
+assert.equal(extractBill(['Total Boleta $ 40.000']).values.bill,'40000');
+assert.equal(extractBill(['CASA MATRIZ: Calle Oficina 100, Santiago.']).values.commune,undefined);
+assert.equal(extractBill(['EEPA y CGE']).values.distributor,undefined);
 console.log('Lectura de boletas: campos, fechas, conflictos, datos existentes y revisión: OK');

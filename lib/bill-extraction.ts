@@ -48,20 +48,28 @@ export function extractBill(pages:string[]):BillExtraction {
   textMatch('region',/\bRegi[oó]n\s*:\s*([^\n]{2,70})/i);
   const town=(values.address??'').match(/(?:Depto\.?|Dpto\.?|Casa|Oficina)\s+[\w-]+\s+([a-záéíóúñ][a-záéíóúñ .'-]{2,45})$/i);
   if(!values.commune&&!conflicts.has('commune')&&town)set('commune',town[1],values.address!);
-  const supplier=flat.match(/\b(COPELEC|ENEL|CGE|CHILQUINTA|SAESA|FRONTEL|LUZ OSORNO|EDELAYSEN|EDELMAG|LUZ LINARES|LUZ PARRAL)\b/i);
-  if(supplier)set('distributor',supplier[1].toUpperCase(),supplier[0]);
+  // Use only the customer's supply address, never branch/office addresses elsewhere on the bill.
+  const addressTown=values.address?.match(/,\s*([a-záéíóúñ][a-záéíóúñ .'-]{2,60})\s*$/i);
+  if(!values.commune&&!conflicts.has('commune')&&addressTown)set('commune',addressTown[1].trim(),values.address!);
+  const suppliers=[...flat.matchAll(/\b(COPELEC|ENEL|CGE|CHILQUINTA|SAESA|FRONTEL|LUZ OSORNO|EDELAYSEN|EDELMAG|LUZ LINARES|LUZ PARRAL|EEPA|EMPRESA\s+EL[EÉ]CTRICA\s+PUENTE\s+ALTO)\b/gi)];
+  const supplierNames=[...new Set(suppliers.map(m=>/^empresa/i.test(m[1])?'EEPA':m[1].toUpperCase()))];
+  if(supplierNames.length===1)set('distributor',supplierNames[0],suppliers[0][0]);
+  else if(supplierNames.length>1)warnings.push('Aparecen varias distribuidoras. Confirma cuál emitió la boleta.');
   textMatch('tariff',/(?:tipo de )?tarifa(?:\s+el[eé]ctrica|\s+contratada)?\s*:\s*((?:BT|AT)\s*\d[\w.-]*)\b/i);
   if(values.tariff)values.tariff=values.tariff.replace(/\s/g,'').toUpperCase();
-  const amountCandidates=[...flat.matchAll(/(?:Total a pagar|Total boleta)\s*[:=]?\s*\$?\s*(\d[\d.,]*)/gi)].map(m=>({n:billNumber(m[1]),source:m[0]})).filter(x=>x.n!==null&&x.n>=0&&x.n<=1e9);
+  // Total boleta excludes previous debt; it must not compete with the explicitly labeled amount due.
+  const payableMatches=[...flat.matchAll(/Total a pagar\s*[:=]?\s*\$?\s*(\d[\d.,]*)/gi)];
+  const amountCandidates=(payableMatches.length?payableMatches:[...flat.matchAll(/Total boleta\s*[:=]?\s*\$?\s*(\d[\d.,]*)/gi)]).map(m=>({n:billNumber(m[1]),source:m[0]})).filter(x=>x.n!==null&&x.n>=0&&x.n<=1e9);
   const amounts=[...new Set(amountCandidates.map(x=>x.n))];
   if(amounts.length===1)set('bill',String(amounts[0]),amountCandidates[0].source);
   else if(amounts.length>1)warnings.push('Se detectaron totales diferentes. Revisa el monto a pagar; podría haber saldo anterior o documentos distintos.');
+  if([...flat.matchAll(/Saldo anterior(?:\s*\([^\n)]*\))?\s*[:=]?\s*\$?\s*(\d[\d.,]*)/gi)].some(m=>(billNumber(m[1])??0)>0))warnings.push('El total a pagar incluye saldo anterior. No lo uses como gasto mensual ni como base directa del ahorro; el consumo se calcula con los kWh y días del período.');
   const usageCandidates=[...flat.matchAll(/(?:Consumo total del mes|Electricidad consumida|Consumo (?:del per[ií]odo|facturado|mensual))\s*[:=]?\s*(\d[\d.,]*)\s*k\s*w\s*h\b/gi)].map(m=>({n:billNumber(m[1]),source:m[0]})).filter(x=>x.n!==null&&x.n>=0&&x.n<=1e8);
   const usages=[...new Set(usageCandidates.map(x=>x.n))];
   if(usages.length===1)set('consumptionKwh',String(usages[0]),usageCandidates[0].source);
   else if(usages.length>1)warnings.push('Las lecturas muestran consumos distintos. Selecciona el consumo facturado del período; no una lectura acumulada del medidor.');
   let period:string|undefined;
-  const numericPeriod=flat.match(/Per[ií]odo de (?:lectura|facturaci[oó]n)\s*:?\s*(\d{1,2})[/-](\d{1,2})[/-](\d{4})\s*(?:-|al?|hasta)\s*(\d{1,2})[/-](\d{1,2})[/-](\d{4})/i);
+  const numericPeriod=flat.match(/(?:Per[ií]odo de (?:lectura|facturaci[oó]n)|Monto del per[ií]odo)\s*:?\s*(\d{1,2})[/-](\d{1,2})[/-](\d{4})\s*(?:-|al?|hasta)\s*(\d{1,2})[/-](\d{1,2})[/-](\d{4})/i);
   let start:Date|null=null,end:Date|null=null;
   if(numericPeriod){start=validDate(+numericPeriod[1],+numericPeriod[2],+numericPeriod[3]);end=validDate(+numericPeriod[4],+numericPeriod[5],+numericPeriod[6]);period=numericPeriod[0]}
   else {
@@ -77,7 +85,8 @@ export function extractBill(pages:string[]):BillExtraction {
   if(pages.length>1){
     const individual=pages.map(page=>extractBill([page]));
     for(const {key,label} of billFields){
-      const distinct=new Set(individual.map(item=>item.values[key]).filter((v):v is string=>!!v).map(v=>normalize(v.trim())));
+      const comparable=key==='bill'&&payableMatches.length?pages.map((page,i)=>/Total a pagar\s*[:=]?\s*\$?\s*\d/i.test(page)?individual[i]:null):individual;
+      const distinct=new Set(comparable.map(item=>item?.values[key]).filter((v):v is string=>!!v).map(v=>normalize(v.trim())));
       if(distinct.size>1){delete values[key];delete evidence[key];warnings.push(`Los documentos no coinciden en ${label.toLowerCase()}. Este dato requiere revisión manual.`);}
     }
   }
