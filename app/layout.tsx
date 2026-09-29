@@ -7,6 +7,7 @@ import "./quote-flow.css";
 import "./bill-reader.css";
 import "./auth.css";
 import "./install-app.css";
+import "./commercial.css";
 
 export const metadata: Metadata = {
   title: "Solvex Solar | Cotizador",

@@ -1,0 +1,8 @@
+.commercial-options,.roi-reference,.payment-summary{margin:24px 0;padding:22px;border:1px solid #d8e3e7;border-radius:14px;background:#f5f8f9}
+.commercial-options h3,.roi-reference h3,.payment-summary h3{margin:0 0 14px;color:#103b48;font-size:17px}
+.roi-reference p{font-size:13px;line-height:1.65;color:#496675}
+.roi-reference .field-grid,.payment-summary .field-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:18px 0}
+.roi-reference .field-grid span,.payment-summary .field-grid span{display:block;font-size:12px;color:#4c6772}
+.roi-reference .field-grid strong,.payment-summary .field-grid strong{display:block;font-size:20px;margin-top:7px;color:#103b48}
+.proposal .payment-summary{break-inside:avoid}
+@media(max-width:640px){.commercial-options,.roi-reference,.payment-summary{padding:16px}.roi-reference .field-grid,.payment-summary .field-grid{grid-template-columns:1fr}.roi-reference .field-grid>div,.payment-summary .field-grid>div{display:flex;justify-content:space-between;align-items:center;gap:12px}.roi-reference .field-grid strong,.payment-summary .field-grid strong{font-size:18px;margin:0}}
