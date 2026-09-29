@@ -1,0 +1,1732 @@
+[
+  {
+    "code": "01101",
+    "commune": "Iquique",
+    "region": "Tarapacá"
+  },
+  {
+    "code": "01107",
+    "commune": "Alto Hospicio",
+    "region": "Tarapacá"
+  },
+  {
+    "code": "01401",
+    "commune": "Pozo Almonte",
+    "region": "Tarapacá"
+  },
+  {
+    "code": "01402",
+    "commune": "Camiña",
+    "region": "Tarapacá"
+  },
+  {
+    "code": "01403",
+    "commune": "Colchane",
+    "region": "Tarapacá"
+  },
+  {
+    "code": "01404",
+    "commune": "Huara",
+    "region": "Tarapacá"
+  },
+  {
+    "code": "01405",
+    "commune": "Pica",
+    "region": "Tarapacá"
+  },
+  {
+    "code": "02101",
+    "commune": "Antofagasta",
+    "region": "Antofagasta"
+  },
+  {
+    "code": "02102",
+    "commune": "Mejillones",
+    "region": "Antofagasta"
+  },
+  {
+    "code": "02103",
+    "commune": "Sierra Gorda",
+    "region": "Antofagasta"
+  },
+  {
+    "code": "02104",
+    "commune": "Taltal",
+    "region": "Antofagasta"
+  },
+  {
+    "code": "02201",
+    "commune": "Calama",
+    "region": "Antofagasta"
+  },
+  {
+    "code": "02202",
+    "commune": "Ollagüe",
+    "region": "Antofagasta"
+  },
+  {
+    "code": "02203",
+    "commune": "San Pedro de Atacama",
+    "region": "Antofagasta"
+  },
+  {
+    "code": "02301",
+    "commune": "Tocopilla",
+    "region": "Antofagasta"
+  },
+  {
+    "code": "02302",
+    "commune": "María Elena",
+    "region": "Antofagasta"
+  },
+  {
+    "code": "03101",
+    "commune": "Copiapó",
+    "region": "Atacama"
+  },
+  {
+    "code": "03102",
+    "commune": "Caldera",
+    "region": "Atacama"
+  },
+  {
+    "code": "03103",
+    "commune": "Tierra Amarilla",
+    "region": "Atacama"
+  },
+  {
+    "code": "03201",
+    "commune": "Chañaral",
+    "region": "Atacama"
+  },
+  {
+    "code": "03202",
+    "commune": "Diego de Almagro",
+    "region": "Atacama"
+  },
+  {
+    "code": "03301",
+    "commune": "Vallenar",
+    "region": "Atacama"
+  },
+  {
+    "code": "03302",
+    "commune": "Alto del Carmen",
+    "region": "Atacama"
+  },
+  {
+    "code": "03303",
+    "commune": "Freirina",
+    "region": "Atacama"
+  },
+  {
+    "code": "03304",
+    "commune": "Huasco",
+    "region": "Atacama"
+  },
+  {
+    "code": "04101",
+    "commune": "La Serena",
+    "region": "Coquimbo"
+  },
+  {
+    "code": "04102",
+    "commune": "Coquimbo",
+    "region": "Coquimbo"
+  },
+  {
+    "code": "04103",
+    "commune": "Andacollo",
+    "region": "Coquimbo"
+  },
+  {
+    "code": "04104",
+    "commune": "La Higuera",
+    "region": "Coquimbo"
+  },
+  {
+    "code": "04105",
+    "commune": "Paiguano",
+    "region": "Coquimbo"
+  },
+  {
+    "code": "04106",
+    "commune": "Vicuña",
+    "region": "Coquimbo"
+  },
+  {
+    "code": "04201",
+    "commune": "Illapel",
+    "region": "Coquimbo"
+  },
+  {
+    "code": "04202",
+    "commune": "Canela",
+    "region": "Coquimbo"
+  },
+  {
+    "code": "04203",
+    "commune": "Los Vilos",
+    "region": "Coquimbo"
+  },
+  {
+    "code": "04204",
+    "commune": "Salamanca",
+    "region": "Coquimbo"
+  },
+  {
+    "code": "04301",
+    "commune": "Ovalle",
+    "region": "Coquimbo"
+  },
+  {
+    "code": "04302",
+    "commune": "Combarbalá",
+    "region": "Coquimbo"
+  },
+  {
+    "code": "04303",
+    "commune": "Monte Patria",
+    "region": "Coquimbo"
+  },
+  {
+    "code": "04304",
+    "commune": "Punitaqui",
+    "region": "Coquimbo"
+  },
+  {
+    "code": "04305",
+    "commune": "Río Hurtado",
+    "region": "Coquimbo"
+  },
+  {
+    "code": "05101",
+    "commune": "Valparaíso",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "05102",
+    "commune": "Casablanca",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "05103",
+    "commune": "Concón",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "05104",
+    "commune": "Juan Fernández",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "05105",
+    "commune": "Puchuncaví",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "05107",
+    "commune": "Quintero",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "05109",
+    "commune": "Viña del Mar",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "05201",
+    "commune": "Isla de Pascua",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "05301",
+    "commune": "Los Andes",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "05302",
+    "commune": "Calle Larga",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "05303",
+    "commune": "Rinconada",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "05304",
+    "commune": "San Esteban",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "05401",
+    "commune": "La Ligua",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "05402",
+    "commune": "Cabildo",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "05403",
+    "commune": "Papudo",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "05404",
+    "commune": "Petorca",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "05405",
+    "commune": "Zapallar",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "05501",
+    "commune": "Quillota",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "05502",
+    "commune": "Calera",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "05503",
+    "commune": "Hijuelas",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "05504",
+    "commune": "La Cruz",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "05506",
+    "commune": "Nogales",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "05601",
+    "commune": "San Antonio",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "05602",
+    "commune": "Algarrobo",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "05603",
+    "commune": "Cartagena",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "05604",
+    "commune": "El Quisco",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "05605",
+    "commune": "El Tabo",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "05606",
+    "commune": "Santo Domingo",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "05701",
+    "commune": "San Felipe",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "05702",
+    "commune": "Catemu",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "05703",
+    "commune": "Llaillay",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "05704",
+    "commune": "Panquehue",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "05705",
+    "commune": "Putaendo",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "05706",
+    "commune": "Santa María",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "05801",
+    "commune": "Quilpué",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "05802",
+    "commune": "Limache",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "05803",
+    "commune": "Olmué",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "05804",
+    "commune": "Villa Alemana",
+    "region": "Valparaíso"
+  },
+  {
+    "code": "06101",
+    "commune": "Rancagua",
+    "region": "Libertador General Bernardo O'Higgins"
+  },
+  {
+    "code": "06102",
+    "commune": "Codegua",
+    "region": "Libertador General Bernardo O'Higgins"
+  },
+  {
+    "code": "06103",
+    "commune": "Coinco",
+    "region": "Libertador General Bernardo O'Higgins"
+  },
+  {
+    "code": "06104",
+    "commune": "Coltauco",
+    "region": "Libertador General Bernardo O'Higgins"
+  },
+  {
+    "code": "06105",
+    "commune": "Doñihue",
+    "region": "Libertador General Bernardo O'Higgins"
+  },
+  {
+    "code": "06106",
+    "commune": "Graneros",
+    "region": "Libertador General Bernardo O'Higgins"
+  },
+  {
+    "code": "06107",
+    "commune": "Las Cabras",
+    "region": "Libertador General Bernardo O'Higgins"
+  },
+  {
+    "code": "06108",
+    "commune": "Machalí",
+    "region": "Libertador General Bernardo O'Higgins"
+  },
+  {
+    "code": "06109",
+    "commune": "Malloa",
+    "region": "Libertador General Bernardo O'Higgins"
+  },
+  {
+    "code": "06110",
+    "commune": "Mostazal",
+    "region": "Libertador General Bernardo O'Higgins"
+  },
+  {
+    "code": "06111",
+    "commune": "Olivar",
+    "region": "Libertador General Bernardo O'Higgins"
+  },
+  {
+    "code": "06112",
+    "commune": "Peumo",
+    "region": "Libertador General Bernardo O'Higgins"
+  },
+  {
+    "code": "06113",
+    "commune": "Pichidegua",
+    "region": "Libertador General Bernardo O'Higgins"
+  },
+  {
+    "code": "06114",
+    "commune": "Quinta de Tilcoco",
+    "region": "Libertador General Bernardo O'Higgins"
+  },
+  {
+    "code": "06115",
+    "commune": "Rengo",
+    "region": "Libertador General Bernardo O'Higgins"
+  },
+  {
+    "code": "06116",
+    "commune": "Requínoa",
+    "region": "Libertador General Bernardo O'Higgins"
+  },
+  {
+    "code": "06117",
+    "commune": "San Vicente",
+    "region": "Libertador General Bernardo O'Higgins"
+  },
+  {
+    "code": "06201",
+    "commune": "Pichilemu",
+    "region": "Libertador General Bernardo O'Higgins"
+  },
+  {
+    "code": "06202",
+    "commune": "La Estrella",
+    "region": "Libertador General Bernardo O'Higgins"
+  },
+  {
+    "code": "06203",
+    "commune": "Litueche",
+    "region": "Libertador General Bernardo O'Higgins"
+  },
+  {
+    "code": "06204",
+    "commune": "Marchihue",
+    "region": "Libertador General Bernardo O'Higgins"
+  },
+  {
+    "code": "06205",
+    "commune": "Navidad",
+    "region": "Libertador General Bernardo O'Higgins"
+  },
+  {
+    "code": "06206",
+    "commune": "Paredones",
+    "region": "Libertador General Bernardo O'Higgins"
+  },
+  {
+    "code": "06301",
+    "commune": "San Fernando",
+    "region": "Libertador General Bernardo O'Higgins"
+  },
+  {
+    "code": "06302",
+    "commune": "Chépica",
+    "region": "Libertador General Bernardo O'Higgins"
+  },
+  {
+    "code": "06303",
+    "commune": "Chimbarongo",
+    "region": "Libertador General Bernardo O'Higgins"
+  },
+  {
+    "code": "06304",
+    "commune": "Lolol",
+    "region": "Libertador General Bernardo O'Higgins"
+  },
+  {
+    "code": "06305",
+    "commune": "Nancagua",
+    "region": "Libertador General Bernardo O'Higgins"
+  },
+  {
+    "code": "06306",
+    "commune": "Palmilla",
+    "region": "Libertador General Bernardo O'Higgins"
+  },
+  {
+    "code": "06307",
+    "commune": "Peralillo",
+    "region": "Libertador General Bernardo O'Higgins"
+  },
+  {
+    "code": "06308",
+    "commune": "Placilla",
+    "region": "Libertador General Bernardo O'Higgins"
+  },
+  {
+    "code": "06309",
+    "commune": "Pumanque",
+    "region": "Libertador General Bernardo O'Higgins"
+  },
+  {
+    "code": "06310",
+    "commune": "Santa Cruz",
+    "region": "Libertador General Bernardo O'Higgins"
+  },
+  {
+    "code": "07101",
+    "commune": "Talca",
+    "region": "Maule"
+  },
+  {
+    "code": "07102",
+    "commune": "Constitución",
+    "region": "Maule"
+  },
+  {
+    "code": "07103",
+    "commune": "Curepto",
+    "region": "Maule"
+  },
+  {
+    "code": "07104",
+    "commune": "Empedrado",
+    "region": "Maule"
+  },
+  {
+    "code": "07105",
+    "commune": "Maule",
+    "region": "Maule"
+  },
+  {
+    "code": "07106",
+    "commune": "Pelarco",
+    "region": "Maule"
+  },
+  {
+    "code": "07107",
+    "commune": "Pencahue",
+    "region": "Maule"
+  },
+  {
+    "code": "07108",
+    "commune": "Río Claro",
+    "region": "Maule"
+  },
+  {
+    "code": "07109",
+    "commune": "San Clemente",
+    "region": "Maule"
+  },
+  {
+    "code": "07110",
+    "commune": "San Rafael",
+    "region": "Maule"
+  },
+  {
+    "code": "07201",
+    "commune": "Cauquenes",
+    "region": "Maule"
+  },
+  {
+    "code": "07202",
+    "commune": "Chanco",
+    "region": "Maule"
+  },
+  {
+    "code": "07203",
+    "commune": "Pelluhue",
+    "region": "Maule"
+  },
+  {
+    "code": "07301",
+    "commune": "Curicó",
+    "region": "Maule"
+  },
+  {
+    "code": "07302",
+    "commune": "Hualañé",
+    "region": "Maule"
+  },
+  {
+    "code": "07303",
+    "commune": "Licantén",
+    "region": "Maule"
+  },
+  {
+    "code": "07304",
+    "commune": "Molina",
+    "region": "Maule"
+  },
+  {
+    "code": "07305",
+    "commune": "Rauco",
+    "region": "Maule"
+  },
+  {
+    "code": "07306",
+    "commune": "Romeral",
+    "region": "Maule"
+  },
+  {
+    "code": "07307",
+    "commune": "Sagrada Familia",
+    "region": "Maule"
+  },
+  {
+    "code": "07308",
+    "commune": "Teno",
+    "region": "Maule"
+  },
+  {
+    "code": "07309",
+    "commune": "Vichuquén",
+    "region": "Maule"
+  },
+  {
+    "code": "07401",
+    "commune": "Linares",
+    "region": "Maule"
+  },
+  {
+    "code": "07402",
+    "commune": "Colbún",
+    "region": "Maule"
+  },
+  {
+    "code": "07403",
+    "commune": "Longaví",
+    "region": "Maule"
+  },
+  {
+    "code": "07404",
+    "commune": "Parral",
+    "region": "Maule"
+  },
+  {
+    "code": "07405",
+    "commune": "Retiro",
+    "region": "Maule"
+  },
+  {
+    "code": "07406",
+    "commune": "San Javier",
+    "region": "Maule"
+  },
+  {
+    "code": "07407",
+    "commune": "Villa Alegre",
+    "region": "Maule"
+  },
+  {
+    "code": "07408",
+    "commune": "Yerbas Buenas",
+    "region": "Maule"
+  },
+  {
+    "code": "08101",
+    "commune": "Concepción",
+    "region": "Biobío"
+  },
+  {
+    "code": "08102",
+    "commune": "Coronel",
+    "region": "Biobío"
+  },
+  {
+    "code": "08103",
+    "commune": "Chiguayante",
+    "region": "Biobío"
+  },
+  {
+    "code": "08104",
+    "commune": "Florida",
+    "region": "Biobío"
+  },
+  {
+    "code": "08105",
+    "commune": "Hualqui",
+    "region": "Biobío"
+  },
+  {
+    "code": "08106",
+    "commune": "Lota",
+    "region": "Biobío"
+  },
+  {
+    "code": "08107",
+    "commune": "Penco",
+    "region": "Biobío"
+  },
+  {
+    "code": "08108",
+    "commune": "San Pedro de la Paz",
+    "region": "Biobío"
+  },
+  {
+    "code": "08109",
+    "commune": "Santa Juana",
+    "region": "Biobío"
+  },
+  {
+    "code": "08110",
+    "commune": "Talcahuano",
+    "region": "Biobío"
+  },
+  {
+    "code": "08111",
+    "commune": "Tomé",
+    "region": "Biobío"
+  },
+  {
+    "code": "08112",
+    "commune": "Hualpén",
+    "region": "Biobío"
+  },
+  {
+    "code": "08201",
+    "commune": "Lebu",
+    "region": "Biobío"
+  },
+  {
+    "code": "08202",
+    "commune": "Arauco",
+    "region": "Biobío"
+  },
+  {
+    "code": "08203",
+    "commune": "Cañete",
+    "region": "Biobío"
+  },
+  {
+    "code": "08204",
+    "commune": "Contulmo",
+    "region": "Biobío"
+  },
+  {
+    "code": "08205",
+    "commune": "Curanilahue",
+    "region": "Biobío"
+  },
+  {
+    "code": "08206",
+    "commune": "Los Alamos",
+    "region": "Biobío"
+  },
+  {
+    "code": "08207",
+    "commune": "Tirúa",
+    "region": "Biobío"
+  },
+  {
+    "code": "08301",
+    "commune": "Los Angeles",
+    "region": "Biobío"
+  },
+  {
+    "code": "08302",
+    "commune": "Antuco",
+    "region": "Biobío"
+  },
+  {
+    "code": "08303",
+    "commune": "Cabrero",
+    "region": "Biobío"
+  },
+  {
+    "code": "08304",
+    "commune": "Laja",
+    "region": "Biobío"
+  },
+  {
+    "code": "08305",
+    "commune": "Mulchén",
+    "region": "Biobío"
+  },
+  {
+    "code": "08306",
+    "commune": "Nacimiento",
+    "region": "Biobío"
+  },
+  {
+    "code": "08307",
+    "commune": "Negrete",
+    "region": "Biobío"
+  },
+  {
+    "code": "08308",
+    "commune": "Quilaco",
+    "region": "Biobío"
+  },
+  {
+    "code": "08309",
+    "commune": "Quilleco",
+    "region": "Biobío"
+  },
+  {
+    "code": "08310",
+    "commune": "San Rosendo",
+    "region": "Biobío"
+  },
+  {
+    "code": "08311",
+    "commune": "Santa Bárbara",
+    "region": "Biobío"
+  },
+  {
+    "code": "08312",
+    "commune": "Tucapel",
+    "region": "Biobío"
+  },
+  {
+    "code": "08313",
+    "commune": "Yumbel",
+    "region": "Biobío"
+  },
+  {
+    "code": "08314",
+    "commune": "Alto Biobío",
+    "region": "Biobío"
+  },
+  {
+    "code": "09101",
+    "commune": "Temuco",
+    "region": "La Araucanía"
+  },
+  {
+    "code": "09102",
+    "commune": "Carahue",
+    "region": "La Araucanía"
+  },
+  {
+    "code": "09103",
+    "commune": "Cunco",
+    "region": "La Araucanía"
+  },
+  {
+    "code": "09104",
+    "commune": "Curarrehue",
+    "region": "La Araucanía"
+  },
+  {
+    "code": "09105",
+    "commune": "Freire",
+    "region": "La Araucanía"
+  },
+  {
+    "code": "09106",
+    "commune": "Galvarino",
+    "region": "La Araucanía"
+  },
+  {
+    "code": "09107",
+    "commune": "Gorbea",
+    "region": "La Araucanía"
+  },
+  {
+    "code": "09108",
+    "commune": "Lautaro",
+    "region": "La Araucanía"
+  },
+  {
+    "code": "09109",
+    "commune": "Loncoche",
+    "region": "La Araucanía"
+  },
+  {
+    "code": "09110",
+    "commune": "Melipeuco",
+    "region": "La Araucanía"
+  },
+  {
+    "code": "09111",
+    "commune": "Nueva Imperial",
+    "region": "La Araucanía"
+  },
+  {
+    "code": "09112",
+    "commune": "Padre Las Casas",
+    "region": "La Araucanía"
+  },
+  {
+    "code": "09113",
+    "commune": "Perquenco",
+    "region": "La Araucanía"
+  },
+  {
+    "code": "09114",
+    "commune": "Pitrufquén",
+    "region": "La Araucanía"
+  },
+  {
+    "code": "09115",
+    "commune": "Pucón",
+    "region": "La Araucanía"
+  },
+  {
+    "code": "09116",
+    "commune": "Saavedra",
+    "region": "La Araucanía"
+  },
+  {
+    "code": "09117",
+    "commune": "Teodoro Schmidt",
+    "region": "La Araucanía"
+  },
+  {
+    "code": "09118",
+    "commune": "Toltén",
+    "region": "La Araucanía"
+  },
+  {
+    "code": "09119",
+    "commune": "Vilcún",
+    "region": "La Araucanía"
+  },
+  {
+    "code": "09120",
+    "commune": "Villarrica",
+    "region": "La Araucanía"
+  },
+  {
+    "code": "09121",
+    "commune": "Cholchol",
+    "region": "La Araucanía"
+  },
+  {
+    "code": "09201",
+    "commune": "Angol",
+    "region": "La Araucanía"
+  },
+  {
+    "code": "09202",
+    "commune": "Collipulli",
+    "region": "La Araucanía"
+  },
+  {
+    "code": "09203",
+    "commune": "Curacautín",
+    "region": "La Araucanía"
+  },
+  {
+    "code": "09204",
+    "commune": "Ercilla",
+    "region": "La Araucanía"
+  },
+  {
+    "code": "09205",
+    "commune": "Lonquimay",
+    "region": "La Araucanía"
+  },
+  {
+    "code": "09206",
+    "commune": "Los Sauces",
+    "region": "La Araucanía"
+  },
+  {
+    "code": "09207",
+    "commune": "Lumaco",
+    "region": "La Araucanía"
+  },
+  {
+    "code": "09208",
+    "commune": "Purén",
+    "region": "La Araucanía"
+  },
+  {
+    "code": "09209",
+    "commune": "Renaico",
+    "region": "La Araucanía"
+  },
+  {
+    "code": "09210",
+    "commune": "Traiguén",
+    "region": "La Araucanía"
+  },
+  {
+    "code": "09211",
+    "commune": "Victoria",
+    "region": "La Araucanía"
+  },
+  {
+    "code": "10101",
+    "commune": "Puerto Montt",
+    "region": "Los Lagos"
+  },
+  {
+    "code": "10102",
+    "commune": "Calbuco",
+    "region": "Los Lagos"
+  },
+  {
+    "code": "10103",
+    "commune": "Cochamó",
+    "region": "Los Lagos"
+  },
+  {
+    "code": "10104",
+    "commune": "Fresia",
+    "region": "Los Lagos"
+  },
+  {
+    "code": "10105",
+    "commune": "Frutillar",
+    "region": "Los Lagos"
+  },
+  {
+    "code": "10106",
+    "commune": "Los Muermos",
+    "region": "Los Lagos"
+  },
+  {
+    "code": "10107",
+    "commune": "Llanquihue",
+    "region": "Los Lagos"
+  },
+  {
+    "code": "10108",
+    "commune": "Maullín",
+    "region": "Los Lagos"
+  },
+  {
+    "code": "10109",
+    "commune": "Puerto Varas",
+    "region": "Los Lagos"
+  },
+  {
+    "code": "10201",
+    "commune": "Castro",
+    "region": "Los Lagos"
+  },
+  {
+    "code": "10202",
+    "commune": "Ancud",
+    "region": "Los Lagos"
+  },
+  {
+    "code": "10203",
+    "commune": "Chonchi",
+    "region": "Los Lagos"
+  },
+  {
+    "code": "10204",
+    "commune": "Curaco de Vélez",
+    "region": "Los Lagos"
+  },
+  {
+    "code": "10205",
+    "commune": "Dalcahue",
+    "region": "Los Lagos"
+  },
+  {
+    "code": "10206",
+    "commune": "Puqueldón",
+    "region": "Los Lagos"
+  },
+  {
+    "code": "10207",
+    "commune": "Queilén",
+    "region": "Los Lagos"
+  },
+  {
+    "code": "10208",
+    "commune": "Quellón",
+    "region": "Los Lagos"
+  },
+  {
+    "code": "10209",
+    "commune": "Quemchi",
+    "region": "Los Lagos"
+  },
+  {
+    "code": "10210",
+    "commune": "Quinchao",
+    "region": "Los Lagos"
+  },
+  {
+    "code": "10301",
+    "commune": "Osorno",
+    "region": "Los Lagos"
+  },
+  {
+    "code": "10302",
+    "commune": "Puerto Octay",
+    "region": "Los Lagos"
+  },
+  {
+    "code": "10303",
+    "commune": "Purranque",
+    "region": "Los Lagos"
+  },
+  {
+    "code": "10304",
+    "commune": "Puyehue",
+    "region": "Los Lagos"
+  },
+  {
+    "code": "10305",
+    "commune": "Río Negro",
+    "region": "Los Lagos"
+  },
+  {
+    "code": "10306",
+    "commune": "San Juan de la Costa",
+    "region": "Los Lagos"
+  },
+  {
+    "code": "10307",
+    "commune": "San Pablo",
+    "region": "Los Lagos"
+  },
+  {
+    "code": "10401",
+    "commune": "Chaitén",
+    "region": "Los Lagos"
+  },
+  {
+    "code": "10402",
+    "commune": "Futaleufú",
+    "region": "Los Lagos"
+  },
+  {
+    "code": "10403",
+    "commune": "Hualaihué",
+    "region": "Los Lagos"
+  },
+  {
+    "code": "10404",
+    "commune": "Palena",
+    "region": "Los Lagos"
+  },
+  {
+    "code": "11101",
+    "commune": "Coyhaique",
+    "region": "Aysén del General Carlos Ibáñez del Campo"
+  },
+  {
+    "code": "11102",
+    "commune": "Lago Verde",
+    "region": "Aysén del General Carlos Ibáñez del Campo"
+  },
+  {
+    "code": "11201",
+    "commune": "Aysén",
+    "region": "Aysén del General Carlos Ibáñez del Campo"
+  },
+  {
+    "code": "11202",
+    "commune": "Cisnes",
+    "region": "Aysén del General Carlos Ibáñez del Campo"
+  },
+  {
+    "code": "11203",
+    "commune": "Guaitecas",
+    "region": "Aysén del General Carlos Ibáñez del Campo"
+  },
+  {
+    "code": "11301",
+    "commune": "Cochrane",
+    "region": "Aysén del General Carlos Ibáñez del Campo"
+  },
+  {
+    "code": "11302",
+    "commune": "O'Higgins",
+    "region": "Aysén del General Carlos Ibáñez del Campo"
+  },
+  {
+    "code": "11303",
+    "commune": "Tortel",
+    "region": "Aysén del General Carlos Ibáñez del Campo"
+  },
+  {
+    "code": "11401",
+    "commune": "Chile Chico",
+    "region": "Aysén del General Carlos Ibáñez del Campo"
+  },
+  {
+    "code": "11402",
+    "commune": "Río Ibáñez",
+    "region": "Aysén del General Carlos Ibáñez del Campo"
+  },
+  {
+    "code": "12101",
+    "commune": "Punta Arenas",
+    "region": "Magallanes y de la Antártica Chilena"
+  },
+  {
+    "code": "12102",
+    "commune": "Laguna Blanca",
+    "region": "Magallanes y de la Antártica Chilena"
+  },
+  {
+    "code": "12103",
+    "commune": "Río Verde",
+    "region": "Magallanes y de la Antártica Chilena"
+  },
+  {
+    "code": "12104",
+    "commune": "San Gregorio",
+    "region": "Magallanes y de la Antártica Chilena"
+  },
+  {
+    "code": "12201",
+    "commune": "Cabo de Hornos",
+    "region": "Magallanes y de la Antártica Chilena"
+  },
+  {
+    "code": "12202",
+    "commune": "Antártica",
+    "region": "Magallanes y de la Antártica Chilena"
+  },
+  {
+    "code": "12301",
+    "commune": "Porvenir",
+    "region": "Magallanes y de la Antártica Chilena"
+  },
+  {
+    "code": "12302",
+    "commune": "Primavera",
+    "region": "Magallanes y de la Antártica Chilena"
+  },
+  {
+    "code": "12303",
+    "commune": "Timaukel",
+    "region": "Magallanes y de la Antártica Chilena"
+  },
+  {
+    "code": "12401",
+    "commune": "Natales",
+    "region": "Magallanes y de la Antártica Chilena"
+  },
+  {
+    "code": "12402",
+    "commune": "Torres del Paine",
+    "region": "Magallanes y de la Antártica Chilena"
+  },
+  {
+    "code": "13101",
+    "commune": "Santiago",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13102",
+    "commune": "Cerrillos",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13103",
+    "commune": "Cerro Navia",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13104",
+    "commune": "Conchalí",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13105",
+    "commune": "El Bosque",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13106",
+    "commune": "Estación Central",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13107",
+    "commune": "Huechuraba",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13108",
+    "commune": "Independencia",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13109",
+    "commune": "La Cisterna",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13110",
+    "commune": "La Florida",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13111",
+    "commune": "La Granja",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13112",
+    "commune": "La Pintana",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13113",
+    "commune": "La Reina",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13114",
+    "commune": "Las Condes",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13115",
+    "commune": "Lo Barnechea",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13116",
+    "commune": "Lo Espejo",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13117",
+    "commune": "Lo Prado",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13118",
+    "commune": "Macul",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13119",
+    "commune": "Maipú",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13120",
+    "commune": "Ñuñoa",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13121",
+    "commune": "Pedro Aguirre Cerda",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13122",
+    "commune": "Peñalolén",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13123",
+    "commune": "Providencia",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13124",
+    "commune": "Pudahuel",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13125",
+    "commune": "Quilicura",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13126",
+    "commune": "Quinta Normal",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13127",
+    "commune": "Recoleta",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13128",
+    "commune": "Renca",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13129",
+    "commune": "San Joaquín",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13130",
+    "commune": "San Miguel",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13131",
+    "commune": "San Ramón",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13132",
+    "commune": "Vitacura",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13201",
+    "commune": "Puente Alto",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13202",
+    "commune": "Pirque",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13203",
+    "commune": "San José de Maipo",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13301",
+    "commune": "Colina",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13302",
+    "commune": "Lampa",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13303",
+    "commune": "Tiltil",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13401",
+    "commune": "San Bernardo",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13402",
+    "commune": "Buin",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13403",
+    "commune": "Calera de Tango",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13404",
+    "commune": "Paine",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13501",
+    "commune": "Melipilla",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13502",
+    "commune": "Alhué",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13503",
+    "commune": "Curacaví",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13504",
+    "commune": "María Pinto",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13505",
+    "commune": "San Pedro",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13601",
+    "commune": "Talagante",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13602",
+    "commune": "El Monte",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13603",
+    "commune": "Isla de Maipo",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13604",
+    "commune": "Padre Hurtado",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "13605",
+    "commune": "Peñaflor",
+    "region": "Metropolitana de Santiago"
+  },
+  {
+    "code": "14101",
+    "commune": "Valdivia",
+    "region": "Los Ríos"
+  },
+  {
+    "code": "14102",
+    "commune": "Corral",
+    "region": "Los Ríos"
+  },
+  {
+    "code": "14103",
+    "commune": "Lanco",
+    "region": "Los Ríos"
+  },
+  {
+    "code": "14104",
+    "commune": "Los Lagos",
+    "region": "Los Ríos"
+  },
+  {
+    "code": "14105",
+    "commune": "Máfil",
+    "region": "Los Ríos"
+  },
+  {
+    "code": "14106",
+    "commune": "Mariquina",
+    "region": "Los Ríos"
+  },
+  {
+    "code": "14107",
+    "commune": "Paillaco",
+    "region": "Los Ríos"
+  },
+  {
+    "code": "14108",
+    "commune": "Panguipulli",
+    "region": "Los Ríos"
+  },
+  {
+    "code": "14201",
+    "commune": "La Unión",
+    "region": "Los Ríos"
+  },
+  {
+    "code": "14202",
+    "commune": "Futrono",
+    "region": "Los Ríos"
+  },
+  {
+    "code": "14203",
+    "commune": "Lago Ranco",
+    "region": "Los Ríos"
+  },
+  {
+    "code": "14204",
+    "commune": "Río Bueno",
+    "region": "Los Ríos"
+  },
+  {
+    "code": "15101",
+    "commune": "Arica",
+    "region": "Arica y Parinacota"
+  },
+  {
+    "code": "15102",
+    "commune": "Camarones",
+    "region": "Arica y Parinacota"
+  },
+  {
+    "code": "15201",
+    "commune": "Putre",
+    "region": "Arica y Parinacota"
+  },
+  {
+    "code": "15202",
+    "commune": "General Lagos",
+    "region": "Arica y Parinacota"
+  },
+  {
+    "code": "16101",
+    "commune": "Chillán",
+    "region": "Ñuble"
+  },
+  {
+    "code": "16102",
+    "commune": "Bulnes",
+    "region": "Ñuble"
+  },
+  {
+    "code": "16103",
+    "commune": "Chillán Viejo",
+    "region": "Ñuble"
+  },
+  {
+    "code": "16104",
+    "commune": "El Carmen",
+    "region": "Ñuble"
+  },
+  {
+    "code": "16105",
+    "commune": "Pemuco",
+    "region": "Ñuble"
+  },
+  {
+    "code": "16106",
+    "commune": "Pinto",
+    "region": "Ñuble"
+  },
+  {
+    "code": "16107",
+    "commune": "Quillón",
+    "region": "Ñuble"
+  },
+  {
+    "code": "16108",
+    "commune": "San Ignacio",
+    "region": "Ñuble"
+  },
+  {
+    "code": "16109",
+    "commune": "Yungay",
+    "region": "Ñuble"
+  },
+  {
+    "code": "16201",
+    "commune": "Quirihue",
+    "region": "Ñuble"
+  },
+  {
+    "code": "16202",
+    "commune": "Cobquecura",
+    "region": "Ñuble"
+  },
+  {
+    "code": "16203",
+    "commune": "Coelemu",
+    "region": "Ñuble"
+  },
+  {
+    "code": "16204",
+    "commune": "Ninhue",
+    "region": "Ñuble"
+  },
+  {
+    "code": "16205",
+    "commune": "Portezuelo",
+    "region": "Ñuble"
+  },
+  {
+    "code": "16206",
+    "commune": "Ranquil",
+    "region": "Ñuble"
+  },
+  {
+    "code": "16207",
+    "commune": "Treguaco",
+    "region": "Ñuble"
+  },
+  {
+    "code": "16301",
+    "commune": "San Carlos",
+    "region": "Ñuble"
+  },
+  {
+    "code": "16302",
+    "commune": "Coihueco",
+    "region": "Ñuble"
+  },
+  {
+    "code": "16303",
+    "commune": "Ñiquén",
+    "region": "Ñuble"
+  },
+  {
+    "code": "16304",
+    "commune": "San Fabián",
+    "region": "Ñuble"
+  },
+  {
+    "code": "16305",
+    "commune": "San Nicolás",
+    "region": "Ñuble"
+  }
+]

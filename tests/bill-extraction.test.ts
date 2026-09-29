@@ -78,12 +78,14 @@ Total Boleta $ 102.009
 Saldo Anterior $ 105.850
 Total a pagar $ 207.850`;
 const eepa=extractBill([eepaFront,eepaBack]);
-assert.equal(eepa.values.commune,'PUENTE ALTO');
+assert.equal(eepa.values.commune,'Puente Alto');
 assert.equal(eepa.values.distributor,'EEPA');
 assert.equal(eepa.values.bill,'207850');
 assert.equal(eepa.values.consumptionKwh,'369');
 assert.equal(eepa.values.billingDays,'30');
-assert.equal(eepa.values.region,undefined,'Do not invent a region absent from the document');
+assert.equal(eepa.values.region,'Metropolitana de Santiago');
+assert.equal(eepa.values.address,'CALLE FICTICIA 321');
+assert.ok(eepa.evidence.region?.includes('SUBDERE'));
 assert.equal(eepa.values.email,undefined);
 assert.ok(eepa.warnings.some(w=>w.includes('incluye saldo anterior')));
 assert.equal(extractBill([eepaFront]).values.billingDays,'30');
@@ -92,4 +94,19 @@ assert.equal(extractBill([eepaFront,'Total a pagar $ 300.000']).values.bill,unde
 assert.equal(extractBill(['Total Boleta $ 40.000']).values.bill,'40000');
 assert.equal(extractBill(['CASA MATRIZ: Calle Oficina 100, Santiago.']).values.commune,undefined);
 assert.equal(extractBill(['EEPA y CGE']).values.distributor,undefined);
+const location=extractBill(['Dirección de suministro: AVENIDA EJEMPLO 42, CHILLAN VIEJO']);
+assert.equal(location.values.commune,'Chillán Viejo');
+assert.equal(location.values.region,'Ñuble');
+assert.equal(location.values.address,'AVENIDA EJEMPLO 42');
+assert.equal(extractBill(['Dirección de suministro: CALLE 44 PUENTE ALTO']).values.region,'Metropolitana de Santiago');
+assert.equal(extractBill(['Comuna: Temuco']).values.region,'La Araucanía');
+assert.equal(extractBill(['Comuna: Puente Alto\nRegión: RM']).values.region,'Metropolitana de Santiago');
+const wrongRegion=extractBill(['Comuna: Puente Alto\nRegión: Valparaíso']);
+assert.equal(wrongRegion.values.region,undefined);
+assert.ok(wrongRegion.warnings.some(w=>w.includes('no corresponde')));
+const mixedPlaces=extractBill(['Comuna: Puente Alto','Comuna: Chillán']);
+assert.equal(mixedPlaces.values.commune,undefined);
+assert.equal(mixedPlaces.values.region,undefined);
+assert.equal(extractBill(['Dirección de suministro: AVENIDA SANTIAGO 42']).values.commune,undefined);
+assert.equal(extractBill(['Sucursal: CALLE 100, PUENTE ALTO']).values.region,undefined);
 console.log('Lectura de boletas: campos, fechas, conflictos, datos existentes y revisión: OK');

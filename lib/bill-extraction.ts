@@ -1,5 +1,6 @@
 import type {QuoteInput} from './quote';
 import {newEnergyInput} from './energy';
+import {findCommune,locationFromAddress,regionMatches} from './chile-location';
 
 export const billFields = [
   {key:'name',label:'Nombre del cliente'}, {key:'email',label:'Correo del cliente'}, {key:'phone',label:'Teléfono del cliente'}, {key:'address',label:'Dirección de suministro'},
@@ -87,8 +88,20 @@ export function extractBill(pages:string[]):BillExtraction {
     for(const {key,label} of billFields){
       const comparable=key==='bill'&&payableMatches.length?pages.map((page,i)=>/Total a pagar\s*[:=]?\s*\$?\s*\d/i.test(page)?individual[i]:null):individual;
       const distinct=new Set(comparable.map(item=>item?.values[key]).filter((v):v is string=>!!v).map(v=>normalize(v.trim())));
-      if(distinct.size>1){delete values[key];delete evidence[key];warnings.push(`Los documentos no coinciden en ${label.toLowerCase()}. Este dato requiere revisión manual.`);}
+      if(distinct.size>1){conflicts.add(key);delete values[key];delete evidence[key];warnings.push(`Los documentos no coinciden en ${label.toLowerCase()}. Este dato requiere revisión manual.`);}
     }
+  }
+  const addressLocation=values.address?locationFromAddress(values.address):null;
+  const place=values.commune?findCommune(values.commune):!conflicts.has('commune')?addressLocation?.place:null;
+  if(place){
+    values.commune=place.commune;
+    evidence.commune??=values.address??place.commune;
+    if(!values.region&&!conflicts.has('region')){
+      values.region=place.region;
+      evidence.region=`Región asociada a la comuna ${place.commune} en el catálogo territorial de SUBDERE (CUT ${place.code}).`;
+    }else if(values.region&&regionMatches(values.region,place.region))values.region=place.region;
+    else if(values.region){delete values.region;delete evidence.region;warnings.push(`La región indicada no corresponde a ${place.commune}. Confirma la ubicación; el catálogo territorial la asocia a ${place.region}.`);}
+    if(addressLocation?.place.code===place.code)values.address=addressLocation.street;
   }
   return {values,evidence,warnings,period};
 }
