@@ -6,9 +6,10 @@ import {assignedAdviser,paymentBreakdown,preliminaryNote,roiReference} from '@/l
 
 export function CommercialFields({quote,settings,onChange}:{quote:QuoteInput;settings:Settings;onChange:(patch:Partial<QuoteInput>)=>void}){
  const adviser=assignedAdviser(quote,settings);
+ const advisers=[...(settings.advisers??[])].sort((a,b)=>a.name.localeCompare(b.name,'es',{sensitivity:'base'}));
  return <section className="commercial-options"><h3>Etapa y responsable comercial</h3><div className="field-grid">
   <label>Tipo de propuesta<Select value={quote.proposalType??'final'} onValueChange={proposalType=>onChange({proposalType:proposalType as 'preliminary'|'final',technicalReviewed:false})}><SelectTrigger aria-label="Tipo de propuesta"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="preliminary">Precotización · antes de la visita</SelectItem><SelectItem value="final">Cotización final · después de la visita</SelectItem></SelectContent></Select></label>
-  <label>Comercial asignado<Select value={quote.adviserId||'none'} onValueChange={id=>onChange({adviserId:id==='none'?'':id})}><SelectTrigger aria-label="Comercial asignado"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="none">Contacto general de la empresa</SelectItem>{settings.advisers?.map(a=><SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}</SelectContent></Select></label>
+  <label>Comercial asignado<Select value={quote.adviserId||'none'} onValueChange={id=>onChange({adviserId:id==='none'?'':id})}><SelectTrigger aria-label="Comercial asignado"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="none">Contacto general de la empresa</SelectItem>{advisers.map(a=><SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}</SelectContent></Select></label>
  </div>{adviser&&<p className="help-text">{adviser.email} · {adviser.phone}</p>}
  {quote.proposalType==='preliminary'?<p className="notice">{preliminaryNote}</p>:<label className="check-label"><Checkbox checked={quote.technicalReviewed} onCheckedChange={v=>onChange({technicalReviewed:v===true})}/>El comercial y el instalador revisaron modelos, compatibilidad, estructura y alcance tras la visita técnica.</label>}
  </section>;
