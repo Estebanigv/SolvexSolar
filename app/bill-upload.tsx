@@ -37,10 +37,16 @@ export function useBillAttachment(onDocumentChange:()=>void,onRead:(result:BillE
    changeList([...base,...added]);
   }catch(e){if(id===selection.current)setError((e as Error).message)}finally{if(id===selection.current)setLoading(false)}
  }
+ async function restore(files:File[]){
+  validateBillBatch(files);const formats=await Promise.all(files.map(validateBillFile));
+  clear();
+  const next=files.map((file,i)=>{const url=URL.createObjectURL(file);urls.current.add(url);return {id:crypto.randomUUID(),file,url,mime:formats[i],rotation:0}});
+  list.current=next;setAttachments(next);
+ }
  function remove(id:string){const old=list.current.find(d=>d.id===id);if(old){URL.revokeObjectURL(old.url);urls.current.delete(old.url)}changeList(list.current.filter(d=>d.id!==id))}
  function rotate(id:string){changeList(list.current.map(d=>d.id===id?{...d,rotation:(d.rotation+90)%360}:d))}
  function clear(){readCache.current.clear();selection.current++;cancel();urls.current.forEach(url=>URL.revokeObjectURL(url));urls.current.clear();list.current=[];setAttachments([]);setError('');setLoading(false);setProgress('');change.current()}
- return {attachments,error,loading,reading,progress,result,select,remove,rotate,clear,cancel,read};
+ return {attachments,error,loading,reading,progress,result,select,restore,remove,rotate,clear,cancel,read};
 }
 
 export function BillUpload({bill,quote,onApply}:{bill:ReturnType<typeof useBillAttachment>;quote:QuoteInput;onApply:(patch:Partial<QuoteInput>)=>void}){
@@ -59,7 +65,7 @@ export function BillUpload({bill,quote,onApply}:{bill:ReturnType<typeof useBillA
   {bill.progress&&<div className="bill-reading" role="status" aria-live="polite">{reading&&<LoaderCircle size={18} className="animate-spin"/>}<span>{bill.progress}</span>{reading&&<Button variant="ghost" onClick={bill.cancel}><X/>Cancelar</Button>}</div>}
   {error&&<p className="field-error" role="alert">{error}</p>}
   {bill.result&&!reading&&<BillReview key={bill.result.id} result={bill.result} quote={quote} onApply={onApply} disabled={loading}/>}
-  <p className="bill-local-note">La lectura se realiza en este dispositivo. Las fotos y el PDF no se envían a un servicio de OCR. Para conservarlos, guarda la cotización y pulsa “Guardar boletas en esta cotización”. Sin ese respaldo, se pierden al recargar. Adjunta solo documentos de la misma boleta para evitar mezclar clientes o períodos. Usa buena luz y procura que la boleta quede plana.</p>
+  <p className="bill-local-note">La lectura se realiza en este dispositivo. Las fotos y el PDF no se envían a un servicio de OCR. Al guardar la cotización, sus archivos se respaldan automáticamente en el espacio privado. Espera la confirmación del respaldo antes de cerrar la página; si falla, puedes reintentarlo sin crear otra cotización. Adjunta solo documentos de la misma boleta para evitar mezclar clientes o períodos. Usa buena luz y procura que la boleta quede plana.</p>
   <Dialog open={!!selected} onOpenChange={open=>!open&&setPreview(null)}><DialogContent className="bill-preview-dialog"><DialogHeader><DialogTitle>Boleta del cliente</DialogTitle><DialogDescription>{selected?.file.name}</DialogDescription></DialogHeader>{selected&&(selected.mime==='application/pdf'?<BillPdfPreview key={selected.url} file={selected.file}/>:<div className="bill-image-preview"><img src={selected.url} alt="Boleta de electricidad adjunta" style={{transform:`rotate(${selected.rotation}deg)`}}/></div>)}</DialogContent></Dialog>
  </section>;
 }

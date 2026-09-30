@@ -22,3 +22,11 @@
 @media(max-width:640px){.qh-top,.qh-toolbar{padding:18px}.qh-top{align-items:flex-start}.qh-top h2{font-size:18px}.qh-top p{font-size:12px}.qh-top>button{font-size:0;width:40px;padding:10px}.qh-top>button svg{width:16px}.qh-views{gap:3px}.qh-views button{font-size:11px;padding:9px}.qh-filters{gap:8px}.qh-search{flex-basis:100%}.qh-filters select{flex:1;min-width:0}.qh-month{padding:18px 14px 8px}.qh-month h3{font-size:19px}.qh-month p{font-size:11px}.qh-month button{min-width:34px;font-size:11px}.qh-note{margin:12px 18px;font-size:11px}.qh-calendar{margin:14px 10px}.qh-day{min-height:78px;padding:4px;gap:3px}.qh-day-number{width:23px;height:23px;font-size:11px}.qh-event{display:none}.qh-day-count{display:block;font-size:9px;color:#36616b}.qh-day small{display:none}.qh-week span{padding:9px 2px}.qh-results{padding:18px;align-items:flex-start}.qh-results>span{text-align:right}.qh-results button{display:block;margin:6px 0 0 auto}.qh-rows{padding:0 18px}.qh-row{gap:15px 10px;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.qh-client{grid-column:1/-1}.qh-owner{grid-row:2}.qh-value{grid-row:2;text-align:right}.qh-actions{grid-column:1/-1;justify-content:flex-start}.qh-actions>button{min-height:42px}.qh-person{font-size:10px}.qh-pagination{padding:16px 18px}.qh-error{margin:12px 18px}}
 
 .qh-month h3::first-letter{text-transform:uppercase}
+.qh-attachments .saved-bills{display:grid;gap:10px;margin-top:12px;text-align:left;min-width:0}
+.qh-attachments .saved-bills>strong{font-size:14px;color:#174c41}
+.qh-attachments .saved-bills>p{font-size:13px;line-height:1.6;color:#496874;margin:0}
+.qh-attachments .saved-bills>button{font-size:13px;white-space:normal;min-height:42px}
+.qh-attachments .bill-file-link{display:flex;align-items:center;gap:9px;min-height:44px;padding:10px 12px;border:1px solid #bdd5d6;border-radius:8px;background:#edf7f3;color:#174c41;font-size:14px;font-weight:600;text-decoration:none}
+.qh-attachments .bill-file-link span{flex:1}
+.qh-attachments .bill-file-link:hover{background:#dfeee7;border-color:#5c9684}
+.qh-attachments .bill-file-link:focus-visible{outline:3px solid #8fac42;outline-offset:2px}
