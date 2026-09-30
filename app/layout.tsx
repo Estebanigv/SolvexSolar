@@ -13,7 +13,10 @@ import "./members.css";
 import "./activity.css";
 import "./clients.css";
 import "./management-dashboard.css";
+import "./catalog.css";
 import "./workspace-status.css";
+import "./panel-theme.css";
+import "./proposal.css";
 import "./cne-reference.css";
 
 export const metadata: Metadata = {
