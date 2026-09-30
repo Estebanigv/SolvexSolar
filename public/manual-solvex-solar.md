@@ -20,7 +20,7 @@ Versión de revisión local: 29 de septiembre de 2026. La disponibilidad depende
 
 1. En Ubicación del proyecto, completa dirección, comuna y región. Buscar coordenadas por dirección envía esos tres datos a Photon/Komoot; no envía la boleta ni los datos de contacto.
 2. Revisa las coincidencias, abre el mapa si hace falta y elige Usar esta ubicación. Puedes corregir latitud y longitud manualmente. Cambiar la dirección invalida las coordenadas anteriores.
-3. En Revisión y envío puedes consultar PVGIS para una estimación de generación solar. Esta consulta no obtiene el consumo del cliente ni garantiza ahorro. La API CNE sigue pendiente.
+3. En Revisión y envío puedes consultar PVGIS para una estimación de generación solar. Esta consulta no obtiene el consumo del cliente ni garantiza ahorro. La referencia CNE permite consultar consumo histórico agregado por comuna, mes y tipo de cliente. No reemplaza la boleta ni modifica los cálculos. El período inicial comprobado es diciembre de 2022; otros períodos pueden no tener registros.
 
 ## Equipos, instalación y precios
 

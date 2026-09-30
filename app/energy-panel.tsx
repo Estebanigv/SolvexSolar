@@ -6,6 +6,7 @@ import {Input} from '@/components/ui/input';
 import {Checkbox} from '@/components/ui/checkbox';
 import {consumptionSummary, newEnergyInput, solarSourceUrl, type EnergyInput, type SolarEstimate} from '@/lib/energy';
 import {ProjectLocation} from './project-location';
+import {CneReferencePanel} from './cne-reference';
 import type {AddressQuery} from '@/lib/geocoding';
 
 const number = (value: number) => value.toLocaleString('es-CL', {maximumFractionDigits: 1});
@@ -82,6 +83,6 @@ export function EnergyPanel({value, peakPower, onChange, address, mode = 'consum
         {!current && <a className="energy-source" href={solarSourceUrl} target="_blank" rel="noreferrer">Fuente: PVGIS / JRC <ExternalLink size={13}/></a>}
       </div>
     </details>}
-    {mode === 'solar' && <p className="energy-reference">Consumo por comuna: integración CNE pendiente de una fuente operativa. Los datos agregados de una zona no reemplazan el consumo del cliente. <a href="https://energiaabierta.cne.cl/categorias-estadistica/electricidad?_sft_etiquetas-estadistica=consumo" target="_blank" rel="noreferrer">Ver catálogo oficial</a>.</p>}
+    {mode === 'solar' && <CneReferencePanel commune={address?.commune} region={address?.region}/>}
   </section>;
 }
