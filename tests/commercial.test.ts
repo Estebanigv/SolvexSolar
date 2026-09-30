@@ -57,3 +57,11 @@ const termsSettings={...settings,terms:'Vigencia: 10 días. Incluye los equipos 
 assert.equal(customerTerms(summaryQuote,termsSettings),'Vigencia: 10 días. Incluye los equipos y cantidades de la configuración cotizada. Baterías cuando forman parte de la configuración cotizada. El alcance se acuerda tras la visita técnica. Garantía: 1 año.');
 assert.ok(customerTerms(q,termsSettings).includes('detallados en esta propuesta'));
 assert.equal(termsSettings.terms.includes('plazos de ejecución'),true,'No modifica la configuración histórica');
+
+import {greenCreditNote} from '../lib/commercial';
+assert.equal(newQuote().financingNote,greenCreditNote);
+assert.equal(quoteSchema.parse({...q,financingNote:undefined}).financingNote,undefined,'Old snapshots do not gain financing language');
+assert.equal(quoteSchema.parse({...q,financingNote:''}).financingNote,'');
+assert.equal(quoteSchema.safeParse({...q,financingNote:'x'.repeat(1001)}).success,false);
+assert.deepEqual(calculate({...q,financingNote:''},initialProducts,settings),base,'Financing note does not alter amounts');
+assert.equal(quoteSchema.parse(JSON.parse(JSON.stringify({...q,financingNote:'Mensaje acordado'}))).financingNote,'Mensaje acordado');

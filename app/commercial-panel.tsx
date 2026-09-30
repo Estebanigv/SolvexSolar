@@ -1,8 +1,9 @@
 'use client';
+import {Textarea} from '@/components/ui/textarea';
 import {Checkbox} from '@/components/ui/checkbox';
 import {Select,SelectTrigger,SelectValue,SelectContent,SelectItem} from '@/components/ui/select';
 import {money,type QuoteInput,type Settings,type Calculation} from '@/lib/quote';
-import {assignedAdviser,paymentBreakdown,preliminaryNote,roiReference} from '@/lib/commercial';
+import {assignedAdviser,paymentBreakdown,preliminaryNote,roiReference,greenCreditNote} from '@/lib/commercial';
 
 export function CommercialFields({quote,settings,onChange}:{quote:QuoteInput;settings:Settings;onChange:(patch:Partial<QuoteInput>)=>void}){
  const adviser=assignedAdviser(quote,settings);
@@ -13,6 +14,7 @@ export function CommercialFields({quote,settings,onChange}:{quote:QuoteInput;set
  </div>{adviser&&<p className="help-text">{adviser.email} · {adviser.phone}</p>}
  {quote.proposalType==='preliminary'?<p className="notice">{preliminaryNote}</p>:<label className="check-label"><Checkbox checked={quote.technicalReviewed} onCheckedChange={v=>onChange({technicalReviewed:v===true})}/>El comercial y el instalador revisaron modelos, compatibilidad, estructura y alcance tras la visita técnica.</label>}
  <h3>Documento para el cliente</h3><label className="check-label"><Checkbox checked={quote.showItemDetails!==false} onCheckedChange={v=>onChange({showItemDetails:v===true})}/>Mostrar detalle de equipos y servicios</label><p className="help-text">{quote.showItemDetails===false?'El documento mostrará el resumen del proyecto y los totales, sin desglosar los ítems.':'El documento incluirá los equipos, cantidades e importes por ítem.'} Se aplica a la vista previa, impresión y PDF compartido.</p>
+ <h3>Acompañamiento financiero</h3><label className="check-label"><Checkbox checked={!!quote.financingNote} onCheckedChange={checked=>onChange({financingNote:checked?greenCreditNote:''})}/>Incluir observación sobre crédito verde</label>{!!quote.financingNote&&<label>Observación para el cliente<Textarea aria-label="Observación de crédito verde" maxLength={1000} rows={4} value={quote.financingNote} onChange={e=>onChange({financingNote:e.target.value})}/></label>}<p className="help-text">Es una orientación comercial. No es un medio de pago ni una aprobación de crédito. Se incluye en la vista previa y el PDF de esta propuesta.</p>
  </section>;
 }
 

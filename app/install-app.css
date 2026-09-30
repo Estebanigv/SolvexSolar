@@ -32,3 +32,12 @@
 .install-feedback,.install-confirmed { font-size: 13px; line-height: 1.6; color: #446333; }
 .install-confirmed { display: flex; align-items: center; gap: 8px; }
 @media(max-width:480px){.install-dialog { padding: 24px!important; }.install-dialog [data-slot=dialog-title] { font-size: 21px; }}
+
+.nav-account-footer .nav-signout {
+  width: 100%; min-height: 42px; margin-top: 8px; gap: 8px;
+  border: 1px solid transparent; border-radius: 8px;
+  background: transparent; color: #b1c8cc; font-size: 12px; font-weight: 500;
+}
+.nav-account-footer .nav-signout:hover { background: #ffffff0d; color: #fff; }
+.nav-account-footer .nav-signout:focus-visible { outline: 2px solid #c3d79e; outline-offset: 2px; }
+.nav-account-footer .nav-signout:disabled { opacity: .6; cursor: wait; }

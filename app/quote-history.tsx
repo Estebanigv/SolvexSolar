@@ -1,0 +1,70 @@
+'use client';
+import {useEffect,useMemo,useRef,useState} from 'react';
+import {CalendarDays,List,Trash2,ChevronLeft,ChevronRight,RotateCcw,Search,Send,FileText,Copy,Undo2} from 'lucide-react';
+import {Button} from '@/components/ui/button';
+import {Dialog,DialogContent,DialogHeader,DialogTitle,DialogDescription} from '@/components/ui/dialog';
+import {money,systemNames,type SavedQuote} from '@/lib/quote';
+import {channelNames,chileDate,monthCells,monthLabel,shiftMonth,responsible,quotePersonColor,type HistoryQuote,type HistoryAction} from '@/lib/quote-history';
+import {toast} from 'sonner';
+import {memberColors,memberColorStyle} from '@/lib/member-color';
+
+export type HistoryQuery={view:'list'|'calendar'|'trash';month:string;offset:number};
+export type HistorySource={
+  load:(query:HistoryQuery,signal:AbortSignal)=>Promise<{quotes:HistoryQuote[];total:number}>;
+  update:(id:string,action:HistoryAction)=>Promise<unknown>;
+};
+async function responseJson<T=unknown>(response:Response):Promise<T>{const body=await response.json() as T&{error?:string};if(!response.ok)throw Error(body.error||'No se pudo actualizar el historial.');return body;}
+const source:HistorySource={
+  load:(query,signal)=>fetch('/api/quote-history?'+new URLSearchParams({view:query.view,month:query.month,offset:String(query.offset)}),{signal}).then(responseJson<{quotes:HistoryQuote[];total:number}>),
+  update:(id,action)=>fetch('/api/quote-history/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(action)}).then(responseJson),
+};
+function PersonTag({quote}:{quote:HistoryQuote}){const person=responsible(quote);return <span className="qh-person" style={memberColorStyle(memberColors[quotePersonColor(quote)].id,'')}><i aria-hidden="true"/>{person.name}</span>;}
+
+export function QuoteHistory({isAdmin,onPreview,onRevision,onDeleted,renderAttachments,dataSource=source}:{
+  isAdmin:boolean;onPreview:(q:SavedQuote)=>void;onRevision:(q:SavedQuote)=>void;onDeleted?:(id:string)=>void;
+  renderAttachments?:(q:SavedQuote)=>React.ReactNode;dataSource?:HistorySource;
+}){
+  const [view,setView]=useState<HistoryQuery['view']>('list'),[month,setMonth]=useState(()=>chileDate().slice(0,7));
+  const [quotes,setQuotes]=useState<HistoryQuote[]>([]),[total,setTotal]=useState(0),[loading,setLoading]=useState(true),[error,setError]=useState(''),[refresh,setRefresh]=useState(0);
+  const [search,setSearch]=useState(''),[person,setPerson]=useState('all'),[status,setStatus]=useState('all'),[day,setDay]=useState<string|null>(null);
+  const [dialog,setDialog]=useState<{quote:HistoryQuote;kind:'send'|'trash'|'restore'}|null>(null),[saving,setSaving]=useState(false),[actionError,setActionError]=useState('');
+  const [sentOn,setSentOn]=useState(chileDate),[channel,setChannel]=useState<'whatsapp'|'email'|'other'>('whatsapp');
+  const epoch=useRef(0);
+  useEffect(()=>{setPerson('all');setDay(null);},[view,month]);
+  useEffect(()=>{
+    const controller=new AbortController(),current=++epoch.current;
+    setLoading(true);setError('');setQuotes([]);setTotal(0);setDay(null);
+    dataSource.load({view,month,offset:0},controller.signal).then(data=>{if(current===epoch.current){setQuotes(data.quotes);setTotal(data.total);}}).catch(e=>{if(!controller.signal.aborted)setError((e as Error).message);}).finally(()=>{if(current===epoch.current)setLoading(false);});
+    return()=>{controller.abort();epoch.current++;};
+  },[view,month,refresh,dataSource]);
+  async function more(){const current=epoch.current;setLoading(true);setError('');try{const data=await dataSource.load({view,month,offset:quotes.length},new AbortController().signal);if(current===epoch.current){setQuotes(old=>Array.from(new Map([...old,...data.quotes].map(q=>[q.id,q])).values()));setTotal(data.total);}}catch(e){if(current===epoch.current)setError((e as Error).message);}finally{if(current===epoch.current)setLoading(false);}}
+  const people=useMemo(()=>Array.from(new Map(quotes.map(q=>{const p=responsible(q);return [p.id,p];})).values()).sort((a,b)=>a.name.localeCompare(b.name,'es')),[quotes]);
+  const filtered=useMemo(()=>quotes.filter(q=>{
+    const match=[q.folio,q.input.customer.name,responsible(q).name].join(' ').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+    const term=search.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+    return match.includes(term)&&(person==='all'||responsible(q).id===person)&&(view!=='list'||status==='all'||(status==='sent'?!!q.sentOn:!q.sentOn));
+  }),[quotes,search,person,status,view]);
+  const selected=day?filtered.filter(q=>q.sentOn===day):filtered;
+  function open(q:HistoryQuote,kind:'send'|'trash'|'restore'){setDialog({quote:q,kind});setSentOn(q.sentOn||chileDate());setChannel(q.sentChannel||'whatsapp');setActionError('');}
+  async function save(action:HistoryAction){if(!dialog)return;setSaving(true);setActionError('');try{await dataSource.update(dialog.quote.id,action);if(action.action==='trash')onDeleted?.(dialog.quote.id);setDialog(null);setRefresh(n=>n+1);toast.success(action.action==='send'?'Envío registrado.':action.action==='clear-send'?'Registro de envío retirado.':action.action==='trash'?'Cotización movida a la papelera.':'Cotización restaurada.');}catch(e){setActionError((e as Error).message);}finally{setSaving(false);}}
+  return <section className="quote-history" aria-label="Gestión de cotizaciones">
+    <div className="qh-top"><div><h2>Propuestas y seguimiento</h2><p>Identifica al responsable y organiza los envíos a tus clientes.</p></div><Button variant="outline" disabled={loading} onClick={()=>setRefresh(n=>n+1)}><RotateCcw size={16}/>Actualizar</Button></div>
+    <div className="qh-toolbar"><div className="qh-views" aria-label="Vista de cotizaciones">
+      <button type="button" aria-pressed={view==='list'} onClick={()=>setView('list')}><List size={16}/>Listado</button>
+      <button type="button" aria-pressed={view==='calendar'} onClick={()=>setView('calendar')}><CalendarDays size={16}/>Calendario de envíos</button>
+      {isAdmin&&<button type="button" aria-pressed={view==='trash'} onClick={()=>setView('trash')}><Trash2 size={16}/>Papelera</button>}
+    </div><div className="qh-filters"><label className="qh-search"><Search size={17} aria-hidden="true"/><input aria-label="Buscar cotización" placeholder="Buscar cliente, folio o responsable" value={search} onChange={e=>setSearch(e.target.value)}/></label><select aria-label="Filtrar responsable" value={person} onChange={e=>setPerson(e.target.value)}><option value="all">Todos los responsables</option>{people.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select>{view==='list'&&<select aria-label="Filtrar estado de envío" value={status} onChange={e=>setStatus(e.target.value)}><option value="all">Todos los estados</option><option value="sent">Envío registrado</option><option value="pending">Sin envío registrado</option></select>}</div></div>
+    {view==='calendar'&&<><div className="qh-month"><div><h3>{monthLabel(month)}</h3><p>{total} cotizaciones con envío registrado este mes</p></div><div><button type="button" aria-label="Mes anterior" onClick={()=>setMonth(m=>shiftMonth(m,-1))}><ChevronLeft/></button><button type="button" onClick={()=>setMonth(chileDate().slice(0,7))}>Este mes</button><button type="button" aria-label="Mes siguiente" onClick={()=>setMonth(m=>shiftMonth(m,1))}><ChevronRight/></button></div></div><p className="qh-note">El calendario usa la fecha que el equipo confirma en “Registrar envío”. Abrir WhatsApp o descargar un PDF no registra un envío.</p></>}
+    {view==='trash'&&<p className="qh-note">Solo administración puede eliminar y restaurar. La cotización y sus documentos se conservan en la papelera.</p>}
+    {error&&<div className="qh-error" role="alert">{error} <button onClick={()=>setRefresh(n=>n+1)}>Reintentar</button></div>}
+    {loading&&!quotes.length?<div className="qh-empty" role="status">Cargando cotizaciones…</div>:!error&&<>
+      {view==='calendar'&&<div className="qh-calendar"><div className="qh-week" aria-hidden="true">{['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'].map(d=><span key={d}>{d}</span>)}</div><div className="qh-days">{monthCells(month).map((date,i)=>{const entries=date?filtered.filter(q=>q.sentOn===date):[];return date?<button type="button" key={date} className="qh-day" aria-pressed={day===date} aria-label={`${date}: ${entries.length} envíos`} data-today={date===chileDate()} onClick={()=>setDay(previous=>previous===date?null:date)}><span className="qh-day-number">{Number(date.slice(-2))}</span>{entries.slice(0,3).map(q=><span key={q.id} className="qh-event" style={memberColorStyle(memberColors[quotePersonColor(q)].id,'')}><i aria-hidden="true"/><span>{q.input.customer.name||q.folio}</span></span>)}{entries.length>3&&<small>+{entries.length-3} más</small>}<span className="qh-day-count">{entries.length>0?`${entries.length} ${entries.length===1?'envío':'envíos'}`:''}</span></button>:<div className="qh-day qh-day-blank" key={'blank'+i}/>;})}</div></div>}
+      <div className="qh-results"><h3>{day?`Envíos del ${day.split('-').reverse().join('/')}`:view==='calendar'?'Envíos del mes':view==='trash'?'Cotizaciones en papelera':'Cotizaciones guardadas'}</h3><span>{selected.length} {selected.length===1?'resultado':'resultados'}{day&&<button onClick={()=>setDay(null)}>Ver todo el mes</button>}</span></div>
+      {!selected.length?<div className="qh-empty"><FileText size={32}/><strong>{quotes.length?'No hay coincidencias':view==='calendar'?'Sin envíos registrados este mes':view==='trash'?'La papelera está vacía':'Aún no hay cotizaciones guardadas'}</strong><p>{quotes.length?'Ajusta la búsqueda o el responsable.':view==='calendar'?'Registra el envío de una cotización desde el listado para verla aquí.':'Las versiones guardadas aparecerán en este espacio.'}</p></div>:<div className="qh-rows">{selected.map(q=><article className="qh-row" key={q.id}><div className="qh-client"><span className="qh-folio">{q.folio}</span><h4>{q.input.customer.name||'Cliente sin nombre'}</h4><p>{systemNames[q.input.system]} · {q.calculation.kwp.toLocaleString('es-CL',{maximumFractionDigits:2})} kWp</p><small>Creada el {chileDate(q.date).split('-').reverse().join('/')}{q.owner?` por ${q.owner.name}`:''}</small></div><div className="qh-owner"><PersonTag quote={q}/><span className="qh-state" data-sent={!!q.sentOn}>{q.sentOn?`${channelNames[q.sentChannel||'other']} · ${q.sentOn.split('-').reverse().join('/')}`:'Sin envío registrado'}</span><small>{q.calculation.official?'Propuesta validada':'Borrador / en revisión'}</small></div><div className="qh-value"><strong>{money(q.calculation.total)}</strong><span>{q.calculation.complete?'Total cotizado':'Subtotal parcial'}</span></div><div className="qh-actions"><Button variant="outline" onClick={()=>onPreview(q)}><FileText size={15}/>Ver propuesta</Button>{view==='trash'?<Button variant="outline" onClick={()=>open(q,'restore')}><Undo2 size={15}/>Restaurar</Button>:<><Button variant="ghost" onClick={()=>open(q,'send')}><Send size={15}/>{q.sentOn?'Editar envío':'Registrar envío'}</Button><button className="qh-link" onClick={()=>onRevision(q)}><Copy size={14}/>Crear revisión</button>{isAdmin&&<button className="qh-delete" aria-label={`Eliminar ${q.folio}`} onClick={()=>open(q,'trash')}><Trash2 size={14}/>Eliminar</button>}</>}{renderAttachments&&<details className="qh-attachments"><summary>Boletas del cliente</summary>{renderAttachments(q)}</details>}</div></article>)}</div>}
+    </>}
+    <div className="qh-pagination"><span>{quotes.length} de {total} cotizaciones cargadas{quotes.length<total?' · carga las restantes para completar la vista':''}</span>{quotes.length<total&&<Button variant="outline" disabled={loading} onClick={more}>{loading?'Cargando…':'Cargar más'}</Button>}</div>
+    <Dialog open={!!dialog} onOpenChange={value=>{if(!value&&!saving)setDialog(null);}}><DialogContent className="qh-dialog"><DialogHeader><DialogTitle>{dialog?.kind==='send'?'Registrar envío al cliente':dialog?.kind==='trash'?'Eliminar cotización':'Restaurar cotización'}</DialogTitle><DialogDescription>{dialog?.quote.folio} · {dialog?.quote.input.customer.name}</DialogDescription></DialogHeader>
+      {dialog?.kind==='send'?<form onSubmit={e=>{e.preventDefault();void save({action:'send',sentOn,channel});}}><p>Confirma la fecha y el canal por el que ya enviaste la propuesta. Este registro no envía mensajes.</p><label>Fecha de envío<input required type="date" min={chileDate(dialog.quote.date)} max={chileDate()} value={sentOn} onChange={e=>setSentOn(e.target.value)}/></label><label>Canal<select value={channel} onChange={e=>setChannel(e.target.value as typeof channel)}><option value="whatsapp">WhatsApp</option><option value="email">Correo</option><option value="other">Otro canal</option></select></label>{actionError&&<p role="alert" className="qh-error">{actionError}</p>}<div className="qh-dialog-actions">{dialog.quote.sentOn&&<Button type="button" variant="ghost" disabled={saving} onClick={()=>save({action:'clear-send'})}>Quitar registro</Button>}<Button type="submit" disabled={saving}>{saving?'Guardando…':'Confirmar envío'}</Button></div></form>:<><p>{dialog?.kind==='trash'?'La moverás a la papelera. Dejará de aparecer en el listado y calendario; podrás restaurarla como administrador.':'La cotización volverá al historial con sus datos y documentos originales.'}</p>{actionError&&<p role="alert" className="qh-error">{actionError}</p>}<div className="qh-dialog-actions"><Button variant="outline" disabled={saving} onClick={()=>setDialog(null)}>Cancelar</Button><Button disabled={saving} onClick={()=>save({action:dialog?.kind==='trash'?'trash':'restore'})}>{saving?'Guardando…':dialog?.kind==='trash'?'Mover a la papelera':'Restaurar'}</Button></div></>}
+    </DialogContent></Dialog>
+  </section>;
+}

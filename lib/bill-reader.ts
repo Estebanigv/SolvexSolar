@@ -1,7 +1,8 @@
 import {billTextScore, extractBill, type BillExtraction} from './bill-extraction';
 import type {Worker} from 'tesseract.js';
 import type {PDFDocumentLoadingTask} from 'pdfjs-dist';
-export type BillDocument = {id:string;file:File;url:string;mime:string;rotation:number};
+import {scanBillCodes,type BillCode} from './bill-barcode';
+export type BillDocument = {id:string;file:File;url:string;mime:string;rotation:number;codeOnly?:boolean};
 
 function abortable<T>(promise:Promise<T>,signal:AbortSignal):Promise<T>{
   return new Promise((resolve,reject)=>{
@@ -11,9 +12,10 @@ function abortable<T>(promise:Promise<T>,signal:AbortSignal):Promise<T>{
     promise.then(resolve,reject).finally(()=>signal.removeEventListener('abort',abort));
   });
 }
-export async function readBills(files:BillDocument[],signal:AbortSignal,progress:(message:string)=>void):Promise<BillExtraction>{
+export type BillReadCache=Map<string,{texts:string[];codes:BillCode[];warnings:string[]}>;
+export async function readBills(files:BillDocument[],signal:AbortSignal,progress:(message:string)=>void,cache:BillReadCache=new Map()):Promise<BillExtraction>{
   let worker:Worker|undefined;let pdfTask:PDFDocumentLoadingTask|undefined;
-  const texts:string[]=[];const warnings:string[]=[];
+  const texts:string[]=[];const warnings:string[]=[];const codes:BillCode[]=[];
   const stop=()=>{const activeWorker=worker;const activePdf=pdfTask;worker=undefined;pdfTask=undefined;void activeWorker?.terminate();void activePdf?.destroy()};
   signal.addEventListener('abort',stop,{once:true});
   async function engine(){
@@ -40,6 +42,9 @@ export async function readBills(files:BillDocument[],signal:AbortSignal,progress
   try {
     for(let i=0;i<files.length;i++){
       signal.throwIfAborted();const item=files[i];const label=`Documento ${i+1} de ${files.length}`;progress(`${label} · Abriendo…`);
+      const cacheKey=`${item.id}:${item.rotation}`;const previous=cache.get(cacheKey);
+      if(previous){texts.push(...previous.texts);codes.push(...previous.codes);warnings.push(...previous.warnings);continue}
+      const textStart=texts.length,codeStart=codes.length,warningStart=warnings.length;
       try {
         if(item.mime==='application/pdf'){
           const pdfjs=await import('pdfjs-dist');pdfjs.GlobalWorkerOptions.workerSrc=new URL('pdfjs-dist/build/pdf.worker.min.mjs',import.meta.url).toString();
@@ -57,13 +62,20 @@ export async function readBills(files:BillDocument[],signal:AbortSignal,progress
           await pdfTask.destroy();pdfTask=undefined;
         }else{
           const bitmap=await createImageBitmap(item.file);
-          try{if(bitmap.width*bitmap.height>50000000)throw Error('Imagen demasiado grande.');texts.push(await recognize(bitmap,bitmap.width,bitmap.height,item.rotation,label))}finally{bitmap.close()}
+          try{
+            if(bitmap.width*bitmap.height>50000000)throw Error('Imagen demasiado grande.');
+            progress(`${label} · Buscando códigos de barras o QR…`);
+            const found=await scanBillCodes(bitmap,bitmap.width,bitmap.height,signal);codes.push(...found);
+            if(!item.codeOnly)texts.push(await recognize(bitmap,bitmap.width,bitmap.height,item.rotation,label));
+            else if(!found.length)warnings.push(`Documento ${i+1}: no se pudo leer el código. Acércate, evita reflejos e incluye el código completo.`);
+          }finally{bitmap.close()}
         }
+        cache.set(cacheKey,{texts:texts.slice(textStart),codes:codes.slice(codeStart),warnings:warnings.slice(warningStart)});
       }catch(error){if(signal.aborted)throw error;warnings.push(`No se pudo leer el documento ${i+1}. Prueba una foto nítida, sin reflejos, o un PDF sin contraseña.`);await pdfTask?.destroy();pdfTask=undefined}
     }
     signal.throwIfAborted();
-    const result=extractBill(texts);result.warnings.unshift(...warnings);
-    if(!texts.some(t=>billTextScore(t)>2))result.warnings.unshift('No se encontró texto suficiente. Repite la foto con la boleta completa, de frente y bien iluminada.');
+    const result=extractBill(texts);result.codes=codes.filter((code,i)=>codes.findIndex(c=>c.text===code.text)===i);result.warnings.unshift(...warnings);
+    if(!texts.some(t=>billTextScore(t)>2))result.warnings.unshift(codes.length?'Código leído. Adjunta también la boleta completa para obtener cliente, región, comuna y consumo.':'No se encontró texto suficiente. Repite la foto con la boleta completa, de frente y bien iluminada.');
     return result;
   }finally{signal.removeEventListener('abort',stop);stop()}
 }

@@ -1,0 +1,21 @@
+import assert from 'node:assert/strict';
+import {chileDate,monthCells,shiftMonth,historyActionSchema,personColor,responsible} from '../lib/quote-history';
+import {newQuote,initialSettings,initialProducts,calculate} from '../lib/quote';
+assert.equal(monthCells('2024-02').filter(Boolean).length,29);
+assert.equal(monthCells('2025-02').filter(Boolean).length,28);
+assert.equal(monthCells('2026-09')[1],'2026-09-01');
+assert.equal(shiftMonth('2026-12',1),'2027-01');
+assert.equal(shiftMonth('2026-01',-1),'2025-12');
+assert.equal(chileDate('2026-06-01T01:00:00Z'),'2026-05-31','Agrupar por fecha chilena');
+assert.equal(historyActionSchema.safeParse({action:'send',sentOn:'2026-02-30',channel:'email'}).success,false);
+assert.equal(historyActionSchema.safeParse({action:'send',sentOn:'2099-01-01',channel:'email'}).success,false);
+assert.equal(historyActionSchema.safeParse({action:'send',sentOn:chileDate(),channel:'whatsapp'}).success,true);
+assert.equal(historyActionSchema.safeParse({action:'delete-forever'}).success,false);
+const input=newQuote(),q={id:'test',folio:'test',date:'2026-01-01',input,settings:initialSettings,calculation:calculate(input,initialProducts,initialSettings),owner:{id:'dev',name:'Dev'}};
+assert.equal(responsible(q).name,'Dev');
+assert.equal(responsible({...q,input:{...input,adviserId:'a'},settings:{...initialSettings,advisers:[{id:'a',name:'Comercial A',email:'a@example.com',phone:''}]}}).name,'Comercial A');
+assert.equal(personColor('adviser:a'),personColor('adviser:a'));
+assert.ok(personColor('owner:dev')>=0&&personColor('owner:dev')<6);
+console.log('Historial: calendario, fechas chilenas, responsables y acciones: OK');
+
+for(const sentOn of ['2026-2-3','January 1 2026','','2026-13-01'])assert.equal(historyActionSchema.safeParse({action:'send',sentOn,channel:'email'}).success,false);

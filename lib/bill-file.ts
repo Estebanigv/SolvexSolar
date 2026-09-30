@@ -1,4 +1,15 @@
 export const maxBillBytes = 10 * 1024 * 1024;
+export const maxBillFiles = 8;
+export const maxBillTotalBytes = 40 * 1024 * 1024;
+export function validateBillBatch(files:Pick<File,'size'>[]){
+  if(files.length>maxBillFiles)throw Error(`Puedes adjuntar hasta ${maxBillFiles} archivos de la misma boleta.`);
+  if(files.reduce((sum,file)=>sum+file.size,0)>maxBillTotalBytes)throw Error('El total de documentos no puede superar 40 MB.');
+}
+export function billStorageName(index:number){
+  if(!Number.isInteger(index)||index<0||index>=maxBillFiles)throw Error('Documento fuera del límite permitido.');
+  return index===0?'frente':index===1?'reverso':`documento-${index+1}`;
+}
+export const billStorageNames=Array.from({length:maxBillFiles},(_,i)=>billStorageName(i));
 
 /** Validate size, extension and signature before creating a local preview URL. */
 export async function validateBillFile(file: File): Promise<string> {

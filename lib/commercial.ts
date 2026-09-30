@@ -40,3 +40,5 @@ export function customerTerms(q:QuoteInput, settings:Settings){
   }
   return terms;
 }
+
+export const greenCreditNote='Solvex Solar puede acompañarte en la gestión de alternativas de financiamiento verde con entidades financieras. Solvex Solar no otorga el crédito. La aprobación, tasas y condiciones dependen de la institución financiera correspondiente.';

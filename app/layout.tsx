@@ -8,6 +8,12 @@ import "./bill-reader.css";
 import "./auth.css";
 import "./install-app.css";
 import "./commercial.css";
+import "./quote-history.css";
+import "./members.css";
+import "./activity.css";
+import "./clients.css";
+import "./management-dashboard.css";
+import "./workspace-status.css";
 
 export const metadata: Metadata = {
   title: "Solvex Solar | Cotizador",

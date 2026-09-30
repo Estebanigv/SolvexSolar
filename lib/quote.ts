@@ -1,6 +1,6 @@
 import raw from './catalog.json';
 import {z} from 'zod';
-import {adviserSchema,roiReferenceSchema,paymentScheduleSchema} from './commercial';
+import {adviserSchema,roiReferenceSchema,paymentScheduleSchema,greenCreditNote} from './commercial';
 import {energyInputSchema,consumptionSummary} from './energy';
 export const systems=['ON GRID','ON GRID TRIFASICO','OFF GRID','HIBRIDO','HIBRIDO TRIFASICO'] as const;
 export const systemNames:Record<string,string>={'ON GRID':'On Grid monofásico','ON GRID TRIFASICO':'On Grid trifásico','OFF GRID':'Off Grid','HIBRIDO':'Híbrido monofásico','HIBRIDO TRIFASICO':'Híbrido trifásico'};
@@ -13,13 +13,13 @@ export const installation:InstallationRates=raw.installation;
 export const settingsSchema=z.object({advisers:z.array(adviserSchema).max(50).optional(),roiReference:roiReferenceSchema.optional(),paymentSchedule:paymentScheduleSchema.optional(),netbillingTerms:z.string().max(2000).optional(),requirementsVersion:z.string().max(50).optional(),name:z.string().min(1).max(100),legal:z.string().max(150),rut:z.string().max(30),address:z.string().max(250),email:z.union([z.literal(''),z.string().email()]),phone:z.string().max(40),validDays:z.number().int().min(1).max(365),taxMode:z.enum(['pending','included','net']),taxRate:z.number().min(0).max(100),terms:z.string().max(5000),warranty:z.string().max(3000),approved:z.boolean()});
 export type Settings=z.infer<typeof settingsSchema>;
 export const initialSettings:Settings={name:'Solvex Solar',legal:'',rut:'',address:'',email:'contacto@solvexsolar.cl',phone:'',validDays:15,taxMode:'pending',taxRate:19,terms:'',warranty:'',approved:false};
-export const quoteSchema=z.object({showItemDetails:z.boolean().optional(),proposalType:z.enum(['preliminary','final']).optional(),adviserId:z.string().max(80).optional(),discountPercent:z.number().int().min(0).max(30).optional(),energy:energyInputSchema.optional(),system:z.enum(systems),customer:z.object({name:z.string().max(150),email:z.union([z.literal(''),z.string().email()]),phone:z.string().max(40),region:z.string().max(100),commune:z.string().max(100),address:z.string().max(300),bill:z.number().finite().min(0).max(1e9)}),quantities:z.record(z.number().finite().min(0).max(100000)),extra:z.number().finite().min(0).max(1e10),extraLabel:z.string().max(300),discount:z.number().finite().min(0).max(1e10),installationOverride:z.number().finite().min(0).max(1e10).nullable(),installationNote:z.string().max(300),payment:z.string().min(1).max(100),notes:z.string().max(5000),technicalReviewed:z.boolean()});
+export const quoteSchema=z.object({financingNote:z.string().max(1000).optional(),showItemDetails:z.boolean().optional(),proposalType:z.enum(['preliminary','final']).optional(),adviserId:z.string().max(80).optional(),discountPercent:z.number().int().min(0).max(30).optional(),energy:energyInputSchema.optional(),system:z.enum(systems),customer:z.object({name:z.string().max(150),email:z.union([z.literal(''),z.string().email()]),phone:z.string().max(40),region:z.string().max(100),commune:z.string().max(100),address:z.string().max(300),bill:z.number().finite().min(0).max(1e9)}),quantities:z.record(z.number().finite().min(0).max(100000)),extra:z.number().finite().min(0).max(1e10),extraLabel:z.string().max(300),discount:z.number().finite().min(0).max(1e10),installationOverride:z.number().finite().min(0).max(1e10).nullable(),installationNote:z.string().max(300),payment:z.string().min(1).max(100),notes:z.string().max(5000),technicalReviewed:z.boolean()});
 export type QuoteInput=z.infer<typeof quoteSchema>;
 export type Line={id:string;name:string;qty:number;unit:string;price:number|null;total:number|null;source:string;category:string};
 export type Calculation={lines:Line[];panelWatts?:number[];panels:number;kwp:number;subtotal:number;discount:number;net:number;tax:number|null;total:number;warnings:string[];complete:boolean;official:boolean};
 export type SavedQuote={id:string;clientId?:string;folio:string;date:string;input:QuoteInput;settings:Settings;calculation:Calculation};
 export const money=(n:number)=>new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(n);
-export function newQuote():QuoteInput{return {showItemDetails:true,proposalType:'preliminary',discountPercent:0,system:'ON GRID',customer:{name:'',email:'',phone:'',region:'',commune:'',address:'',bill:0},quantities:{'0-10':8,'0-13':8,'0-26':1,'0-35':15,'0-37':15,'0-43':1,'0-45':1,'0-47':1},extra:0,extraLabel:'',discount:0,installationOverride:null,installationNote:'',payment:'Transferencia bancaria',notes:'',technicalReviewed:false}}
+export function newQuote():QuoteInput{return {financingNote:greenCreditNote,showItemDetails:true,proposalType:'preliminary',discountPercent:0,system:'ON GRID',customer:{name:'',email:'',phone:'',region:'',commune:'',address:'',bill:0},quantities:{'0-10':8,'0-13':8,'0-26':1,'0-35':15,'0-37':15,'0-43':1,'0-45':1,'0-47':1},extra:0,extraLabel:'',discount:0,installationOverride:null,installationNote:'',payment:'Transferencia bancaria',notes:'',technicalReviewed:false}}
 export function calculate(input:QuoteInput,products:Product[],settings:Settings,installationRates:InstallationRates=installation):Calculation{
  const q=quoteSchema.parse(input); const warnings:string[]=[];
  const selected=products.filter(p=>p.system===q.system&&(q.quantities[p.id]||0)>0);
@@ -57,4 +57,13 @@ export function calculate(input:QuoteInput,products:Product[],settings:Settings,
  if(!q.customer.name.trim()||!q.customer.email||!q.customer.phone.trim()||!q.customer.region.trim()||!q.customer.commune.trim()||q.customer.bill<=0)warnings.push('Completa los datos del cliente y su monto de boleta.');
  if(q.adviserId&&!settings.advisers?.some(a=>a.id===q.adviserId))warnings.push('Selecciona un comercial vigente para esta propuesta.');
  return {lines,panelWatts:selected.filter(p=>p.category==='PANEL FOTOVOLTAICO').map(p=>p.watts??0),panels,kwp,subtotal,discount,net,tax,total,warnings,complete,official:complete&&warnings.length===0};
+}
+
+// A changed installation address invalidates both geocoded and manually entered coordinates.
+export function mergeQuotePatch(quote:QuoteInput,patch:Partial<QuoteInput>):QuoteInput{
+  const next={...quote,...patch,technicalReviewed:patch.technicalReviewed??false};
+  if(patch.customer&&(['address','commune','region'] as const).some(key=>patch.customer![key]!==quote.customer[key])&&next.energy){
+    next.energy={...next.energy,latitude:null,longitude:null};
+  }
+  return next;
 }

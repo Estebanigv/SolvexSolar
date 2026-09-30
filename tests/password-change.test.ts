@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import {passwordChangeSchema,passwordChangeError} from '../lib/password-change';
+const valid={currentPassword:'old-example',newPassword:'Un ejemplo largo 2026!'};
+assert.equal(passwordChangeSchema.safeParse(valid).success,true);
+assert.equal(passwordChangeSchema.safeParse({...valid,currentPassword:''}).success,false);
+assert.equal(passwordChangeSchema.safeParse({...valid,newPassword:'short'}).success,false);
+assert.equal(passwordChangeSchema.safeParse({currentPassword:valid.newPassword,newPassword:valid.newPassword}).success,false);
+assert.equal(passwordChangeSchema.safeParse({...valid,id:'another-user'}).success,false,'A user cannot select a target account');
+assert.equal(passwordChangeSchema.safeParse({...valid,role:'admin'}).success,false);
+assert.equal(passwordChangeSchema.safeParse({...valid,newPassword:'á'.repeat(37)}).success,false,'Respect bcrypt byte limit');
+assert.equal(passwordChangeSchema.safeParse({...valid,newPassword:'á'.repeat(36)}).success,true);
+assert.match(passwordChangeError('same_password'),/diferente/);
+assert.match(passwordChangeError('over_request_rate_limit'),/Espera/);
+assert.match(passwordChangeError('reauthentication_needed'),/iniciar sesión/);
+console.log('Cambio de contraseña: validación, identidad y errores: OK');

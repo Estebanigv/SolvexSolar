@@ -1,7 +1,12 @@
 import assert from 'node:assert/strict';
-import {validateBillFile, maxBillBytes} from '../lib/bill-file';
+import {validateBillFile, maxBillBytes,validateBillBatch,billStorageName,billStorageNames} from '../lib/bill-file';
 
 async function run() {
+  assert.doesNotThrow(()=>validateBillBatch(Array.from({length:8},()=>({size:1024}))));
+  assert.throws(()=>validateBillBatch(Array.from({length:9},()=>({size:1024}))));
+  assert.throws(()=>validateBillBatch(Array.from({length:5},()=>({size:maxBillBytes}))));
+  assert.equal(new Set(billStorageNames).size,8);
+  assert.equal(billStorageName(7),'documento-8');assert.throws(()=>billStorageName(8));
   assert.equal(await validateBillFile(new File(['%PDF-1.7\n'], 'boleta.pdf', {type:'application/pdf'})), 'application/pdf');
   assert.equal(await validateBillFile(new File([new Uint8Array([255,216,255,224])], 'boleta.JPG', {type:'image/jpeg'})), 'image/jpeg');
   assert.equal(await validateBillFile(new File([new Uint8Array([137,80,78,71,13,10,26,10])], 'boleta.png')), 'image/png');

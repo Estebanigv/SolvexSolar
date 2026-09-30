@@ -5,12 +5,14 @@ import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Checkbox} from '@/components/ui/checkbox';
 import {consumptionSummary, newEnergyInput, solarSourceUrl, type EnergyInput, type SolarEstimate} from '@/lib/energy';
+import {ProjectLocation} from './project-location';
+import type {AddressQuery} from '@/lib/geocoding';
 
 const number = (value: number) => value.toLocaleString('es-CL', {maximumFractionDigits: 1});
 const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 
-export function EnergyPanel({value, peakPower, onChange, mode = 'consumption'}: {
-  mode?: 'consumption' | 'solar'; value?: EnergyInput; peakPower: number; onChange: (value: EnergyInput) => void;
+export function EnergyPanel({value, peakPower, onChange, address, mode = 'consumption'}: {
+  address?:AddressQuery; mode?: 'consumption' | 'solar'; value?: EnergyInput; peakPower: number; onChange: (value: EnergyInput) => void;
 }) {
   const energy = value ?? newEnergyInput();
   const consumption = consumptionSummary(energy);
@@ -60,9 +62,8 @@ export function EnergyPanel({value, peakPower, onChange, mode = 'consumption'}: 
     {mode === 'solar' && <details open className="solar-study"><summary><Sun size={18}/><span>Estimar generación solar por ubicación<small>Consulta pública de PVGIS · Comisión Europea</small></span></summary>
       <div className="solar-study-body">
         <p>Usa las coordenadas del proyecto y ajusta los supuestos según el techo. La potencia seleccionada es <strong>{peakPower.toLocaleString('es-CL', {maximumFractionDigits: 3})} kWp</strong>.</p>
+        {address&&<ProjectLocation address={address} latitude={energy.latitude} longitude={energy.longitude} onChange={edit}/>}
         <div className="field-grid energy-fields">
-          <label>Latitud<Input type="number" step="any" min={-56.6} max={-17} value={energy.latitude ?? ''} placeholder="Ej. -33.45" onChange={e => edit({latitude: e.target.value === '' ? null : Number(e.target.value)})}/></label>
-          <label>Longitud<Input type="number" step="any" min={-110} max={-66} value={energy.longitude ?? ''} placeholder="Ej. -70.66" onChange={e => edit({longitude: e.target.value === '' ? null : Number(e.target.value)})}/></label>
           <label>Inclinación del panel (°)<Input type="number" min={0} max={90} value={energy.tilt} onChange={e => edit({tilt: Number(e.target.value)})}/></label>
           <label>Orientación del panel<select value={energy.azimuth} onChange={e => edit({azimuth: Number(e.target.value)})}><option value={180}>Norte</option><option value={-135}>Noreste</option><option value={-90}>Este</option><option value={-45}>Sureste</option><option value={0}>Sur</option><option value={45}>Suroeste</option><option value={90}>Oeste</option><option value={135}>Noroeste</option></select></label>
           <label>Pérdidas del sistema (%)<Input type="number" min={0} max={50} step="any" value={energy.loss} onChange={e => edit({loss: Number(e.target.value)})}/></label>

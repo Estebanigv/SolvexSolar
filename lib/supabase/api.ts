@@ -36,5 +36,6 @@ export async function quotesPost(request:Request){return protectedApi(async()=>{
   const id=crypto.randomUUID(),date=new Date().toISOString(),folio=`SVX-${date.slice(0,4)}-${id.slice(0,8).toUpperCase()}`;
   const snapshot={id,folio,date,input:body.input,settings,calculation:calculate(body.input,products,settings,installationSchema.parse(config.data!.installation))};
   const {data,error}=await db.rpc('save_quote',{snapshot,expected_revision:body.revision,customer_id:body.clientId??null});
+  if(error?.code==='55000')throw new AccessError('Este cliente está en la papelera. Restáuralo antes de cotizar.',409);
   if(error)databaseError(error);return reply(data,201);
 })}

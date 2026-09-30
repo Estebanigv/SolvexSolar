@@ -28,6 +28,7 @@ export async function quotePdf(q:SavedQuote,logoBytes?:ArrayBuffer){
  if(payments.length){heading('DISTRIBUCIÓN DE PAGOS');for(const row of payments)text(`${row.label} (${row.percent}%): ${money(row.amount)}`);}
  if(q.calculation.warnings.length){heading('VALIDACIONES PENDIENTES');for(const w of q.calculation.warnings)text('- '+w,9,false,grey);}
  heading('ALCANCE Y CONDICIONES');if(q.input.proposalType==='preliminary')text(preliminaryNote); text(q.input.notes||'Alcance técnico pendiente de confirmar en visita y revisión del proyecto.');text(customerTerms(q.input,q.settings)||'Condiciones comerciales pendientes de aprobación.');
+ if(q.input.financingNote?.trim()){heading('ACOMPAÑAMIENTO FINANCIERO');text(q.input.financingNote);}
  if(netbillingScope(q.input,q.settings))text(netbillingScope(q.input,q.settings));
  space(225);heading('GARANTÍAS');text(q.settings.warranty||'Garantías por modelo y garantía de instalación pendientes de confirmación.');
  const adviser=assignedAdviser(q.input,q.settings);if(adviser){heading('TU CONTACTO COMERCIAL');text(adviser.name,11,true);text(`${adviser.email} | ${adviser.phone}`);}

@@ -135,3 +135,17 @@ assert.equal(extractBill(['Electricidad Consumida (660 kWh)']).values.consumptio
 assert.equal(extractBill(['Consumo total del período= 660 kWh']).values.consumptionKwh,'660');
 assert.equal(extractBill(['Consumo de referencia: 500 kWh']).values.consumptionKwh,undefined);
 console.log('Lectura de boletas: campos, fechas, conflictos, datos existentes y revisión: OK');
+const expanded=extractBill([
+  'CGE\nNombre / Razón social: CLIENTE DE EJEMPLO\nDirección del servicio CALLE PRUEBA 250\nPUENTE ALTO',
+  'Comuna: Puente Alto Región: RM\nMonto a pagar CLP $ 120 000',
+  'Correo del cliente: prueba@example.com\nTeléfono del cliente: +56 9 1111 2222',
+  'Consumo mensual: 400 kWh\nDías facturados: 30',
+]);
+assert.equal(expanded.values.name,'CLIENTE DE EJEMPLO');
+assert.equal(expanded.values.address,'CALLE PRUEBA 250');
+assert.equal(expanded.values.commune,'Puente Alto');
+assert.equal(expanded.values.region,'Metropolitana de Santiago');
+assert.equal(expanded.values.bill,'120000');
+assert.equal(expanded.values.email,'prueba@example.com');
+assert.equal(expanded.values.phone,'+56 9 1111 2222');
+assert.equal(extractBill(['Cliente: 123456789']).values.name,undefined,'Account numbers are not customer names');

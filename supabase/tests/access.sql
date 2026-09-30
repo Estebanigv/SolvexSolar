@@ -10,7 +10,7 @@ where id in (current_setting('test.admin')::uuid,current_setting('test.seller_a'
 set local role authenticated;
 select set_config('request.jwt.claim.sub',current_setting('test.seller_a'),true);
 do $$
-declare saved jsonb; rev integer; existing_count integer;
+declare saved jsonb; rev integer; existing_count integer; slot integer;
 begin
   select revision into rev from public.workspace_config;
   if rev is null then raise exception 'Seller cannot read catalog'; end if;
@@ -18,6 +18,15 @@ begin
   perform set_config('test.client_a',saved->>'clientId',true);
   perform set_config('test.quote_a',saved->>'id',true);
   insert into storage.objects(bucket_id,name,owner_id) values('boletas',auth.uid()::text||'/'||(saved->>'id')||'/frente',auth.uid()::text);
+  insert into storage.objects(bucket_id,name,owner_id) values('boletas',auth.uid()::text||'/'||(saved->>'id')||'/reverso',auth.uid()::text);
+  for slot in 3..8 loop
+    insert into storage.objects(bucket_id,name,owner_id) values('boletas',auth.uid()::text||'/'||(saved->>'id')||'/documento-'||slot,auth.uid()::text);
+  end loop;
+  begin
+    insert into storage.objects(bucket_id,name,owner_id) values('boletas',auth.uid()::text||'/'||(saved->>'id')||'/documento-9',auth.uid()::text);
+    raise exception 'Ninth bill slot accepted';
+  exception when insufficient_privilege then null;
+  end;
   begin
     insert into storage.objects(bucket_id,name,owner_id) values('boletas',auth.uid()::text||'/'||(saved->>'id')||'/tercero',auth.uid()::text);
     raise exception 'Extra bill slot accepted';

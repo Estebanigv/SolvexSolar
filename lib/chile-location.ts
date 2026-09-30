@@ -8,6 +8,10 @@ export function regionMatches(text:string,region:string){
   const key=locationKey(text).replace(/^region\s+(?:de\s+|del\s+)?/,'');
   return key===locationKey(region)||(region==='Metropolitana de Santiago'&&['rm','metropolitana','xiii'].includes(key));
 }
+export const chileRegions=[...new Set(territories.map(place=>place.region))].sort((a,b)=>a.localeCompare(b,'es'));
+export function communesForRegion(region:string){
+  return territories.filter(place=>regionMatches(region,place.region)).map(place=>place.commune).sort((a,b)=>a.localeCompare(b,'es'));
+}
 export function locationFromAddress(address:string){
   // Only match the final municipality in a customer address, not arbitrary mentions of cities.
   const clean=address.trim().replace(/[,.\s]+$/,'');
