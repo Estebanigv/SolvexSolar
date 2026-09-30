@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
-import {proposalReadingSections,proposalSentences} from '../lib/proposal-document';
+import {proposalLines,proposalEquipment,proposalReadingSections,proposalSentences} from '../lib/proposal-document';
 import {customerTerms} from '../lib/commercial';
-import {newQuote,initialSettings,initialProducts,calculate,type SavedQuote} from '../lib/quote';
+import {newQuote,initialSettings,initialProducts,calculate,quoteSchema,type SavedQuote} from '../lib/quote';
 const input={...newQuote(),notes:'Incluye paneles de 5.5 kWp. Excluye obras civiles. Sujeto a visita técnica. Condición especial acordada con el cliente.'};
 const settings={...initialSettings,warranty:'1 año de garantía de instalación: reparación sin costo.\nGarantía del fabricante: 15 años para paneles fotovoltaicos. Servicio postventa: soporte según contrato. La garantía de baterías se confirmará por modelo. Condición particular de cobertura.',terms:'Precios con IVA incluidos. Vigencia de la oferta: 10 días. Formas de pago: transferencia. Anticipo 20%, entrega 80%. Incluye los equipos y cantidades detallados en esta propuesta. Baterías y otros equipos solo cuando figuran en el detalle. Traslados especiales se cobran aparte. El alcance se acuerda tras la visita técnica. Descuento especial de 2.5%.'};
 const quote:SavedQuote={id:'layout-check',folio:'CHECK',date:'2026-09-29T12:00:00Z',input,settings,calculation:calculate(input,initialProducts,settings)};
@@ -20,3 +20,21 @@ const empty=proposalReadingSections({...quote,settings:{...settings,warranty:'',
 assert.ok(empty.warranty[0].items[0].includes('pendientes'));
 assert.ok(empty.scope[0].items[0].includes('pendiente'));
 console.log('Propuesta: cláusulas completas, agrupación, decimales, condiciones personalizadas y detalle oculto: OK');
+
+const hiddenId='0-35';
+assert.ok(quote.calculation.lines.some(line=>line.id===hiddenId));
+const selectiveInput={...input,hiddenLineIds:[hiddenId]};
+const reopened=quoteSchema.parse(JSON.parse(JSON.stringify(selectiveInput)));
+assert.deepEqual(reopened.hiddenLineIds,[hiddenId],'La selección se conserva al guardar y reabrir');
+const selectiveQuote={...quote,input:reopened};
+assert.ok(!proposalLines(selectiveQuote).some(line=>line.id===hiddenId));
+assert.equal(proposalLines(selectiveQuote).length,quote.calculation.lines.length-1);
+assert.deepEqual(calculate(reopened,initialProducts,settings),quote.calculation,'Ocultar un ítem no cambia importes ni validaciones');
+assert.deepEqual(proposalLines({...selectiveQuote,input:{...reopened,showItemDetails:false}}),[],'El control global prevalece');
+assert.deepEqual(proposalLines({...selectiveQuote,input:{...reopened,hiddenLineIds:[]}}),quote.calculation.lines,'Volver a marcar restaura el detalle');
+assert.deepEqual(proposalLines(quote),quote.calculation.lines,'Las cotizaciones anteriores mantienen todos sus ítems');
+assert.equal(quoteSchema.safeParse({...input,hiddenLineIds:[42]}).success,false);
+assert.ok(!proposalEquipment({...quote,input:{...input,hiddenLineIds:['0-10']}}).some(row=>row.label==='Paneles solares'));
+assert.ok(customerTerms(reopened,settings).includes('configuración cotizada'));
+assert.equal(JSON.stringify(quote),before,'No se modifica el cálculo ni la cotización original');
+console.log('Detalle por ítem: persistencia, compatibilidad, importes y restauración: OK');

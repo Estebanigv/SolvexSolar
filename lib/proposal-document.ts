@@ -3,11 +3,22 @@ import {customerTerms} from './commercial';
 
 export const proposalImages={roof:'/proposal/solar-roof.jpg',home:'/proposal/solar-home.jpg'};
 
+// Visibility only affects the customer document; the saved calculation remains intact.
+export function proposalLines(q:SavedQuote){
+ if(q.input.showItemDetails===false)return [];
+ const hidden=new Set(q.input.hiddenLineIds??[]);
+ return q.calculation.lines.filter(line=>!hidden.has(line.id));
+}
+export function hasHiddenProposalLines(q:SavedQuote){
+ return q.input.showItemDetails!==false&&proposalLines(q).length<q.calculation.lines.length;
+}
+export const partialDetailNote='El total incluye todos los equipos y servicios de la configuración cotizada, también los que no se desglosan en este documento.';
+
 export function proposalEquipment(q:SavedQuote){
  if(q.input.showItemDetails===false)return [];
  const groups=[{label:'Paneles solares',match:(category:string)=>category.includes('PANEL FOTOVOLTAICO')},{label:'Inversor',match:(category:string)=>category.includes('INVERSOR')},{label:'Almacenamiento',match:(category:string)=>category.includes('BATER')}];
- const rows=groups.flatMap(group=>{const selected=q.calculation.lines.filter(l=>group.match(l.category));return selected.length?[{label:group.label,value:selected.map(l=>`${l.qty.toLocaleString('es-CL')} × ${l.name}`).join(' · ')}]:[]});
- if(q.calculation.lines.some(l=>l.id==='installation'))rows.push({label:'Instalación',value:'Servicio considerado en esta propuesta'});
+ const rows=groups.flatMap(group=>{const selected=proposalLines(q).filter(l=>group.match(l.category));return selected.length?[{label:group.label,value:selected.map(l=>`${l.qty.toLocaleString('es-CL')} × ${l.name}`).join(' · ')}]:[]});
+ if(proposalLines(q).some(l=>l.id==='installation'))rows.push({label:'Instalación',value:'Servicio considerado en esta propuesta'});
  return rows;
 }
 

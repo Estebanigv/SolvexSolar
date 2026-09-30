@@ -1,0 +1,10 @@
+.additional-services{margin-top:20px}
+.additional-services-help{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px;background:#edf4eb;border:1px solid #d1dfc8;border-radius:10px;margin-bottom:18px}
+.additional-services-help strong{font-size:16px;color:#123e46}.additional-services-help p{font-size:14px;line-height:1.6;margin:5px 0 0;color:#42605e}.additional-services-help>span{font-size:13px;font-weight:650;white-space:nowrap;color:#365431}
+.additional-services-head,.additional-service{display:grid;grid-template-columns:minmax(0,1fr) 100px 175px;align-items:center;gap:22px}
+.additional-services-head{padding:12px 0;color:#476570;font-size:12px;font-weight:650;border-bottom:1px solid #c8dadd}.additional-service{padding:17px 0;border-bottom:1px solid #dce6e8}
+.additional-service-name{min-width:0;overflow-wrap:anywhere}.additional-service-name strong{font-size:15px;line-height:1.5;color:#123e46}.additional-service-name p{font-size:13px;margin:4px 0 0;color:#496c77}
+.additional-service-quantity{min-width:0;display:block}.additional-service-quantity>span{display:none}.additional-service-quantity input{width:100%;min-height:44px}
+.additional-service-visibility{display:flex;flex-direction:row;align-items:center;gap:10px;min-height:44px;font-size:13px;line-height:1.5;cursor:pointer}.additional-service-visibility [data-slot=checkbox]{flex-shrink:0;width:20px;height:20px}.additional-service-visibility:has([disabled]){cursor:default;color:#657d83}
+.additional-services-notice{display:flex;align-items:center;gap:16px;margin-bottom:16px;padding:14px;background:#fcf6e6;border-radius:8px}.additional-services-notice p{font-size:14px;line-height:1.6}
+@media(max-width:640px){.additional-services-help,.additional-services-notice{align-items:flex-start;flex-direction:column;gap:10px}.additional-services-head{display:none}.additional-service{grid-template-columns:minmax(0,1fr) 92px;gap:10px 16px}.additional-service-quantity>span{display:block;font-size:12px;margin-bottom:5px}.additional-service-visibility{grid-column:1/-1}}

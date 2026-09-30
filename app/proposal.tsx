@@ -2,7 +2,7 @@ import type {SavedQuote} from '@/lib/quote';
 import {money,systemNames} from '@/lib/quote';
 import {assignedAdviser,netbillingScope,paymentBreakdown,preliminaryNote,proposalTitle} from '@/lib/commercial';
 import {consumptionSummary} from '@/lib/energy';
-import {proposalEquipment,proposalImages,proposalWarranties,proposalReadingSections} from '@/lib/proposal-document';
+import {proposalLines,hasHiddenProposalLines,partialDetailNote,proposalEquipment,proposalImages,proposalWarranties,proposalReadingSections} from '@/lib/proposal-document';
 import {UserRound,Phone,Mail,MapPin,CalendarDays,Sun,Zap,ShieldCheck} from 'lucide-react';
 
 export function Proposal({q}:{q:SavedQuote}){
@@ -28,7 +28,8 @@ export function Proposal({q}:{q:SavedQuote}){
   <section className="proposal-sheet">
    <header className="proposal-section-title"><p>{q.folio}</p><h2>Inversión y alcance</h2><p>Equipos, servicios y condiciones de pago de tu propuesta.</p></header>
    <div className="proposal-sheet-content">
-    {input.showItemDetails!==false&&<section className="proposal-items"><h3>Tu proyecto incluye</h3><table><thead><tr><th>Equipo o servicio</th><th>Cantidad</th><th>Importe</th></tr></thead><tbody>{c.lines.map(l=><tr key={l.id}><td>{l.name}</td><td>{l.qty.toLocaleString('es-CL')} <small>{l.unit}</small></td><td>{l.total===null?'Pendiente':money(l.total)}</td></tr>)}</tbody></table></section>}
+    {proposalLines(q).length>0&&<section className="proposal-items"><h3>Tu proyecto incluye</h3><table><thead><tr><th>Equipo o servicio</th><th>Cantidad</th><th>Importe</th></tr></thead><tbody>{proposalLines(q).map(l=><tr key={l.id}><td>{l.name}</td><td>{l.qty.toLocaleString('es-CL')} <small>{l.unit}</small></td><td>{l.total===null?'Pendiente':money(l.total)}</td></tr>)}</tbody></table></section>}
+    {hasHiddenProposalLines(q)&&<p className="proposal-detail-note">{partialDetailNote}</p>}
     <section className="proposal-costs"><div><h3>Resumen de inversión</h3><p>Vigencia de {settings.validDays} días desde la emisión.</p>{c.tax===null&&<p>IVA pendiente de confirmar.</p>}</div><dl><div><dt>Subtotal</dt><dd>{money(c.subtotal)}</dd></div><div><dt>Descuento</dt><dd>{money(c.discount)}</dd></div>{c.tax!==null&&<><div><dt>Neto</dt><dd>{money(c.net)}</dd></div><div><dt>IVA ({settings.taxRate}%)</dt><dd>{money(c.tax)}</dd></div></>}<div className="proposal-cost-total"><dt>{c.complete?'Total':'Subtotal parcial'}</dt><dd>{money(c.total)}</dd></div></dl></section>
     <section className="proposal-payments"><h3>Forma de pago</h3><p>{input.payment}</p>{payments.length>0&&<div>{payments.map((row,index)=><div key={row.label}><span>{index+1}</span><div><p>{row.label}</p><small>{row.percent}% del total</small></div><strong>{money(row.amount)}</strong></div>)}</div>}</section>
     {c.warnings.length>0&&<section className="proposal-pending"><h3>Propuesta en revisión</h3><ul>{c.warnings.map(w=><li key={w}>{w}</li>)}</ul></section>}

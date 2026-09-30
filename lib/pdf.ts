@@ -1,7 +1,7 @@
 import {BlendMode,PDFDocument,StandardFonts,rgb,pushGraphicsState,popGraphicsState,rectangle,clip,endPath,type PDFImage} from 'pdf-lib';
 import {assignedAdviser,paymentBreakdown,netbillingScope,preliminaryNote,proposalTitle} from './commercial';
 import {consumptionSummary} from './energy';
-import {proposalEquipment,proposalWarranties,proposalReadingSections,type ProposalTextBlock} from './proposal-document';
+import {proposalLines,hasHiddenProposalLines,partialDetailNote,proposalEquipment,proposalWarranties,proposalReadingSections,type ProposalTextBlock} from './proposal-document';
 import type {SavedQuote} from './quote';
 import {money,systemNames} from './quote';
 
@@ -49,11 +49,12 @@ export async function quotePdf(q:SavedQuote,logoBytes?:ArrayBuffer,photos:Propos
  const consumption=consumptionSummary(q.input.energy);
  if(consumption&&q.input.energy){space(104);heading('Consumo de referencia');const values=[['Boleta informada',money(q.input.customer.bill)],['Consumo del período',q.input.energy.consumptionKwh?.toLocaleString('es-CL')+' kWh'],['Período facturado',q.input.energy.billingDays+' días']];values.forEach(([label,value],i)=>{const x=M+i*(factWidth+14);draw(label,x,y-8,8,false,muted);draw(value,x,y-29,17,true)});y-=41;text([q.input.energy.distributor,q.input.energy.tariff,q.input.energy.billReviewed?'Revisado con la boleta':'Pendiente de revisión'].filter(Boolean).join(' · '),8);text(`Equivalente a 30 días: ${consumption.equivalent30DaysKwh.toLocaleString('es-CL',{maximumFractionDigits:1})} kWh. No representa una proyección anual.`,8);}
  newPage('Inversión y pagos');title('Inversión y alcance','Equipos, servicios y condiciones de pago de tu propuesta.');
- if(q.input.showItemDetails!==false){
+ if(proposalLines(q).length){
   const tableHeader=()=>{box(M,y,CW,23);draw('Equipo o servicio',M+7,y-15,8,true,muted);draw('Cantidad',363,y-15,8,true,muted);right('Importe',R-7,y-15,8,true,muted);y-=23};
   heading('Tu proyecto incluye');tableHeader();
-  for(const item of q.calculation.lines){const name=wrap(item.name,9,306,true),quantity=wrap(`${item.qty.toLocaleString('es-CL')} ${item.unit}`,8,73),height=Math.max(name.length*13.5,quantity.length*12.5)+9;if(y-height<57){newPage();heading('Tu proyecto incluye · continuación');tableHeader()}name.forEach((row,i)=>draw(row,M+7,y-15-i*13.5,9,true));quantity.forEach((row,i)=>draw(row,363,y-15-i*12.5,8,false,muted));const amount=item.total===null?'Pendiente':money(item.total);right(amount,R-7,y-15,fitted(amount,9,97,false));y-=height;line(y)}
+  for(const item of proposalLines(q)){const name=wrap(item.name,9,306,true),quantity=wrap(`${item.qty.toLocaleString('es-CL')} ${item.unit}`,8,73),height=Math.max(name.length*13.5,quantity.length*12.5)+9;if(y-height<57){newPage();heading('Tu proyecto incluye · continuación');tableHeader()}name.forEach((row,i)=>draw(row,M+7,y-15-i*13.5,9,true));quantity.forEach((row,i)=>draw(row,363,y-15-i*12.5,8,false,muted));const amount=item.total===null?'Pendiente':money(item.total);right(amount,R-7,y-15,fitted(amount,9,97,false));y-=height;line(y)}
  }
+ if(hasHiddenProposalLines(q)){y-=12;text(partialDetailNote,9);}
  const c=q.calculation;
  space(132);y-=12;line(y);y-=20;draw('Resumen de inversión',M,y,12,true);block(`Vigencia de ${q.settings.validDays} días desde la emisión.`,M,y-14,226,9);if(c.tax===null)block('IVA pendiente de confirmar.',M,y-43,220,9);
  const rows=[['Subtotal',money(c.subtotal)],['Descuento',money(c.discount)],...(c.tax===null?[]:[['Neto',money(c.net)],[`IVA (${q.settings.taxRate}%)`,money(c.tax)]])];for(const [label,value] of rows){draw(label,328,y,9,false,muted);right(value,R,y,9);y-=13}y-=7;line(y,328);y-=22;draw(c.complete?'Total':'Subtotal parcial',328,y,10,true);right(money(c.total),R,y-1,fitted(money(c.total),22,155),true,teal);y-=15;line(y);y-=4;
