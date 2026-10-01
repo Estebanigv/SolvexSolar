@@ -127,3 +127,15 @@
  .proposal-brochure .proposal-reading-block ul,.proposal-brochure .proposal-reading-block p,.proposal-brochure .proposal-technical-note p{font-size:10px;line-height:1.6}
  .proposal-brochure .proposal-commercial-list>.proposal-reading-block{padding:14px 0;grid-template-columns:140px 1fr;gap:18px}
 }
+.proposal-brochure .proposal-project-includes{margin-bottom:26px}
+.proposal-brochure .proposal-project-includes>h3{font-size:29px;letter-spacing:-.7px;margin:0 0 22px}
+.proposal-brochure .proposal-project-equipment{display:grid;gap:0}
+.proposal-brochure .proposal-project-equipment-row{display:flex;gap:18px;padding:22px 0;border-bottom:1px solid #dce6e5;break-inside:avoid}
+.proposal-brochure .proposal-project-equipment-row:first-child{padding-top:0}
+.proposal-brochure .proposal-project-equipment-icon{color:#6a8b21;padding-top:3px;flex-shrink:0}
+.proposal-brochure .proposal-project-equipment-row h4{color:#325d36;font-size:20px;font-weight:800;line-height:1.4;letter-spacing:-.35px;margin:0 0 9px}
+.proposal-brochure .proposal-project-model{color:#163d47;font-size:15px;font-weight:650;line-height:1.65;margin:0 0 5px}
+.proposal-brochure .proposal-project-note,.proposal-brochure .proposal-validity{color:#49656c;font-size:13px;line-height:1.6;margin:0}
+.proposal-brochure .proposal-validity{margin:0 0 26px}
+@media screen and (max-width:600px){.proposal-brochure .proposal-project-equipment-row{gap:12px}.proposal-brochure .proposal-project-equipment-row h4{font-size:18px}.proposal-brochure .proposal-project-includes>h3{font-size:25px}}
+@media print{.proposal-brochure .proposal-project-equipment-row h4{font-size:16px}.proposal-brochure .proposal-project-model{font-size:12px}.proposal-brochure .proposal-project-note,.proposal-brochure .proposal-validity{font-size:10px}}

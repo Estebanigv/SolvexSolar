@@ -15,10 +15,14 @@ export function hasHiddenProposalLines(q:SavedQuote){
 export const partialDetailNote='El total incluye todos los equipos y servicios de la configuración cotizada, también los que no se desglosan en este documento.';
 
 export function proposalEquipment(q:SavedQuote){
- if(q.input.showItemDetails===false)return [];
- const groups=[{label:'Paneles solares',match:(category:string)=>category.includes('PANEL FOTOVOLTAICO')},{label:'Inversor',match:(category:string)=>category.includes('INVERSOR')},{label:'Almacenamiento',match:(category:string)=>category.includes('BATER')}];
- const rows=groups.flatMap(group=>{const selected=proposalLines(q).filter(l=>group.match(l.category));return selected.length?[{label:group.label,value:selected.map(l=>`${l.qty.toLocaleString('es-CL')} × ${l.name}`).join(' · ')}]:[]});
- if(proposalLines(q).some(l=>l.id==='installation'))rows.push({label:'Instalación',value:'Servicio considerado en esta propuesta'});
+ // The customer summary always describes the actual saved equipment. Legacy
+ // item visibility controls must never reintroduce cost breakdowns into it.
+ const {calculation:c,input}=q;
+ const panels=c.lines.filter(l=>l.category==='PANEL FOTOVOLTAICO');
+ const rows:{label:string;value:string;note:string;kind:'panels'|'inverter'|'battery'}[]=[];
+ if(panels.length)rows.push({kind:'panels',label:`${c.panels.toLocaleString('es-CL')} ${c.panels===1?'panel solar':'paneles solares'} · Potencia total ${c.kwp.toLocaleString('es-CL',{maximumFractionDigits:3})} kWp`,value:panels.map(l=>`${l.qty.toLocaleString('es-CL')} × ${l.name}`).join(' · '),note:'Certificado SEC'});
+ for(const line of c.lines.filter(l=>l.category.includes('INVERSOR')))rows.push({kind:'inverter',label:`${line.qty.toLocaleString('es-CL')} ${line.qty===1?'inversor':'inversores'} ${input.system==='OFF GRID'?'Off Grid':input.system.includes('HIBRIDO')?'híbrido':'On Grid'}`,value:line.name,note:input.system==='OFF GRID'?'Sistema independiente de la red eléctrica':'Permite Netbilling'});
+ for(const line of c.lines.filter(l=>l.category.includes('BATER')))rows.push({kind:'battery',label:`${line.qty.toLocaleString('es-CL')} ${line.qty===1?'batería':'baterías'}${/litio/i.test(line.name)?' de litio':''}`,value:line.name,note:'Almacenamiento de energía'});
  return rows;
 }
 

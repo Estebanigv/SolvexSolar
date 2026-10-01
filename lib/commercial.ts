@@ -32,12 +32,10 @@ export function roiReference(q:QuoteInput, c:Calculation, settings:Settings){
 }
 
 // Retire the previous template's execution-time clause without changing payment dates or warranties.
-export function customerTerms(q:QuoteInput, settings:Settings){
+export function customerTerms(_q:QuoteInput, settings:Settings){
   let terms=settings.terms.replace(/El alcance y los plazos de ejecución se acuerdan tras la visita técnica\./gi,'El alcance se acuerda tras la visita técnica.');
-  if(q.showItemDetails===false||q.hiddenLineIds?.length){
-    terms=terms.replace('los equipos y cantidades detallados en esta propuesta','los equipos y cantidades de la configuración cotizada')
+  terms=terms.replace('los equipos y cantidades detallados en esta propuesta','los equipos y cantidades de la configuración cotizada')
       .replace('cuando figuran en el detalle','cuando forman parte de la configuración cotizada');
-  }
   return terms;
 }
 

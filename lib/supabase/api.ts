@@ -1,5 +1,5 @@
 import {z} from 'zod';
-import {calculate,installationSchema,productSchema,quoteSchema,settingsSchema} from '@/lib/quote';
+import {calculate,panelQuantities,isInstallation,installationSchema,productSchema,quoteSchema,settingsSchema} from '@/lib/quote';
 import {AccessError,requireMember,checkOrigin,databaseError,privateHeaders} from './server';
 const reply=(data:unknown,status=200)=>Response.json(data,{status,headers:privateHeaders});
 export async function protectedApi(run:()=>Promise<Response>){
@@ -16,6 +16,8 @@ export async function workspacePut(request:Request){return protectedApi(async()=
   checkOrigin(request);const {db}=await requireMember(true);
   const body=z.object({revision:z.number().int().positive(),products:z.array(productSchema).min(1).max(1000),settings:settingsSchema}).parse(await request.json());
   if(new Set(body.products.map(p=>p.id)).size!==body.products.length)throw new AccessError('Hay códigos de producto duplicados.',400);
+  const installationSystems=body.products.filter(isInstallation).map(p=>p.system);
+  if(new Set(installationSystems).size!==installationSystems.length)throw new AccessError('Debe existir una sola tarifa de instalación por sistema.',400);
   const {data,error}=await db.rpc('save_workspace',{expected_revision:body.revision,new_products:body.products,new_settings:body.settings});
   if(error)databaseError(error);return reply({revision:data});
 })}
@@ -33,6 +35,7 @@ export async function quotesPost(request:Request){return protectedApi(async()=>{
   if(config.error)databaseError(config.error);
   if(config.data!.revision!==body.revision)throw new AccessError('El catálogo cambió. Recarga antes de guardar.',409);
   const products=z.array(productSchema).parse(config.data!.products),settings=settingsSchema.parse(config.data!.settings);
+  body.input.quantities=panelQuantities(body.input,products);
   const id=crypto.randomUUID(),date=new Date().toISOString(),folio=`SVX-${date.slice(0,4)}-${id.slice(0,8).toUpperCase()}`;
   let projectId=id;
   if(body.sourceQuoteId){const parent=await db.from('quotes').select('project_id,client_id').eq('id',body.sourceQuoteId).is('deleted_at',null).maybeSingle();if(parent.error)databaseError(parent.error);if(!parent.data||parent.data.client_id!==body.clientId)throw new AccessError('La revisión debe pertenecer al mismo cliente y a una propuesta activa.',409);projectId=parent.data.project_id}

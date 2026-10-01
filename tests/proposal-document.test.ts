@@ -34,7 +34,7 @@ assert.deepEqual(proposalLines({...selectiveQuote,input:{...reopened,showItemDet
 assert.deepEqual(proposalLines({...selectiveQuote,input:{...reopened,hiddenLineIds:[]}}),quote.calculation.lines,'Volver a marcar restaura el detalle');
 assert.deepEqual(proposalLines(quote),quote.calculation.lines,'Las cotizaciones anteriores mantienen todos sus ítems');
 assert.equal(quoteSchema.safeParse({...input,hiddenLineIds:[42]}).success,false);
-assert.ok(!proposalEquipment({...quote,input:{...input,hiddenLineIds:['0-10']}}).some(row=>row.label==='Paneles solares'));
+assert.ok(proposalEquipment({...quote,input:{...input,hiddenLineIds:['0-10']}}).some(row=>row.kind==='panels'),'El nuevo resumen siempre informa los equipos cotizados');
 assert.ok(customerTerms(reopened,settings).includes('configuración cotizada'));
 assert.equal(JSON.stringify(quote),before,'No se modifica el cálculo ni la cotización original');
 console.log('Detalle por ítem: persistencia, compatibilidad, importes y restauración: OK');

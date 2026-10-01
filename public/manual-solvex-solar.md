@@ -24,15 +24,15 @@ Versión de revisión local: 29 de septiembre de 2026. La disponibilidad depende
 
 ## Equipos, instalación y precios
 
-1. Selecciona el sistema, equipos, cantidades e instalación. Revisa los adicionales y descuentos. El catálogo recibido ya incluye margen comercial: el sistema no calcula utilidad real.
+1. Selecciona el sistema y los equipos. La cantidad de paneles multiplica los precios unitarios de paneles, estructura, material del techo e instalación. Revisa los adicionales y descuentos. El catálogo recibido ya incluye margen comercial: el sistema no calcula utilidad real.
 2. En Equipos y precios, pulsa Editar para actualizar nombre, sistema, categoría, unidad, potencia o precio. Pulsa Aplicar cambios y después Guardar catálogo. Cambiar cantidades o descuentos de una propuesta no cambia los precios maestros.
-3. Para un importe manual de instalación, escribe el motivo. Las fichas técnicas y compatibilidad de los modelos deben validarse antes de aprobar la propuesta final.
+3. El importe manual de instalación reemplaza el total y requiere un motivo; no se multiplica nuevamente por paneles. Las fichas técnicas y compatibilidad de los modelos deben validarse antes de aprobar la propuesta final.
 4. No se incluyen plazos de instalación ni la dirección física de la empresa en el documento del cliente.
 
 ## Revisión, crédito verde y documento
 
 1. Revisa las etapas anteriores y asigna el comercial responsable. Una precotización está sujeta a visita; la cotización final requiere revisión técnica.
-2. Activa o desactiva Mostrar detalle de equipos y servicios según lo acordado con el cliente. El total no cambia.
+2. El documento del cliente resume paneles, potencia total, modelos de inversor y baterías seleccionadas. Los precios por partida y el desglose de inversión permanecen en el cotizador interno.
 3. Revisa la observación de crédito verde. Puedes editarla o excluirla. Es acompañamiento para gestionar financiamiento con una entidad financiera, no un medio de pago ni crédito otorgado por Solvex.
 4. Guarda una versión en el historial y revisa su PDF. El documento conserva los datos comerciales de esa versión; las cotizaciones anteriores no se modifican al editar el catálogo.
 5. Descarga el PDF, imprime o utiliza Compartir/WhatsApp. Según el navegador, tendrás que adjuntar el archivo manualmente. En correo también debes adjuntar el PDF. Abrir una aplicación no confirma el envío.
@@ -59,7 +59,7 @@ Usar registros de prueba autorizados. Completar una copia por integrante; anotar
 - [ ] Cargar una boleta de prueba y confirmar cliente, región, comuna, monto, kWh, días y distribuidora.
 - [ ] Probar el ingreso manual sin boleta y revisar la ubicación del proyecto.
 - [ ] Cotizar equipos e instalación; comprobar descuentos y totales.
-- [ ] Guardar y descargar dos propuestas: una con detalle y otra sin detalle; revisar crédito verde y garantías.
+- [ ] Guardar y descargar propuestas On Grid y con baterías; revisar modelos, potencia, crédito verde y garantías.
 - [ ] Compartir el PDF por WhatsApp/correo y comprobar el archivo adjunto; registrar el envío en el historial.
 - [ ] Revisar el resumen mensual y la actividad por responsable.
 - [ ] Corregir un cliente de prueba, enviarlo a papelera y restaurarlo.

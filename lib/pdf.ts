@@ -1,7 +1,7 @@
 import {BlendMode,PDFDocument,StandardFonts,rgb,pushGraphicsState,popGraphicsState,rectangle,clip,endPath,type PDFImage} from 'pdf-lib';
 import {assignedAdviser,paymentBreakdown,netbillingScope,preliminaryNote,proposalTitle} from './commercial';
 import {consumptionSummary} from './energy';
-import {proposalLines,hasHiddenProposalLines,partialDetailNote,proposalEquipment,proposalWarranties,proposalReadingSections,type ProposalTextBlock} from './proposal-document';
+import {proposalEquipment,proposalWarranties,proposalReadingSections,type ProposalTextBlock} from './proposal-document';
 import type {SavedQuote} from './quote';
 import {money,systemNames} from './quote';
 
@@ -45,19 +45,22 @@ export async function quotePdf(q:SavedQuote,logoBytes?:ArrayBuffer,photos:Propos
  draw(q.calculation.complete?'Inversión total':'Subtotal parcial',M+15,y-18,9,false,light);draw(money(q.calculation.total),M+15,y-47,fitted(money(q.calculation.total),26,half-30),true,white);draw(q.calculation.tax===null?'IVA pendiente · CLP':'Valor final con IVA · CLP',M+15,y-64,8,false,light);
  draw('Potencia del sistema',M+half+27,y-18,9,false,ink);draw(q.calculation.kwp.toLocaleString('es-CL',{maximumFractionDigits:3})+' kWp',M+half+27,y-47,25,true);draw(q.calculation.panels+' paneles',M+half+27,y-64,8,false,ink);y-=87;
  const equipment=proposalEquipment(q);
- for(let i=0;i<equipment.length;i+=2){const pair=equipment.slice(i,i+2);const height=Math.max(...pair.map(item=>wrap(item.value,9,half-24,true).length*13.5))+30;space(height+8);pair.forEach((item,j)=>{const x=M+j*(half+12);page.drawRectangle({x,y:y-height,width:half,height,borderColor:rule,borderWidth:.6});draw(item.label,x+12,y-14,8,false,muted);block(item.value,x+12,y-20,half-24,9,true,ink)});y-=height+8}
  const consumption=consumptionSummary(q.input.energy);
  if(consumption&&q.input.energy){space(104);heading('Consumo de referencia');const values=[['Boleta informada',money(q.input.customer.bill)],['Consumo del período',q.input.energy.consumptionKwh?.toLocaleString('es-CL')+' kWh'],['Período facturado',q.input.energy.billingDays+' días']];values.forEach(([label,value],i)=>{const x=M+i*(factWidth+14);draw(label,x,y-8,8,false,muted);draw(value,x,y-29,17,true)});y-=41;text([q.input.energy.distributor,q.input.energy.tariff,q.input.energy.billReviewed?'Revisado con la boleta':'Pendiente de revisión'].filter(Boolean).join(' · '),8);text(`Equivalente a 30 días: ${consumption.equivalent30DaysKwh.toLocaleString('es-CL',{maximumFractionDigits:1})} kWh. No representa una proyección anual.`,8);}
- newPage('Inversión y pagos');title('Inversión y alcance','Equipos, servicios y condiciones de pago de tu propuesta.');
- if(proposalLines(q).length){
-  const tableHeader=()=>{box(M,y,CW,23);draw('Equipo o servicio',M+7,y-15,8,true,muted);draw('Cantidad',363,y-15,8,true,muted);right('Importe',R-7,y-15,8,true,muted);y-=23};
-  heading('Tu proyecto incluye');tableHeader();
-  for(const item of proposalLines(q)){const name=wrap(item.name,9,306,true),quantity=wrap(`${item.qty.toLocaleString('es-CL')} ${item.unit}`,8,73),height=Math.max(name.length*13.5,quantity.length*12.5)+9;if(y-height<57){newPage();heading('Tu proyecto incluye · continuación');tableHeader()}name.forEach((row,i)=>draw(row,M+7,y-15-i*13.5,9,true));quantity.forEach((row,i)=>draw(row,363,y-15-i*12.5,8,false,muted));const amount=item.total===null?'Pendiente':money(item.total);right(amount,R-7,y-15,fitted(amount,9,97,false));y-=height;line(y)}
+ newPage('Equipos y pagos');title('Equipos y alcance','Los equipos seleccionados para tu proyecto y su forma de pago.');
+ heading('Tu proyecto incluye');y-=5;
+ for(const item of equipment){
+  const width=CW-30;
+  const height=wrap(item.label,16,width,true).length*20.5+wrap(item.value,11,width,true).length*15.5+wrap(item.note,10,width).length*14.5+39;
+  space(height);page.drawRectangle({x:M,y:y-height+13,width:3,height:height-18,color:green});
+  let top=y-3;
+  top-=block(item.label,M+17,top,width,16,true,teal)+8;
+  top-=block(item.value,M+17,top,width,11,true,ink)+5;
+  block(item.note,M+17,top,width,10,false,muted);
+  y-=height;line(y);y-=16;
  }
- if(hasHiddenProposalLines(q)){y-=12;text(partialDetailNote,9);}
+ text(`Vigencia de ${q.settings.validDays} días desde la emisión.`,10);y-=10;
  const c=q.calculation;
- space(132);y-=12;line(y);y-=20;draw('Resumen de inversión',M,y,12,true);block(`Vigencia de ${q.settings.validDays} días desde la emisión.`,M,y-14,226,9);if(c.tax===null)block('IVA pendiente de confirmar.',M,y-43,220,9);
- const rows=[['Subtotal',money(c.subtotal)],['Descuento',money(c.discount)],...(c.tax===null?[]:[['Neto',money(c.net)],[`IVA (${q.settings.taxRate}%)`,money(c.tax)]])];for(const [label,value] of rows){draw(label,328,y,9,false,muted);right(value,R,y,9);y-=13}y-=7;line(y,328);y-=22;draw(c.complete?'Total':'Subtotal parcial',328,y,10,true);right(money(c.total),R,y-1,fitted(money(c.total),22,155),true,teal);y-=15;line(y);y-=4;
  const payments=paymentBreakdown(c.total,q.settings);const paymentHeight=payments.length?72:0;space(58+paymentHeight);heading('Forma de pago');text(q.input.payment,10,true);y-=10;
  for(let i=0;i<payments.length;i+=3){const group=payments.slice(i,i+3),col=(CW-20)/3;const height=Math.max(...group.map(row=>wrap(row.label,9,col-20,true).length*13.5))+54;space(height);group.forEach((row,j)=>{const x=M+j*(col+10);box(x,y,col,height,pale);block(row.label,x+10,y-10,col-20,9,true,ink);const labelHeight=wrap(row.label,9,col-20,true).length*13.5;draw(`${row.percent}% del total`,x+10,y-23-labelHeight,8,false,muted);draw(money(row.amount),x+10,y-height+12,fitted(money(row.amount),17,col-20),true,ink)});y-=height+10}
  if(c.warnings.length){heading('Propuesta en revisión');for(const warning of c.warnings)text('- '+warning,9,false,rgb(.46,.36,.16))}

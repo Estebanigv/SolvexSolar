@@ -1,0 +1,21 @@
+'use client';
+import {useState} from 'react';
+import {Proposal} from '../../proposal';
+import {calculate,initialSettings,newQuote,money,type Product,type QuoteInput} from '@/lib/quote';
+import {quotePdf} from '@/lib/pdf';
+const settings={...initialSettings,legal:'Solvex Solar SpA',validDays:10,taxMode:'included' as const,warranty:'Garantía del fabricante: 15 años para paneles fotovoltaicos y 5 años para inversores.\n1 año de garantía de instalación: cubre fallas técnicas y errores de montaje.',terms:'Precios con IVA incluidos. Vigencia de la oferta: 10 días. El alcance se acuerda tras la visita técnica.',paymentSchedule:[{label:'Anticipo',percent:20},{label:'Inicio de obras',percent:30},{label:'Entrega',percent:50}]};
+export default function Preview(){
+ const [system,setSystem]=useState<QuoteInput['system']>('HIBRIDO'),[panels,setPanels]=useState(8),[mobile,setMobile]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState('');
+ const products:Product[]=[
+  {id:'panel',system,name:'Panel fotovoltaico 585 W · Modelo de ejemplo',category:'PANEL FOTOVOLTAICO',watts:585,price:100000,unit:'panel',source:'Ejemplo'},
+  {id:'inverter',system,name:system==='OFF GRID'?'Voltronic 6,2 kW':system==='ON GRID'?'Solis 5 kW':'RENAC 8 kW · 48 V',category:'INVERSOR',watts:null,price:1000000,unit:'unidad',source:'Ejemplo'},
+  {id:'battery',system,name:'Batería de litio 9,6 kWh · 48 V · 200 Ah ROXON',category:'BATERÍA',watts:null,price:1000000,unit:'unidad',source:'Ejemplo'},
+  {id:'roof',system,name:'Material de techo',category:'MATERIAL DE TECHO',watts:null,price:10000,unit:'unidad',source:'Ejemplo'},
+  {id:'structure',system,name:'Estructura a piso',category:'TIPO DE ESTRUCTURA',watts:null,price:20000,unit:'unidad por confirmar',source:'Ejemplo'},
+  {id:'rate',system,name:'Servicio de instalación',category:'SERVICIO DE INSTALACIÓN',watts:null,price:50000,unit:'panel',source:'Ejemplo'},
+ ];
+ const input={...newQuote(),system,quantities:{panel:panels,inverter:1,battery:system==='ON GRID'?0:1,roof:1,structure:1},customer:{...newQuote().customer,name:'Cliente de ejemplo',email:'cliente@ejemplo.cl',phone:'+56 9 1234 5678',region:'Metropolitana de Santiago',commune:'Santiago'},notes:'Incluye los equipos indicados en esta propuesta. Sujeto a visita técnica.'};
+ const calculation=calculate(input,products,settings),q={id:'example',folio:'VISTA-DE-EJEMPLO',date:'2026-10-01T15:00:00Z',input,settings,calculation};
+ async function download(){setBusy(true);setError('');try{const get=(p:string)=>fetch(p).then(r=>r.arrayBuffer());const [logo,roof,home]=await Promise.all(['/logo.jpg','/proposal/solar-roof.jpg','/proposal/solar-home.jpg'].map(get));const bytes=await quotePdf(q,logo,{roof,home}),url=URL.createObjectURL(new Blob([bytes as BlobPart],{type:'application/pdf'}));const a=document.createElement('a');a.href=url;a.download='propuesta-ejemplo.pdf';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}catch{setError('No se pudo generar el PDF de ejemplo.')}finally{setBusy(false)}}
+ return <main style={{padding:24,maxWidth:1000,margin:'auto'}}><section className="card"><h1>Revisión local de la propuesta</h1><p>Datos y precios de prueba. No guarda cambios en la base de datos.</p><div className="field-grid"><label>Sistema<select value={system} onChange={e=>setSystem(e.target.value as QuoteInput['system'])}><option value="ON GRID">On Grid</option><option value="OFF GRID">Off Grid</option><option value="HIBRIDO">Híbrido</option></select></label><label>Paneles<input type="number" min={1} max={100} value={panels} onChange={e=>setPanels(Math.max(1,Number(e.target.value)))}/></label></div><p>Techo: {calculation.lines.find(l=>l.id==='roof')?.qty} paneles. Estructura: {calculation.lines.find(l=>l.id==='structure')?.qty} paneles. Instalación: {panels} × $50.000 = {money(calculation.lines.find(l=>l.id==='installation')!.total!)}.</p><button onClick={()=>setMobile(!mobile)}>{mobile?'Ver ancho completo':'Ver ancho de celular'}</button> <button disabled={busy} onClick={download}>{busy?'Generando PDF…':'Descargar PDF de ejemplo'}</button>{error&&<p role="alert">{error}</p>}</section><div style={{maxWidth:mobile?390:900,margin:'24px auto'}}><Proposal q={q}/></div></main>;
+}

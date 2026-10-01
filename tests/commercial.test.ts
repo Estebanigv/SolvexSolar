@@ -55,7 +55,7 @@ assert.equal(quoteSchema.parse({...q,showItemDetails:undefined}).showItemDetails
 assert.deepEqual(calculate(summaryQuote,initialProducts,settings),base,'Ocultar el detalle no altera importes ni validaciones');
 const termsSettings={...settings,terms:'Vigencia: 10 días. Incluye los equipos y cantidades detallados en esta propuesta. Baterías cuando figuran en el detalle. El alcance y los plazos de ejecución se acuerdan tras la visita técnica. Garantía: 1 año.'};
 assert.equal(customerTerms(summaryQuote,termsSettings),'Vigencia: 10 días. Incluye los equipos y cantidades de la configuración cotizada. Baterías cuando forman parte de la configuración cotizada. El alcance se acuerda tras la visita técnica. Garantía: 1 año.');
-assert.ok(customerTerms(q,termsSettings).includes('detallados en esta propuesta'));
+assert.ok(customerTerms(q,termsSettings).includes('configuración cotizada'),'El PDF siempre usa el resumen de equipos');
 assert.equal(termsSettings.terms.includes('plazos de ejecución'),true,'No modifica la configuración histórica');
 
 import {greenCreditNote} from '../lib/commercial';
