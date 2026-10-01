@@ -16,6 +16,7 @@ import "./management-dashboard.css";
 import "./catalog.css";
 import "./workspace-status.css";
 import "./panel-theme.css";
+import "./productivity.css";
 import "./proposal.css";
 import "./cne-reference.css";
 

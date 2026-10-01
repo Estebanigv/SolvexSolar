@@ -17,7 +17,7 @@ export const quoteSchema=z.object({financingNote:z.string().max(1000).optional()
 export type QuoteInput=z.infer<typeof quoteSchema>;
 export type Line={id:string;name:string;qty:number;unit:string;price:number|null;total:number|null;source:string;category:string};
 export type Calculation={lines:Line[];panelWatts?:number[];panels:number;kwp:number;subtotal:number;discount:number;net:number;tax:number|null;total:number;warnings:string[];complete:boolean;official:boolean};
-export type SavedQuote={id:string;clientId?:string;folio:string;date:string;input:QuoteInput;settings:Settings;calculation:Calculation};
+export type SavedQuote={id:string;clientId?:string;projectId?:string;parentQuoteId?:string|null;folio:string;date:string;input:QuoteInput;settings:Settings;calculation:Calculation};
 export const money=(n:number)=>new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(n);
 export function newQuote():QuoteInput{return {financingNote:greenCreditNote,showItemDetails:true,proposalType:'preliminary',discountPercent:0,system:'ON GRID',customer:{name:'',email:'',phone:'',region:'',commune:'',address:'',bill:0},quantities:{'0-10':8,'0-13':8,'0-26':1,'0-35':15,'0-37':15,'0-43':1,'0-45':1,'0-47':1},extra:0,extraLabel:'',discount:0,installationOverride:null,installationNote:'',payment:'Transferencia bancaria',notes:'',technicalReviewed:false}}
 export function calculate(input:QuoteInput,products:Product[],settings:Settings,installationRates:InstallationRates=installation):Calculation{

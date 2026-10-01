@@ -12,7 +12,7 @@ export async function validateBackupFiles(files:File[]){
 }
 
 /** A job owns an immutable file selection; retries never create another quote. */
-export async function backupBills(job:BillBackupJob,store:BillStore,onProgress:(count:number)=>void=()=>{}){
+export async function backupBills(job:BillBackupJob,store:BillStore,onProgress:(count:number)=>void|Promise<void>=()=>{}){
   const formats=await validateBackupFiles(job.files);
   for(let i=job.completed;i<job.files.length;i++){
     const path=`${job.ownerId}/${job.quoteId}/${billStorageName(i)}`;
@@ -30,6 +30,6 @@ export async function backupBills(job:BillBackupJob,store:BillStore,onProgress:(
       }catch{/* Keep the original upload failure. */}
       if(!matches)throw uploadError;
     }
-    job.completed=i+1;onProgress(job.completed);
+    job.completed=i+1;await onProgress(job.completed);
   }
 }

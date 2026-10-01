@@ -1,4 +1,6 @@
 'use client';
+import {MemberAccess} from './member-access';
+import {activityTime} from '@/lib/activity';
 import {ChangePasswordButton} from './change-password';
 import {useEffect,useMemo,useState} from 'react';
 import {Search,ShieldCheck,Users,RefreshCw,Mail,LockKeyhole,UserRoundCheck,PauseCircle,Palette,Check} from 'lucide-react';
@@ -7,7 +9,7 @@ import {Dialog,DialogContent,DialogHeader,DialogTitle,DialogDescription} from '@
 import {memberColors,memberColor,memberColorStyle,type MemberColor} from '@/lib/member-color';
 import {toast} from 'sonner';
 
-export type TeamMember={id:string;email:string;full_name:string;role:'admin'|'sales'|'pending'|'disabled';created_at?:string;identification_color?:MemberColor|null};
+export type TeamMember={id:string;email:string;full_name:string;role:'admin'|'sales'|'pending'|'disabled';last_login?:string|null;last_activity?:string|null;created_at?:string;identification_color?:MemberColor|null};
 export type TeamSource={load:(signal:AbortSignal)=>Promise<TeamMember[]>;setRole:(id:string,role:'admin'|'disabled')=>Promise<void>;setColor:(color:MemberColor|null)=>Promise<MemberColor|null>};
 async function json<T>(response:Response){const data=await response.json() as T&{error?:string};if(!response.ok)throw Error(data.error||'No se pudo actualizar el acceso.');return data;}
 const teamSource:TeamSource={
@@ -36,14 +38,14 @@ export function Members({currentId,dataSource=teamSource,onColorChange,preview=f
   function open(member:TeamMember,role:'admin'|'disabled'){setChange({member,role});setSaveError('');}
   async function confirm(){if(!change||change.member.id===currentId)return;setSaving(true);setSaveError('');try{await dataSource.setRole(change.member.id,change.role);setMembers(old=>old.map(m=>m.id===change.member.id?{...m,role:change.role}:m));setChange(null);toast.success(change.role==='admin'?'Acceso de administrador habilitado.':'Acceso suspendido.');}catch(e){setSaveError((e as Error).message);}finally{setSaving(false);}}
   return <section className="team-directory" aria-label="Usuarios del equipo">
-    <header className="team-heading"><div className="team-emblem" aria-hidden="true"><Users size={25}/></div><div><h2>Equipo de administración</h2><p>Las personas detrás de cada proyecto de Solvex Solar.</p></div><Button variant="outline" disabled={loading} onClick={()=>setRefresh(n=>n+1)}><RefreshCw size={16}/><span>Actualizar</span></Button></header>
+    <header className="team-heading"><div className="team-emblem" aria-hidden="true"><Users size={25}/></div><div><h2>Equipo de administración</h2><p>Las personas detrás de cada proyecto de Solvex Solar.</p></div>{!preview&&<MemberAccess members={members}/>}<Button variant="outline" disabled={loading} onClick={()=>setRefresh(n=>n+1)}><RefreshCw size={16}/><span>Actualizar</span></Button></header>
     <div className="team-scope"><ShieldCheck size={19} aria-hidden="true"/><p><strong>Un equipo, acceso completo.</strong> Los administradores pueden editar precios y gestionar clientes, cotizaciones y accesos.</p></div>
     <div className="team-tools"><div className="team-filters" aria-label="Filtrar usuarios por estado">{([['all','Todos'],['active','Activos'],['pending','Pendientes'],['suspended','Suspendidos']] as const).map(([value,label])=><button type="button" key={value} aria-pressed={filter===value} onClick={()=>setFilter(value)}>{label}<span>{counts[value]}</span></button>)}</div><label className="team-search"><Search size={17} aria-hidden="true"/><input aria-label="Buscar usuario" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar por nombre o correo"/></label></div>
     {error?<div className="team-error" role="alert">{error}<Button variant="outline" onClick={()=>setRefresh(n=>n+1)}>Reintentar</Button></div>:loading?<div className="team-empty" role="status">Cargando el equipo…</div>:<>
       <div className="team-column-head" aria-hidden="true"><span>Integrante</span><span>Acceso</span><span>Estado</span><span>Gestión</span></div>
       <div className="team-list">{visible.map(m=>{const state=accessState(m),self=m.id===currentId;return <article className="team-member" key={m.id} data-self={self}>
         <div className="team-identity"><div className="team-avatar team-person-color" style={memberColorStyle(m.identification_color,m.id)} data-state={state} aria-hidden="true">{initials(m)}</div><div><div className="team-name"><h3>{m.full_name.trim()||'Nombre por completar'}</h3>{self&&<span className="team-you">Tú</span>}</div><p className="team-email"><Mail size={13} aria-hidden="true"/><span title={m.email}>{m.email}</span></p>{m.created_at&&<small>En el equipo desde {new Intl.DateTimeFormat('es-CL',{day:'numeric',month:'short',year:'numeric'}).format(new Date(m.created_at))}</small>}</div></div>
-        <div className="team-role"><span><ShieldCheck size={14} aria-hidden="true"/>{m.role==='admin'?'Administrador':m.role==='sales'?'Ejecutivo':'Sin acceso activo'}</span><small>{m.role==='admin'?'Gestión completa':m.role==='sales'?'Cartera propia':'Requiere autorización'}</small></div>
+        <div className="team-role"><span><ShieldCheck size={14} aria-hidden="true"/>{m.role==='admin'?'Administrador':m.role==='sales'?'Ejecutivo':'Sin acceso activo'}</span><small>{m.role==='admin'?'Gestión completa':m.role==='sales'?'Cartera propia':'Requiere autorización'}</small><small>Último acceso: {m.last_login?activityTime(m.last_login):'Sin registro'}</small><small>Última modificación: {m.last_activity?activityTime(m.last_activity):'Sin registro'}</small></div>
         <span className="team-status" data-state={state}><i aria-hidden="true"/>{stateNames[state]}</span>
         <div className="team-actions">{self?<div className="team-own-actions"><span className="team-current"><LockKeyhole size={14} aria-hidden="true"/>Tu sesión actual</span>{m.role==='admin'&&<Button variant="outline" onClick={editColor}><Palette size={15}/>Cambiar mi color</Button>}<ChangePasswordButton preview={preview}/></div>:<>{m.role!=='admin'&&<Button variant="outline" onClick={()=>open(m,'admin')}><UserRoundCheck size={15}/>{state==='suspended'?'Reactivar acceso':state==='pending'?'Autorizar acceso':'Hacer administrador'}</Button>}{state==='active'&&<Button variant="ghost" className="team-suspend" onClick={()=>open(m,'disabled')}><PauseCircle size={15}/>Suspender acceso</Button>}</>}</div>
       </article>;})}</div>

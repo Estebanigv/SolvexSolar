@@ -1,8 +1,10 @@
+import type {Followup} from './followup';
 import {z} from 'zod';
 import {memberColors} from './member-color';
 import type {SavedQuote} from './quote';
 
 export type HistoryQuote=SavedQuote&{
+  followup?:Followup|null;
   owner?:{id:string;name:string;identification_color?:string|null};
   responsibleColor?:string|null;
   sentOn?:string|null;

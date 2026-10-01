@@ -1,5 +1,6 @@
 "use client";
 import {useEffect,useRef,useState} from 'react';
+import {readRecovery,writeRecovery} from '@/lib/local-recovery';
 import {Button} from '@/components/ui/button';
 import {toast} from 'sonner';
 import {LogOut,FileText,ExternalLink} from 'lucide-react';
@@ -22,22 +23,25 @@ export function ClientPicker({customer,clientId,onSelect,onSave,refresh=0,onMana
   return <section className="client-picker"><label htmlFor="existing-client"><strong>Cliente nuevo o registrado</strong></label><select id="existing-client" value={clientId??''} onChange={e=>onSelect(clients.find(c=>c.id===e.target.value)??null)}><option value="">Nuevo cliente</option>{clientId&&!clients.some(c=>c.id===clientId)&&<option value={clientId}>Cliente de esta cotización</option>}{clients.map(client=><option key={client.id} value={client.id}>{client.details.name}{client.details.email?` · ${client.details.email}`:''}</option>)}</select><p>Guardar una cotización también guarda los datos del cliente. Puedes guardarlos ahora, aunque aún no tengas la propuesta.</p><Button variant="outline" onClick={save} disabled={busy||!customer.name.trim()}>{clientId?'Actualizar cliente':'Guardar cliente'}</Button>{onManage&&<Button variant="ghost" onClick={onManage}>Ver y administrar clientes</Button>}{error&&<p role="alert">{error} <button onClick={load}>Reintentar</button></p>}</section>;
 }
 export {Members} from './members';
-export function useQuoteBillBackup(){
+export function useQuoteBillBackup(ownerId?:string){
   const [job,setJob]=useState<BillBackupJob|null>(null),[busy,setBusy]=useState(false),[error,setError]=useState('');
   const running=useRef(false);
+  useEffect(()=>{if(!ownerId)return;let cancelled=false;readRecovery<BillBackupJob>('backup:'+ownerId).then(saved=>{if(!cancelled&&saved&&saved.ownerId===ownerId&&saved.completed<saved.files.length&&!running.current)setJob(saved)}).catch(()=>setError('No se pudo consultar el respaldo pendiente de este dispositivo.'));return()=>{cancelled=true}},[ownerId]);
   const pending=!!job&&job.completed<job.files.length;
   useEffect(()=>{if(!pending)return;const warn=(event:BeforeUnloadEvent)=>{event.preventDefault();event.returnValue=''};window.addEventListener('beforeunload',warn);return()=>window.removeEventListener('beforeunload',warn)},[pending]);
   async function run(target:BillBackupJob){
     if(running.current)return false;
     running.current=true;setBusy(true);setError('');setJob({...target});
     try{
+      let localAvailable=true;try{await writeRecovery('backup:'+target.ownerId,target)}catch{localAvailable=false;setError('El navegador no permite conservar archivos locales. Mantén la página abierta hasta completar el respaldo.')}
       const bucket=browserDatabase().storage.from('boletas');
       await backupBills(target,{
         upload:async(path,file,mime)=>{const {error}=await bucket.upload(path,file,{contentType:mime,upsert:false});if(error)throw error},
         download:async path=>{const {data,error}=await bucket.download(path);if(error||!data)throw error??Error('Archivo no disponible');return data},
-      },completed=>setJob({...target,completed}));
+      },async completed=>{setJob({...target,completed});if(localAvailable)await writeRecovery('backup:'+target.ownerId,{...target,completed})});
+      if(localAvailable)await writeRecovery('backup:'+target.ownerId,undefined);setError('');
       return true;
-    }catch{setError('La cotización está guardada, pero el respaldo quedó incompleto. Revisa la conexión y reintenta aquí antes de cerrar esta página.');return false}
+    }catch{setError('La cotización está guardada, pero el respaldo quedó incompleto. Revisa la conexión y reintenta. Si el navegador permitió guardar los archivos, recuperarás este respaldo al volver desde este dispositivo.');return false}
     finally{running.current=false;setBusy(false)}
   }
   return {job,busy,error,pending,validate:validateBackupFiles,

@@ -21,7 +21,7 @@ async function run() {
   const unreviewed = {...q, proposalType: 'final' as const, technicalReviewed: false};
   assert.equal(workflowReadiness(unreviewed, initialProducts, calculate(q, initialProducts, initialSettings)).customer, true, 'Customer data can be completed before the final technical review');
   assert.equal(workflowReadiness(unreviewed, initialProducts, calculate(q, initialProducts, initialSettings)).review, false);
-  assert.equal(workflowReadiness({...q, energy: {...bill, billReviewed: false}}, initialProducts, calculate(q, initialProducts, initialSettings)).customer, false);
+  assert.equal(workflowReadiness({...q, proposalType:'final', energy: {...bill, billReviewed: false}}, initialProducts, calculate(q, initialProducts, initialSettings)).customer, false);
   assert.ok(calculate({...q, energy: undefined}, initialProducts, initialSettings).warnings.some(w => w.includes('kWh')));
 
   const input = {latitude:'-33.45',longitude:'-70.66',peakPower:'4.4',tilt:'30',azimuth:'180',loss:'14'};
