@@ -40,3 +40,27 @@ export function monthCells(month:string){
 }
 export function shiftMonth(month:string,amount:number){const [y,m]=month.split('-').map(Number);return new Date(Date.UTC(y,m-1+amount,1)).toISOString().slice(0,7);}
 export function monthLabel(month:string){return new Intl.DateTimeFormat('es-CL',{month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(month+'-01T12:00:00Z'));}
+
+export type CalendarBasis='created'|'sent';
+export function calendarDate(quote:HistoryQuote,basis:CalendarBasis){return basis==='sent'?quote.sentOn??null:chileDate(quote.date);}
+// Find the first instant of the local date, including Chile's daylight-saving changes.
+export function chileMonthRange(month:string){
+  function start(date:string){
+    const formatter=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Santiago',year:'numeric',month:'2-digit',day:'2-digit'});
+    const utc=Date.parse(date+'T00:00:00Z');let low=utc-86400000,high=utc+86400000;
+    while(low<high){const mid=Math.floor((low+high)/2);if(formatter.format(new Date(mid))<date)low=mid+1;else high=mid;}
+    return new Date(low).toISOString();
+  }
+  return {start:start(month+'-01'),end:start(shiftMonth(month,1)+'-01')};
+}
+export function calendarDays(quotes:HistoryQuote[],basis:CalendarBasis){
+  const days=new Map<string,{total:number;people:Map<string,{id:string;name:string;count:number;quote:HistoryQuote}>}>();
+  for(const quote of quotes){
+    if(quote.deletedAt)continue;
+    const date=calendarDate(quote,basis);if(!date)continue;
+    const day=days.get(date)??{total:0,people:new Map()},person=responsible(quote);
+    const entry=day.people.get(person.id)??{...person,count:0,quote};
+    entry.count++;day.total++;day.people.set(person.id,entry);days.set(date,day);
+  }
+  return days;
+}

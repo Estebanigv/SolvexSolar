@@ -9,7 +9,7 @@
 .qh-filters select{border:1px solid #d0dfe4;border-radius:8px;background:white;min-height:44px;padding:8px 28px 8px 12px;font-size:12px;max-width:100%}
 .qh-month{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:24px 28px 12px}.qh-month h3{font-size:23px;font-weight:700;letter-spacing:-.5px;text-transform:none}.qh-month p{font-size:12px;color:#6b838b;margin-top:3px}.qh-month>div:last-child{display:flex;align-items:center;gap:5px}.qh-month button{min-height:42px;min-width:42px;display:grid;place-items:center;padding:8px;font-size:12px;border:1px solid #d3e0e4;border-radius:8px;cursor:pointer;background:#fff}.qh-month button:hover{background:#edf4f4}
 .qh-note{font-size:12px;line-height:1.65;color:#617c85;margin:16px 28px}.qh-calendar{margin:18px 28px 24px;border:1px solid #d7e3e7;border-radius:10px;overflow:hidden}.qh-week,.qh-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}.qh-week{background:#f0f5f6;font-size:11px;color:#5b737d;text-align:center}.qh-week span{padding:10px}.qh-days{gap:1px;background:#dce6ea}.qh-day{display:flex;flex-direction:column;align-items:stretch;gap:4px;min-height:114px;padding:8px;background:white;text-align:left;cursor:pointer;min-width:0}.qh-day:hover{background:#f4f8f4}.qh-day[aria-pressed=true]{background:#edf4dd;box-shadow:inset 0 0 0 2px #799b33}.qh-day-blank{background:#f6f8f9;cursor:default}.qh-day-number{font-size:12px;font-weight:600;display:grid;place-items:center;width:26px;height:26px;margin-bottom:3px}.qh-day[data-today=true] .qh-day-number{background:#123f4b;color:white;border-radius:50%}.qh-day small{font-size:10px;color:#657b83}.qh-day-count{display:none}
-.qh-person,.qh-event{--person-fg:#12634e;--person-bg:#e3f2ea;--person-dot:#298460;color:var(--person-fg);background:var(--person-bg)}
+.qh-person,.qh-event,.qh-person-count{--person-fg:#12634e;--person-bg:#e3f2ea;--person-dot:#298460;color:var(--person-fg);background:var(--person-bg)}
 .quote-history [data-color="1"]{--person-fg:#235d9a;--person-bg:#e7effb;--person-dot:#3777bd}.quote-history [data-color="2"]{--person-fg:#794ba0;--person-bg:#f2eafa;--person-dot:#9160b8}.quote-history [data-color="3"]{--person-fg:#95631b;--person-bg:#fcf1da;--person-dot:#b08232}.quote-history [data-color="4"]{--person-fg:#9c4969;--person-bg:#f9e9ef;--person-dot:#bd6082}.quote-history [data-color="5"]{--person-fg:#247180;--person-bg:#e3f3f5;--person-dot:#3595a5}
 .qh-person{display:inline-flex;align-items:center;gap:7px;padding:6px 9px;border-radius:6px;font-size:11px;font-weight:650;width:fit-content;max-width:100%;overflow-wrap:anywhere}.qh-person i,.qh-event i{width:6px;height:6px;background:var(--person-dot);border-radius:50%;flex-shrink:0}.qh-event{display:flex;align-items:center;gap:5px;padding:4px;border-radius:4px;font-size:10px;line-height:1.35;min-width:0}.qh-event>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .qh-results{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:22px 28px 12px}.qh-results h3{font-size:14px;font-weight:650}.qh-results>span{font-size:11px;color:#6c838d}.qh-results button{margin-left:12px;text-decoration:underline;color:#255e6e;cursor:pointer}
@@ -30,3 +30,19 @@
 .qh-attachments .bill-file-link span{flex:1}
 .qh-attachments .bill-file-link:hover{background:#dfeee7;border-color:#5c9684}
 .qh-attachments .bill-file-link:focus-visible{outline:3px solid #8fac42;outline-offset:2px}
+/* Calendar: responsible person and count remain readable at every screen size. */
+.qh-calendar-controls{display:flex;gap:8px;flex-wrap:wrap;margin:8px 28px 0}
+.qh-calendar-controls button{padding:10px 16px;border:1px solid #b9cfd3;border-radius:8px;min-height:44px;font-size:15px;font-weight:650;color:#234e59;background:#fff;cursor:pointer}
+.qh-calendar-controls button[aria-pressed=true]{color:#fff;background:#12634e;border-color:#12634e}
+.qh-calendar-scroll{overflow-x:auto;margin:18px 28px 24px;border:1px solid #c5d9de;border-radius:12px}
+.qh-calendar-counts{margin:0;border:0;border-radius:0;min-width:840px}
+.qh-calendar-counts .qh-week{font-size:14px;font-weight:650;color:#315966}
+.qh-calendar-counts .qh-day{min-height:130px;gap:7px;padding:10px}
+.qh-day-heading{display:flex;align-items:center;justify-content:space-between;gap:4px}
+.qh-calendar-counts .qh-day-number{font-size:15px;width:30px;height:30px}
+.qh-day-total{font-size:12px;color:#456572;font-weight:600;white-space:nowrap}
+.qh-person-count{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:7px 8px;border-radius:7px;min-width:0;border-left:3px solid var(--person-dot);font-size:13px;line-height:1.35;font-weight:600}
+.qh-person-count>span{min-width:0;overflow-wrap:anywhere}
+.qh-person-count strong{display:grid;place-items:center;min-width:25px;height:25px;padding:0 5px;border-radius:999px;background:var(--person-fg);color:#fff;font-size:13px;flex-shrink:0;font-variant-numeric:tabular-nums}
+.workspace .qh-month p{font-size:15px;color:#456572}
+@media(max-width:640px){.qh-calendar-scroll{margin:16px 12px}.qh-calendar-controls{margin:8px 18px 0}.qh-calendar-controls button{font-size:14px}.qh-month{flex-wrap:wrap}}

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {chileDate,monthCells,shiftMonth,historyActionSchema,personColor,responsible} from '../lib/quote-history';
+import {chileDate,monthCells,shiftMonth,historyActionSchema,personColor,responsible,calendarDate,calendarDays,chileMonthRange} from '../lib/quote-history';
 import {newQuote,initialSettings,initialProducts,calculate} from '../lib/quote';
 assert.equal(monthCells('2024-02').filter(Boolean).length,29);
 assert.equal(monthCells('2025-02').filter(Boolean).length,28);
@@ -19,3 +19,20 @@ assert.ok(personColor('owner:dev')>=0&&personColor('owner:dev')<6);
 console.log('Historial: calendario, fechas chilenas, responsables y acciones: OK');
 
 for(const sentOn of ['2026-2-3','January 1 2026','','2026-13-01'])assert.equal(historyActionSchema.safeParse({action:'send',sentOn,channel:'email'}).success,false);
+
+const created={...q,date:'2026-10-02T15:00:00Z',sentOn:null};
+assert.equal(calendarDate(created,'created'),'2026-10-02','Cotizaciones sin envío aparecen por fecha de creación');
+assert.equal(calendarDate(created,'sent'),null,'No inventar envíos');
+const calendar=calendarDays([created,{...created,id:'second'},{...created,id:'deleted',deletedAt:'2026-10-03'}, {...created,id:'other',owner:{id:'carol',name:'Carol'}}],'created');
+assert.equal(calendar.get('2026-10-02')?.total,3,'Excluir papelera');
+assert.equal(calendar.get('2026-10-02')?.people.get('owner:dev')?.count,2,'Globo agrupado por responsable');
+assert.equal(calendar.get('2026-10-02')?.people.get('owner:carol')?.count,1);
+assert.equal(calendarDays([created],'sent').size,0);
+assert.equal(calendarDays([{...created,sentOn:'2026-10-03'}],'sent').get('2026-10-03')?.total,1);
+assert.equal(calendarDate({...created,date:'2026-10-01T02:59:59Z'},'created'),'2026-09-30');
+assert.deepEqual(chileMonthRange('2026-10'),{start:'2026-10-01T03:00:00.000Z',end:'2026-11-01T03:00:00.000Z'});
+assert.deepEqual(chileMonthRange('2026-09'),{start:'2026-09-01T04:00:00.000Z',end:'2026-10-01T03:00:00.000Z'},'Límites del mes respetan el cambio de hora');
+assert.equal(chileMonthRange('2026-12').end,'2027-01-01T03:00:00.000Z');
+const many=calendarDays(Array.from({length:125},(_,i)=>({...created,id:'quote-'+i})),'created');
+assert.equal(many.get('2026-10-02')?.people.get('owner:dev')?.count,125);
+console.log('Calendario: creadas sin envío, contador por persona, papelera y límites de mes: OK');
