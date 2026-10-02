@@ -1,4 +1,5 @@
 import type {SavedQuote} from '@/lib/quote';
+import {ProposalProjection} from './proposal-projection';
 import {money,systemNames} from '@/lib/quote';
 import {assignedAdviser,netbillingScope,paymentBreakdown,preliminaryNote,proposalTitle} from '@/lib/commercial';
 import {consumptionSummary} from '@/lib/energy';
@@ -34,6 +35,7 @@ export function Proposal({q}:{q:SavedQuote}){
     {c.warnings.length>0&&<section className="proposal-pending"><h3>Propuesta en revisión</h3><ul>{c.warnings.map(w=><li key={w}>{w}</li>)}</ul></section>}
    </div>{footer('Equipos y pagos')}
   </section>
+  <ProposalProjection q={q}/>
   <section className="proposal-sheet">
    <div className="proposal-photo-band"><img src={proposalImages.home} alt="Vivienda con instalación fotovoltaica, imagen referencial"/><p>Imagen referencial</p></div>
    <div className="proposal-sheet-content">
@@ -47,7 +49,7 @@ export function Proposal({q}:{q:SavedQuote}){
     <div className="proposal-commercial-list">{reading.commercial.map(group=><section className="proposal-reading-block" key={group.title}><h4>{group.title}</h4><ul>{group.items.map((item,i)=><li key={i}>{item}</li>)}</ul></section>)}</div>
     {netbilling&&<section className="proposal-reading-block proposal-netbilling"><h4>Certificación y Netbilling</h4><p>{netbilling}</p></section>}
     {input.financingNote?.trim()&&<section className="proposal-terms"><h3>Acompañamiento financiero</h3><p>{input.financingNote}</p></section>}
-    <section className="proposal-contact"><div><h3>Conversemos sobre tu proyecto</h3><strong>{adviser?.name||settings.legal||settings.name}</strong><p>{[adviser?.email||settings.email,adviser?.phone||settings.phone].filter(Boolean).join(' · ')}</p></div><div>{adviser&&<strong>{settings.legal||settings.name}</strong>}{settings.rut&&<p>RUT: {settings.rut}</p>}{adviser&&adviser.email!==settings.email&&<p>{settings.email}</p>}</div></section>
+    <section className="proposal-contact"><div><h3>Conversemos sobre tu proyecto</h3><strong>{adviser?.name||settings.legal||settings.name}</strong><p>{[adviser?.email||settings.email,adviser?.phone||settings.phone].filter(Boolean).join(' · ')}</p></div><div>{adviser&&<strong>{settings.legal||settings.name}</strong>}{adviser&&adviser.email!==settings.email&&<p>{settings.email}</p>}</div></section>
     <p className="proposal-disclaimer">Las fotografías son referenciales y no representan la instalación cotizada. No se incluyen estimaciones de ahorro, generación o retorno sin parámetros técnicos validados.</p>
    </div>{footer('Condiciones comerciales')}
   </section>

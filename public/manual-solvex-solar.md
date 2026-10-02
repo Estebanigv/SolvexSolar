@@ -24,7 +24,7 @@ Versión de revisión local: 29 de septiembre de 2026. La disponibilidad depende
 
 ## Equipos, instalación y precios
 
-1. Selecciona el sistema y los equipos. La cantidad de paneles multiplica los precios unitarios de paneles, estructura, material del techo e instalación. Revisa los adicionales y descuentos. El catálogo recibido ya incluye margen comercial: el sistema no calcula utilidad real.
+1. Selecciona el sistema y los equipos. La cantidad de paneles multiplica los precios unitarios de paneles, estructura y material del techo. La instalación utiliza el total de la tabla Servicio Instalación para la cantidad de paneles, sin multiplicarlo. Revisa los adicionales y descuentos. El catálogo recibido ya incluye margen comercial: el sistema no calcula utilidad real.
 2. En Equipos y precios, pulsa Editar para actualizar nombre, sistema, categoría, unidad, potencia o precio. Pulsa Aplicar cambios y después Guardar catálogo. Cambiar cantidades o descuentos de una propuesta no cambia los precios maestros.
 3. El importe manual de instalación reemplaza el total y requiere un motivo; no se multiplica nuevamente por paneles. Las fichas técnicas y compatibilidad de los modelos deben validarse antes de aprobar la propuesta final.
 4. No se incluyen plazos de instalación ni la dirección física de la empresa en el documento del cliente.

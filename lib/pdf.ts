@@ -4,6 +4,7 @@ import {consumptionSummary} from './energy';
 import {proposalEquipment,proposalWarranties,proposalReadingSections,type ProposalTextBlock} from './proposal-document';
 import type {SavedQuote} from './quote';
 import {money,systemNames} from './quote';
+import {publishedProjection,projectionAssumptions} from './projection';
 
 type ProposalPhotos={roof?:ArrayBuffer;home?:ArrayBuffer};
 export async function quotePdf(q:SavedQuote,logoBytes?:ArrayBuffer,photos:ProposalPhotos={}){
@@ -64,6 +65,20 @@ export async function quotePdf(q:SavedQuote,logoBytes?:ArrayBuffer,photos:Propos
  const payments=paymentBreakdown(c.total,q.settings);const paymentHeight=payments.length?72:0;space(58+paymentHeight);heading('Forma de pago');text(q.input.payment,10,true);y-=10;
  for(let i=0;i<payments.length;i+=3){const group=payments.slice(i,i+3),col=(CW-20)/3;const height=Math.max(...group.map(row=>wrap(row.label,9,col-20,true).length*13.5))+54;space(height);group.forEach((row,j)=>{const x=M+j*(col+10);box(x,y,col,height,pale);block(row.label,x+10,y-10,col-20,9,true,ink);const labelHeight=wrap(row.label,9,col-20,true).length*13.5;draw(`${row.percent}% del total`,x+10,y-23-labelHeight,8,false,muted);draw(money(row.amount),x+10,y-height+12,fitted(money(row.amount),17,col-20),true,ink)});y-=height+10}
  if(c.warnings.length){heading('Propuesta en revisión');for(const warning of c.warnings)text('- '+warning,9,false,rgb(.46,.36,.16))}
+ const forecast=publishedProjection(q);
+ if(forecast){
+  newPage('Proyección y supuestos');title('El valor de tu energía','Escenario estimado, sujeto a los supuestos revisados del proyecto.');
+  const metrics=[['Ahorro mensual inicial',money(forecast.input.monthlySavings!)],['Recuperación estimada',forecast.payback!==null?forecast.payback.toLocaleString('es-CL',{maximumFractionDigits:1})+' años':'Fuera del horizonte'],['Balance neto a '+forecast.input.years+' años',money(forecast.net)]];
+  const col=(CW-20)/3;space(80);metrics.forEach(([label,value],i)=>{const x=M+i*(col+10);box(x,y,col,70,teal);draw(label,x+10,y-18,8,false,light);draw(value,x+10,y-45,fitted(value,19,col-20),true,lime)});y-=86;
+  text('Inversión total: '+money(c.total)+'. Ahorro del primer año después de costos: '+money(forecast.annual)+'.',10,true);y-=6;heading('Ahorro acumulado');text('Después de mantenciones y reposición; antes de descontar la inversión inicial de '+money(c.total)+'.',10);y-=15;
+  const max=Math.max(1,c.total,...forecast.rows.map(r=>r.cumulative));
+  for(const row of forecast.rows.filter(r=>r.year===1||r.year%5===0||r.year===forecast.input.years)){
+   space(35);draw('Año '+row.year,M,y-14,10,true);box(M+60,y-3,285,17,pale);if(row.cumulative>0)box(M+60,y-3,285*row.cumulative/max,17,teal);right(money(row.cumulative),R,y-15,10,true);y-=32;
+  }
+  y-=8;text('Ahorro acumulado: '+money(forecast.cumulative)+'. Balance después de inversión: '+money(forecast.net)+'.',10,true);
+  if(forecast.co2Tonnes!==null){heading('Impacto ambiental estimado');text(forecast.co2Tonnes.toLocaleString('es-CL',{maximumFractionDigits:2})+' t CO2 evitadas en el primer año',15,true,teal);text(forecast.input.avoidedKwh?.toLocaleString('es-CL')+' kWh sustituidos x '+forecast.input.emissionFactor+' kg CO2/kWh. Fuente: '+forecast.input.emissionSource,9)}
+  heading('Cómo se calculó');text(forecast.input.savingsSource,10);text(projectionAssumptions(forecast.input),9);y-=6;text('La recuperación es el primer cruce del ahorro acumulado con la inversión. Reposiciones posteriores pueden reducir el balance. El ahorro mensual inicial se expresa antes de costos.',9);
+ }
  const reading=proposalReadingSections(q);
  function bulletList(items:string[],x=M,width=CW,size=10){
   for(const item of items){const rows=wrap(item,size,width-13);space(Math.min(rows.length,2)*(size+4.5)+5);
@@ -96,7 +111,7 @@ export async function quotePdf(q:SavedQuote,logoBytes?:ArrayBuffer,photos:Propos
  const netbilling=netbillingScope(q.input,q.settings);
  if(netbilling){heading('Certificación y Netbilling');bulletList([netbilling])}
  if(q.input.financingNote?.trim()){heading('Acompañamiento financiero');bulletList([q.input.financingNote])}
- const adviser=assignedAdviser(q.input,q.settings);heading('Conversemos sobre tu proyecto');text(adviser?.name||q.settings.legal||q.settings.name,11,true,ink);text([adviser?.email||q.settings.email,adviser?.phone||q.settings.phone].filter(Boolean).join(' · '),9);y-=8;if(adviser)text(q.settings.legal||q.settings.name,9,true);if(q.settings.rut)text('RUT: '+q.settings.rut,9);if(adviser&&adviser.email!==q.settings.email)text(q.settings.email,9);y-=8;text('Las fotografías son referenciales y no representan la instalación cotizada. No se incluyen estimaciones de ahorro, generación o retorno sin parámetros técnicos validados.',8);
+ const adviser=assignedAdviser(q.input,q.settings);heading('Conversemos sobre tu proyecto');text(adviser?.name||q.settings.legal||q.settings.name,11,true,ink);text([adviser?.email||q.settings.email,adviser?.phone||q.settings.phone].filter(Boolean).join(' · '),9);y-=8;if(adviser)text(q.settings.legal||q.settings.name,9,true);if(adviser&&adviser.email!==q.settings.email)text(q.settings.email,9);y-=8;text('Las fotografías son referenciales y no representan la instalación cotizada. No se incluyen estimaciones de ahorro, generación o retorno sin parámetros técnicos validados.',8);
  const pages=pdf.getPages();pages.forEach((p,i)=>{page=p;line(42);draw(q.settings.name+' · '+sections[i],M,27,8,false,muted);right(`${q.folio} · ${i+1} / ${pages.length}`,R,27,8,false,muted)});
  return new Uint8Array(await pdf.save());
 }

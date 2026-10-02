@@ -1,4 +1,5 @@
 import raw from './catalog.json';
+import {projectionSchema} from './projection';
 import {z} from 'zod';
 import {adviserSchema,roiReferenceSchema,paymentScheduleSchema,greenCreditNote} from './commercial';
 import {energyInputSchema,consumptionSummary} from './energy';
@@ -13,7 +14,7 @@ export const installation:InstallationRates=raw.installation;
 export const settingsSchema=z.object({advisers:z.array(adviserSchema).max(50).optional(),roiReference:roiReferenceSchema.optional(),paymentSchedule:paymentScheduleSchema.optional(),netbillingTerms:z.string().max(2000).optional(),requirementsVersion:z.string().max(50).optional(),name:z.string().min(1).max(100),legal:z.string().max(150),rut:z.string().max(30),address:z.string().max(250),email:z.union([z.literal(''),z.string().email()]),phone:z.string().max(40),validDays:z.number().int().min(1).max(365),taxMode:z.enum(['pending','included','net']),taxRate:z.number().min(0).max(100),terms:z.string().max(5000),warranty:z.string().max(3000),approved:z.boolean()});
 export type Settings=z.infer<typeof settingsSchema>;
 export const initialSettings:Settings={name:'Solvex Solar',legal:'',rut:'',address:'',email:'contacto@solvexsolar.cl',phone:'',validDays:15,taxMode:'pending',taxRate:19,terms:'',warranty:'',approved:false};
-export const quoteSchema=z.object({financingNote:z.string().max(1000).optional(),showItemDetails:z.boolean().optional(),hiddenLineIds:z.array(z.string().min(1).max(60)).max(1000).optional(),proposalType:z.enum(['preliminary','final']).optional(),adviserId:z.string().max(80).optional(),discountPercent:z.number().int().min(0).max(30).optional(),energy:energyInputSchema.optional(),system:z.enum(systems),customer:z.object({name:z.string().max(150),email:z.union([z.literal(''),z.string().email()]),phone:z.string().max(40),region:z.string().max(100),commune:z.string().max(100),address:z.string().max(300),bill:z.number().finite().min(0).max(1e9)}),quantities:z.record(z.number().finite().min(0).max(100000)),extra:z.number().finite().min(0).max(1e10),extraLabel:z.string().max(300),discount:z.number().finite().min(0).max(1e10),installationOverride:z.number().finite().min(0).max(1e10).nullable(),installationNote:z.string().max(300),payment:z.string().min(1).max(100),notes:z.string().max(5000),technicalReviewed:z.boolean()});
+export const quoteSchema=z.object({projection:projectionSchema.optional(),financingNote:z.string().max(1000).optional(),showItemDetails:z.boolean().optional(),hiddenLineIds:z.array(z.string().min(1).max(60)).max(1000).optional(),proposalType:z.enum(['preliminary','final']).optional(),adviserId:z.string().max(80).optional(),discountPercent:z.number().int().min(0).max(30).optional(),energy:energyInputSchema.optional(),system:z.enum(systems),customer:z.object({name:z.string().max(150),email:z.union([z.literal(''),z.string().email()]),phone:z.string().max(40),region:z.string().max(100),commune:z.string().max(100),address:z.string().max(300),bill:z.number().finite().min(0).max(1e9)}),quantities:z.record(z.number().finite().min(0).max(100000)),extra:z.number().finite().min(0).max(1e10),extraLabel:z.string().max(300),discount:z.number().finite().min(0).max(1e10),installationOverride:z.number().finite().min(0).max(1e10).nullable(),installationNote:z.string().max(300),payment:z.string().min(1).max(100),notes:z.string().max(5000),technicalReviewed:z.boolean()});
 export type QuoteInput=z.infer<typeof quoteSchema>;
 export type Line={id:string;name:string;qty:number;unit:string;price:number|null;total:number|null;source:string;category:string};
 export type Calculation={lines:Line[];panelWatts?:number[];panels:number;kwp:number;subtotal:number;discount:number;net:number;tax:number|null;total:number;warnings:string[];complete:boolean;official:boolean};
@@ -44,18 +45,13 @@ export function calculate(input:QuoteInput,products:Product[],settings:Settings,
  if(!panels){complete=false;warnings.push('Selecciona al menos un panel.');}
  if(!selected.some(p=>p.category.includes('INVERSOR'))){complete=false;warnings.push('Selecciona un inversor.');}
  if(q.system==='OFF GRID'&&!selected.some(p=>p.category.includes('BATER'))){complete=false;warnings.push('Selecciona almacenamiento para el sistema Off Grid.');}
- const installProducts=products.filter(p=>p.system===q.system&&isInstallation(p));
- if(installProducts.length>1)throw Error('Debe existir una sola tarifa de instalación por sistema.');
- const unitInstall=installProducts[0];
  const install=installationRates.find(i=>i.panels===panels);
- const perPanel=q.installationOverride===null&&!!unitInstall;
- let installationPrice=q.installationOverride??(unitInstall?unitInstall.price:install?.price)??null;
+ let installationPrice=q.installationOverride??install?.price??null;
  if(q.installationOverride!==null&&!q.installationNote.trim()){complete=false;warnings.push('Indica el motivo del valor manual de instalación.');}
- if(installationPrice===null){complete=false;warnings.push(unitInstall?'Falta precio por panel del servicio de instalación.':`No existe tarifa de instalación para ${panels} paneles. Ingresa un valor validado.`);}
- // Catalog unit prices follow taxMode. Legacy table totals and manual totals
- // already include VAT; never add the workbook's tax or margin factor twice.
- if(installationPrice!==null&&settings.taxMode==='net'&&!perPanel)installationPrice/=1+settings.taxRate/100;
- lines.push({id:'installation',name:'Servicio de instalación',qty:perPanel?panels:1,unit:perPanel?'panel':'servicio',price:installationPrice,total:installationPrice===null?null:Math.round(installationPrice*(perPanel?panels:1)),source:q.installationOverride!==null?'Valor total manual: '+q.installationNote:unitInstall?.source||install?.source||'Sin tarifa',category:'INSTALACIÓN'});
+ if(installationPrice===null){complete=false;warnings.push(`No existe tarifa de instalación para ${panels} paneles. Ingresa un total validado.`);}
+ // The workbook table and exceptional totals already include VAT.
+ if(installationPrice!==null&&settings.taxMode==='net')installationPrice/=1+settings.taxRate/100;
+ lines.push({id:'installation',name:'Servicio de instalación',qty:1,unit:'servicio',price:installationPrice,total:installationPrice===null?null:Math.round(installationPrice),source:q.installationOverride!==null?'Valor total manual: '+q.installationNote:install?.source||'Sin tarifa',category:'INSTALACIÓN'});
  if(q.extra>0){lines.push({id:'extra',name:q.extraLabel||'Costos adicionales',qty:1,unit:'servicio',price:q.extra,total:Math.round(q.extra),source:'Ingreso del ejecutivo',category:'ADICIONALES'});if(!q.extraLabel.trim())warnings.push('Describe qué cubren los costos adicionales.');}
  const subtotal=lines.reduce((s,l)=>s+(l.total??0),0);
  if(q.discountPercent===undefined&&q.discount>subtotal){complete=false;warnings.push('El descuento supera el subtotal.');}

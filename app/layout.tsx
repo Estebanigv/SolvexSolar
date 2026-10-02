@@ -19,6 +19,7 @@ import "./panel-theme.css";
 import "./productivity.css";
 import "./proposal.css";
 import "./cne-reference.css";
+import "./projection.css";
 
 export const metadata: Metadata = {
   title: "Solvex Solar | Cotizador",
