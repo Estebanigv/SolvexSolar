@@ -32,11 +32,17 @@ export function roiReference(q:QuoteInput, c:Calculation, settings:Settings){
 }
 
 // Retire the previous template's execution-time clause without changing payment dates or warranties.
-export function customerTerms(_q:QuoteInput, settings:Settings){
-  let terms=settings.terms.replace(/El alcance y los plazos de ejecución se acuerdan tras la visita técnica\./gi,'El alcance se acuerda tras la visita técnica.');
+export function customerTerms(q:QuoteInput, settings:Settings){
+  let terms=q.documentTerms??settings.terms.replace(/Precios con IVA y margen comercial incluidos\.?/gi,'Valor incluye IVA.');
+  if(q.documentValidDays!==undefined)terms=terms.replace(/Vigencia(?: de la oferta)?\s*:\s*\d+\s*días\.?/gi,`Vigencia de la oferta: ${q.documentValidDays} días.`);
+  terms=terms.replace(/El alcance y los plazos de ejecución se acuerdan tras la visita técnica\./gi,'El alcance se acuerda tras la visita técnica.');
   terms=terms.replace('los equipos y cantidades detallados en esta propuesta','los equipos y cantidades de la configuración cotizada')
       .replace('cuando figuran en el detalle','cuando forman parte de la configuración cotizada');
   return terms;
+}
+
+export function customerDocumentSettings(q:QuoteInput,settings:Settings):Settings{
+ return {...settings,terms:customerTerms(q,settings),warranty:q.documentWarranty??settings.warranty,validDays:q.documentValidDays??settings.validDays};
 }
 
 export const greenCreditNote='Solvex Solar puede acompañarte en la gestión de alternativas de financiamiento verde con entidades financieras. Solvex Solar no otorga el crédito. La aprobación, tasas y condiciones dependen de la institución financiera correspondiente.';

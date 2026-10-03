@@ -2,12 +2,13 @@ import {documentTitle,isIssued} from '@/lib/quote-issuance';
 import type {SavedQuote} from '@/lib/quote';
 import {ProposalProjection} from './proposal-projection';
 import {money,systemNames} from '@/lib/quote';
-import {assignedAdviser,netbillingScope,paymentBreakdown,preliminaryNote} from '@/lib/commercial';
+import {customerDocumentSettings,assignedAdviser,netbillingScope,paymentBreakdown,preliminaryNote} from '@/lib/commercial';
 import {consumptionSummary} from '@/lib/energy';
 import {proposalEquipment,proposalImages,proposalWarranties,proposalReadingSections} from '@/lib/proposal-document';
 import {UserRound,Phone,Mail,MapPin,CalendarDays,Sun,Zap,BatteryCharging,ShieldCheck} from 'lucide-react';
 
 export function Proposal({q}:{q:SavedQuote}){
+ q={...q,settings:customerDocumentSettings(q.input,q.settings)};
  const {input,settings,calculation:c}=q;
  const adviser=assignedAdviser(input,settings),consumption=consumptionSummary(input.energy);
  const payments=paymentBreakdown(c.total,settings),netbilling=netbillingScope(input,settings);

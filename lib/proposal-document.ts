@@ -1,5 +1,5 @@
 import type {SavedQuote} from './quote';
-import {customerTerms} from './commercial';
+import {customerTerms,customerDocumentSettings} from './commercial';
 
 export const proposalImages={roof:'/proposal/solar-roof.jpg',home:'/proposal/solar-home.jpg'};
 
@@ -52,6 +52,7 @@ function groupedText(value:string,groups:{title:string;match:RegExp}[],fallback:
  return [...result,remaining].filter(g=>g.items.length);
 }
 export function proposalReadingSections(q:SavedQuote){
+ q={...q,settings:customerDocumentSettings(q.input,q.settings)};
  return {
   warranty:groupedText(q.settings.warranty||'Garantías por modelo e instalación pendientes de confirmar.',[
    {title:'Instalación',match:/^(?:\d+\s*años? de garantía de instalación|Garantía de instalación)/i},
@@ -65,7 +66,7 @@ export function proposalReadingSections(q:SavedQuote){
    {title:'Por validar',match:/^Sujeto a visita|^Sujeta a visita/i},
   ],'Alcance del proyecto'),
   commercial:groupedText(customerTerms(q.input,q.settings)||'Condiciones comerciales pendientes de aprobación.',[
-   {title:'Precio y vigencia',match:/^Precios\b|^Vigencia\b/i},
+   {title:'Precio y vigencia',match:/^Precios\b|^Valor\b|^Vigencia\b/i},
    {title:'Medios e hitos de pago',match:/^Formas de pago|^Anticipo\b/i},
    {title:'Equipos y servicio de instalación',match:/^Incluye\b/i},
    {title:'Adicionales y límites del alcance',match:/^Baterías y otros equipos|^Traslados\b/i},

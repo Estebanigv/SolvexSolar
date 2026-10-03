@@ -141,3 +141,5 @@
 @media print{.proposal-brochure .proposal-project-equipment-row h4{font-size:16px}.proposal-brochure .proposal-project-model{font-size:12px}.proposal-brochure .proposal-project-note,.proposal-brochure .proposal-validity{font-size:10px}}
 
 .quote-issue-panel{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:22px 24px;margin:8px 0 18px;background:#e8f2ed;border:1px solid #b5d1c4;border-radius:12px;color:#123f4b}.quote-issue-panel strong{font-size:18px}.quote-issue-panel p{margin:6px 0 0;line-height:1.5;font-size:15px}.quote-issue-panel button{flex-shrink:0}@media(max-width:700px){.quote-issue-panel{align-items:stretch;flex-direction:column}}
+
+.document-edit-fields{margin:24px 0;padding:22px;border:1px solid #b8cfd4;border-radius:12px;display:grid;gap:18px;background:#f5f9fa}.document-edit-fields legend{padding:0 8px;font-size:18px;font-weight:650;color:#123f4b}.document-edit-fields label{display:grid;gap:8px}.document-edit-fields textarea{font-size:16px;line-height:1.6}.document-edit-fields input{max-width:180px}.document-edit-fields button{justify-self:start}

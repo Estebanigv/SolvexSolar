@@ -1,12 +1,15 @@
 'use client';
+import {Input} from '@/components/ui/input';
+import {Button} from '@/components/ui/button';
 import {Textarea} from '@/components/ui/textarea';
 import {Checkbox} from '@/components/ui/checkbox';
 import {Select,SelectTrigger,SelectValue,SelectContent,SelectItem} from '@/components/ui/select';
 import {money,type QuoteInput,type Settings,type Calculation} from '@/lib/quote';
-import {assignedAdviser,paymentBreakdown,preliminaryNote,roiReference,greenCreditNote} from '@/lib/commercial';
+import {customerDocumentSettings,assignedAdviser,paymentBreakdown,preliminaryNote,roiReference,greenCreditNote} from '@/lib/commercial';
 
 export function CommercialFields({quote,settings,onChange}:{quote:QuoteInput;settings:Settings;onChange:(patch:Partial<QuoteInput>)=>void}){
  const adviser=assignedAdviser(quote,settings);
+ const document=customerDocumentSettings(quote,settings);
  const advisers=[...(settings.advisers??[])].sort((a,b)=>a.name.localeCompare(b.name,'es',{sensitivity:'base'}));
  return <section className="commercial-options"><h3>Etapa y responsable comercial</h3><div className="field-grid">
   <label>Tipo de propuesta<Select value={quote.proposalType??'final'} onValueChange={proposalType=>onChange({proposalType:proposalType as 'preliminary'|'final',technicalReviewed:false})}><SelectTrigger aria-label="Tipo de propuesta"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="preliminary">Precotización · antes de la visita</SelectItem><SelectItem value="final">Cotización final · después de la visita</SelectItem></SelectContent></Select></label>
@@ -14,6 +17,12 @@ export function CommercialFields({quote,settings,onChange}:{quote:QuoteInput;set
  </div>{adviser&&<p className="help-text">{adviser.email} · {adviser.phone}</p>}
  {quote.proposalType==='preliminary'?<p className="notice">{preliminaryNote}</p>:<label className="check-label"><Checkbox checked={quote.technicalReviewed} onCheckedChange={v=>onChange({technicalReviewed:v===true})}/>El comercial y el instalador revisaron modelos, compatibilidad, estructura y alcance tras la visita técnica.</label>}
  <h3>Documento para el cliente</h3><p className="help-text">La vista previa, impresión y PDF muestran los paneles y su potencia total, el modelo del inversor y las baterías seleccionadas. El precio final aparece en la portada. Los precios por ítem, subtotal, descuento, neto e IVA se consultan únicamente en el cotizador.</p>
+ <fieldset className="document-edit-fields"><legend>Textos y vigencia de esta cotización</legend><p className="help-text">Edita las condiciones y garantías que verá el cliente. Estos cambios se guardan con esta cotización y aparecen en la vista previa y el PDF. Para cambiar los valores predeterminados del equipo, usa Empresa.</p>
+ <label>Vigencia de la oferta (días)<Input type="number" min={1} max={365} step={1} value={document.validDays} onChange={e=>onChange({documentValidDays:Math.min(365,Math.max(1,Math.floor(Number(e.target.value)||1)))})}/></label>
+ <label>Condiciones para el cliente<Textarea rows={7} maxLength={5000} value={document.terms} onChange={e=>onChange({documentTerms:e.target.value})}/></label>
+ <label>Garantías para el cliente<Textarea rows={6} maxLength={3000} value={document.warranty} onChange={e=>onChange({documentWarranty:e.target.value})}/></label>
+ {(quote.documentTerms!==undefined||quote.documentWarranty!==undefined||quote.documentValidDays!==undefined)&&<Button type="button" variant="outline" onClick={()=>onChange({documentTerms:undefined,documentWarranty:undefined,documentValidDays:undefined})}>Restablecer textos y vigencia de Empresa</Button>}
+ </fieldset>
  <h3>Acompañamiento financiero</h3><label className="check-label"><Checkbox checked={!!quote.financingNote} onCheckedChange={checked=>onChange({financingNote:checked?greenCreditNote:''})}/>Incluir observación sobre crédito verde</label>{!!quote.financingNote&&<label>Observación para el cliente<Textarea aria-label="Observación de crédito verde" maxLength={1000} rows={4} value={quote.financingNote} onChange={e=>onChange({financingNote:e.target.value})}/></label>}<p className="help-text">Es una orientación comercial. No es un medio de pago ni una aprobación de crédito. Se incluye en la vista previa y el PDF de esta propuesta.</p>
  </section>;
 }

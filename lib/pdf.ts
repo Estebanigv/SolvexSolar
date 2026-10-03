@@ -1,6 +1,6 @@
 import {documentTitle,isIssued} from './quote-issuance';
 import {BlendMode,PDFDocument,StandardFonts,rgb,pushGraphicsState,popGraphicsState,rectangle,clip,endPath,type PDFImage} from 'pdf-lib';
-import {assignedAdviser,paymentBreakdown,netbillingScope,preliminaryNote} from './commercial';
+import {customerDocumentSettings,assignedAdviser,paymentBreakdown,netbillingScope,preliminaryNote} from './commercial';
 import {consumptionSummary} from './energy';
 import {proposalEquipment,proposalWarranties,proposalReadingSections,type ProposalTextBlock} from './proposal-document';
 import type {SavedQuote} from './quote';
@@ -9,6 +9,7 @@ import {publishedProjection,projectionAssumptions} from './projection';
 
 type ProposalPhotos={roof?:ArrayBuffer;home?:ArrayBuffer};
 export async function quotePdf(q:SavedQuote,logoBytes?:ArrayBuffer,photos:ProposalPhotos={}){
+ q={...q,settings:customerDocumentSettings(q.input,q.settings)};
  const pdf=await PDFDocument.create();pdf.setTitle(`${q.folio} - ${q.settings.name}`);pdf.setAuthor(q.settings.name);
  const regular=await pdf.embedFont(StandardFonts.Helvetica),bold=await pdf.embedFont(StandardFonts.HelveticaBold);
  const ink=rgb(.05,.20,.25),brand=rgb(.03,.17,.22),teal=rgb(.06,.25,.28),green=rgb(.69,.80,.24),muted=rgb(.34,.44,.48),rule=rgb(.84,.89,.90),pale=rgb(.94,.96,.93),white=rgb(1,1,1),light=rgb(.79,.86,.86),lime=rgb(.79,.86,.38);

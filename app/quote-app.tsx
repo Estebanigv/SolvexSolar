@@ -142,7 +142,7 @@ export default function QuoteApp(){
     })));
    }
    await bill.restore(files);
-   setSourceQuoteId(q.id);setClientId(q.clientId??null);update({...q.input,energy:q.input.energy});if(reconcileQuoteProducts(q.input,products)!==q.input)toast.warning('La nueva revisión excluye equipos retirados del catálogo. Revisa y selecciona sus reemplazos.');setConfirmed([]);setTab('quote');moveStep('customer');
+   setSourceQuoteId(q.id);setClientId(q.clientId??null);update({...q.input,energy:q.input.energy,documentTerms:q.input.documentTerms,documentWarranty:q.input.documentWarranty,documentValidDays:q.input.documentValidDays});if(reconcileQuoteProducts(q.input,products)!==q.input)toast.warning('La nueva revisión excluye equipos retirados del catálogo. Revisa y selecciona sus reemplazos.');setConfirmed([]);setTab('quote');moveStep('customer');
    toast.info('Copia preparada con los precios actuales'+(files.length?' y sus boletas.':'.')+' Revisa los cambios antes de guardar.');
   }catch(e){toast.error((e as Error).message)}finally{setBusy(false)}
  }
@@ -196,6 +196,6 @@ export default function QuoteApp(){
  {shareTarget&&<DocumentShare quote={shareTarget.quote} whatsapp={shareTarget.whatsapp} onClose={()=>setShareTarget(null)}/>}
  <Dialog open={!!preview} onOpenChange={open=>!open&&setPreview(null)}><DialogContent className="preview-dialog"><DialogHeader className="screen-only"><DialogTitle>Propuesta para el cliente</DialogTitle><DialogDescription>Descarga el PDF, imprímelo o prepara el archivo para compartirlo por WhatsApp. En correo, adjunta el PDF descargado.</DialogDescription></DialogHeader>{preview&&<><div className="screen-only">{actions(preview)}</div><Proposal q={preview}/></>}</DialogContent></Dialog>
 
- <AlertDialog open={resetOpen} onOpenChange={setResetOpen}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>¿Comenzar una nueva cotización?</AlertDialogTitle><AlertDialogDescription>Se restablecerán los datos de la propuesta en pantalla. Las versiones guardadas permanecerán en el historial.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Seguir editando</AlertDialogCancel><AlertDialogAction onClick={()=>{bill.clear();setSourceQuoteId(null);setClientId(null);update({...newQuote(),energy:undefined});setConfirmed([]);moveStep('customer');toast.info('Nueva propuesta preparada.')}}>Nueva cotización</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
+ <AlertDialog open={resetOpen} onOpenChange={setResetOpen}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>¿Comenzar una nueva cotización?</AlertDialogTitle><AlertDialogDescription>Se restablecerán los datos de la propuesta en pantalla. Las versiones guardadas permanecerán en el historial.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Seguir editando</AlertDialogCancel><AlertDialogAction onClick={()=>{bill.clear();setSourceQuoteId(null);setClientId(null);update({...newQuote(),energy:undefined,documentTerms:undefined,documentWarranty:undefined,documentValidDays:undefined});setConfirmed([]);moveStep('customer');toast.info('Nueva propuesta preparada.')}}>Nueva cotización</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
  </div></SidebarInset></SidebarProvider></Tabs>
 }
