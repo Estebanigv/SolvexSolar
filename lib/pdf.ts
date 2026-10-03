@@ -1,5 +1,6 @@
+import {documentTitle,isIssued} from './quote-issuance';
 import {BlendMode,PDFDocument,StandardFonts,rgb,pushGraphicsState,popGraphicsState,rectangle,clip,endPath,type PDFImage} from 'pdf-lib';
-import {assignedAdviser,paymentBreakdown,netbillingScope,preliminaryNote,proposalTitle} from './commercial';
+import {assignedAdviser,paymentBreakdown,netbillingScope,preliminaryNote} from './commercial';
 import {consumptionSummary} from './energy';
 import {proposalEquipment,proposalWarranties,proposalReadingSections,type ProposalTextBlock} from './proposal-document';
 import type {SavedQuote} from './quote';
@@ -31,13 +32,13 @@ export async function quotePdf(q:SavedQuote,logoBytes?:ArrayBuffer,photos:Propos
  newPage();
  box(0,H,W,84,brand);if(logo)page.drawImage(logo,{x:M-10,y:H-70,width:91,height:61,blendMode:BlendMode.Lighten});
  draw(q.settings.name,M+86,H-37,fitted(q.settings.name,17,235),true,white);draw('Proyectos que iluminan',M+86,H-54,8,false,light);
- right(proposalTitle(q.input,q.calculation.official),R,H-32,8,true,lime);right(q.folio,R,H-51,9,false,white);
+ right(documentTitle(q),R,H-32,8,true,lime);right(q.folio,R,H-51,9,false,white);
  const heroTop=H-84;box(0,heroTop,W,208,teal);if(roof)imageCover(roof,326,heroTop,W-326,208);
  draw(systemNames[q.input.system],M,heroTop-33,10,true,lime);draw('Tu proyecto',M,heroTop-78,29,true,white);draw('fotovoltaico',M,heroTop-113,29,true,white);
  draw(q.calculation.kwp.toLocaleString('es-CL',{maximumFractionDigits:3})+' kWp',M,heroTop-156,28,true,lime);draw(q.calculation.panels+' paneles para tu proyecto',M,heroTop-179,10,false,light);
  if(roof){box(W-127,heroTop-187,112,14,brand);draw('Imagen referencial',W-119,heroTop-197,8,false,white)}
  y=heroTop-228;
- const facts=[['Cliente',q.input.customer.name||'Por completar'],['Teléfono',q.input.customer.phone||'Por completar'],['Correo',q.input.customer.email||'Por completar'],['Región',q.input.customer.region||'Por completar'],['Comuna',q.input.customer.commune||'Por completar'],['Emisión',new Date(q.date).toLocaleDateString('es-CL')]];
+ const facts=[['Cliente',q.input.customer.name||'Por completar'],['Teléfono',q.input.customer.phone||'Por completar'],['Correo',q.input.customer.email||'Por completar'],['Región',q.input.customer.region||'Por completar'],['Comuna',q.input.customer.commune||'Por completar'],['Emisión',new Date(q.issuedAt??q.date).toLocaleDateString('es-CL',{timeZone:'America/Santiago'})]];
  const factWidth=(CW-28)/3;
  for(let row=0;row<2;row++){const values=facts.slice(row*3,row*3+3),height=Math.max(...values.map(([,v])=>wrap(v,9.5,factWidth,true).length*14))+23;space(height);values.forEach(([label,value],i)=>{const x=M+i*(factWidth+14);draw(label,x,y-8,8,false,muted);block(value,x,y-16,factWidth,9.5,true,ink)});y-=height+8}
  if(q.input.customer.address){text(q.input.customer.address,9);y-=7}line(y);y-=3;
@@ -64,7 +65,7 @@ export async function quotePdf(q:SavedQuote,logoBytes?:ArrayBuffer,photos:Propos
  const c=q.calculation;
  const payments=paymentBreakdown(c.total,q.settings);const paymentHeight=payments.length?72:0;space(58+paymentHeight);heading('Forma de pago');text(q.input.payment,10,true);y-=10;
  for(let i=0;i<payments.length;i+=3){const group=payments.slice(i,i+3),col=(CW-20)/3;const height=Math.max(...group.map(row=>wrap(row.label,9,col-20,true).length*13.5))+54;space(height);group.forEach((row,j)=>{const x=M+j*(col+10);box(x,y,col,height,pale);block(row.label,x+10,y-10,col-20,9,true,ink);const labelHeight=wrap(row.label,9,col-20,true).length*13.5;draw(`${row.percent}% del total`,x+10,y-23-labelHeight,8,false,muted);draw(money(row.amount),x+10,y-height+12,fitted(money(row.amount),17,col-20),true,ink)});y-=height+10}
- if(c.warnings.length){heading('Propuesta en revisión');for(const warning of c.warnings)text('- '+warning,9,false,rgb(.46,.36,.16))}
+ if(!isIssued(q)&&c.warnings.length){heading('Propuesta en revisión');for(const warning of c.warnings)text('- '+warning,9,false,rgb(.46,.36,.16))}
  const forecast=publishedProjection(q);
  if(forecast){
   newPage('Proyección y supuestos');title('El valor de tu energía','Escenario estimado, sujeto a los supuestos revisados del proyecto.');

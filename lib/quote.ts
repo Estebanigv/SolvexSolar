@@ -18,7 +18,7 @@ export const quoteSchema=z.object({projection:projectionSchema.optional(),financ
 export type QuoteInput=z.infer<typeof quoteSchema>;
 export type Line={id:string;name:string;qty:number;unit:string;price:number|null;total:number|null;source:string;category:string};
 export type Calculation={lines:Line[];panelWatts?:number[];panels:number;kwp:number;subtotal:number;discount:number;net:number;tax:number|null;total:number;warnings:string[];complete:boolean;official:boolean};
-export type SavedQuote={id:string;clientId?:string;projectId?:string;parentQuoteId?:string|null;folio:string;date:string;input:QuoteInput;settings:Settings;calculation:Calculation};
+export type SavedQuote={id:string;clientId?:string;projectId?:string;parentQuoteId?:string|null;folio:string;date:string;issuedAt?:string;issuedBy?:string;previousFolio?:string;input:QuoteInput;settings:Settings;calculation:Calculation};
 export const money=(n:number)=>new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(n);
 export const followsPanelCount=(p:Pick<Product,'category'>)=>['TIPO DE ESTRUCTURA','MATERIAL DE TECHO'].includes(p.category);
 export const productUnit=(p:Pick<Product,'category'|'unit'>)=>followsPanelCount(p)||p.category==='SERVICIO DE INSTALACIÓN'?'panel':p.unit;

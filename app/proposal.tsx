@@ -1,7 +1,8 @@
+import {documentTitle,isIssued} from '@/lib/quote-issuance';
 import type {SavedQuote} from '@/lib/quote';
 import {ProposalProjection} from './proposal-projection';
 import {money,systemNames} from '@/lib/quote';
-import {assignedAdviser,netbillingScope,paymentBreakdown,preliminaryNote,proposalTitle} from '@/lib/commercial';
+import {assignedAdviser,netbillingScope,paymentBreakdown,preliminaryNote} from '@/lib/commercial';
 import {consumptionSummary} from '@/lib/energy';
 import {proposalEquipment,proposalImages,proposalWarranties,proposalReadingSections} from '@/lib/proposal-document';
 import {UserRound,Phone,Mail,MapPin,CalendarDays,Sun,Zap,BatteryCharging,ShieldCheck} from 'lucide-react';
@@ -11,11 +12,11 @@ export function Proposal({q}:{q:SavedQuote}){
  const adviser=assignedAdviser(input,settings),consumption=consumptionSummary(input.energy);
  const payments=paymentBreakdown(c.total,settings),netbilling=netbillingScope(input,settings);
  const equipment=proposalEquipment(q),warranties=proposalWarranties(settings.warranty),reading=proposalReadingSections(q);
- const facts=[{label:'Cliente',value:input.customer.name||'Por completar',icon:UserRound},{label:'Teléfono',value:input.customer.phone||'Por completar',icon:Phone},{label:'Correo',value:input.customer.email||'Por completar',icon:Mail},{label:'Región',value:input.customer.region||'Por completar',icon:MapPin},{label:'Comuna',value:input.customer.commune||'Por completar',icon:MapPin},{label:'Emisión',value:new Date(q.date).toLocaleDateString('es-CL'),icon:CalendarDays}];
+ const facts=[{label:'Cliente',value:input.customer.name||'Por completar',icon:UserRound},{label:'Teléfono',value:input.customer.phone||'Por completar',icon:Phone},{label:'Correo',value:input.customer.email||'Por completar',icon:Mail},{label:'Región',value:input.customer.region||'Por completar',icon:MapPin},{label:'Comuna',value:input.customer.commune||'Por completar',icon:MapPin},{label:'Emisión',value:new Date(q.issuedAt??q.date).toLocaleDateString('es-CL',{timeZone:'America/Santiago'}),icon:CalendarDays}];
  const footer=(section:string)=><div className="proposal-sheet-footer"><strong>{settings.name}</strong><span>{section}</span><span>{q.folio}</span></div>;
  return <article className="proposal proposal-brochure">
   <section className="proposal-sheet">
-   <header className="proposal-masthead"><div className="proposal-brand"><img src="/logo.jpg" alt={settings.name}/><div><strong>{settings.name}</strong><p>Proyectos que iluminan</p></div></div><div className="proposal-ref"><p>{proposalTitle(input,c.official)}</p><strong>{q.folio}</strong></div></header>
+   <header className="proposal-masthead"><div className="proposal-brand"><img src="/logo.jpg" alt={settings.name}/><div><strong>{settings.name}</strong><p>Proyectos que iluminan</p></div></div><div className="proposal-ref"><p>{documentTitle(q)}</p><strong>{q.folio}</strong></div></header>
    <div className="proposal-hero"><div className="proposal-hero-copy"><p>{systemNames[input.system]}</p><h2>Tu proyecto<br/>fotovoltaico</h2><strong>{c.kwp.toLocaleString('es-CL',{maximumFractionDigits:3})} <small>kWp</small></strong><p>{c.panels} paneles para tu proyecto</p></div><figure><img src={proposalImages.roof} alt="Paneles solares sobre una vivienda, imagen referencial"/><figcaption>Imagen referencial</figcaption></figure></div>
    <div className="proposal-sheet-content">
     <div className="proposal-facts">{facts.map(fact=><div key={fact.label}><fact.icon size={17}/><div><small>{fact.label}</small><strong>{fact.value}</strong></div></div>)}</div>
@@ -32,7 +33,7 @@ export function Proposal({q}:{q:SavedQuote}){
     <section className="proposal-project-includes"><h3>Tu proyecto incluye</h3><div className="proposal-project-equipment">{equipment.map((item,index)=><div className="proposal-project-equipment-row" key={item.kind+'-'+index}><span className="proposal-project-equipment-icon">{item.kind==='panels'?<Sun size={26}/>:item.kind==='battery'?<BatteryCharging size={26}/>:<Zap size={26}/>}</span><div><h4>{item.label}</h4><p className="proposal-project-model">{item.value}</p><p className="proposal-project-note">{item.note}</p></div></div>)}</div></section>
     <p className="proposal-validity">Vigencia de {settings.validDays} días desde la emisión.</p>
     <section className="proposal-payments"><h3>Forma de pago</h3><p>{input.payment}</p>{payments.length>0&&<div>{payments.map((row,index)=><div key={row.label}><span>{index+1}</span><div><p>{row.label}</p><small>{row.percent}% del total</small></div><strong>{money(row.amount)}</strong></div>)}</div>}</section>
-    {c.warnings.length>0&&<section className="proposal-pending"><h3>Propuesta en revisión</h3><ul>{c.warnings.map(w=><li key={w}>{w}</li>)}</ul></section>}
+    {!isIssued(q)&&c.warnings.length>0&&<section className="proposal-pending"><h3>Propuesta en revisión</h3><ul>{c.warnings.map(w=><li key={w}>{w}</li>)}</ul></section>}
    </div>{footer('Equipos y pagos')}
   </section>
   <ProposalProjection q={q}/>

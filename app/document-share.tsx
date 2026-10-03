@@ -4,6 +4,7 @@ import {Download,LoaderCircle,Share2} from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Dialog,DialogContent,DialogHeader,DialogTitle,DialogDescription} from '@/components/ui/dialog';
+import {isIssued} from '@/lib/quote-issuance';
 import {quotePdf} from '@/lib/pdf';
 import {whatsappUrl} from '@/lib/document-share';
 import type {SavedQuote} from '@/lib/quote';
@@ -23,7 +24,7 @@ export function DocumentShare({quote,whatsapp,onClose}:{quote:SavedQuote;whatsap
     }catch{if(active)setError('No se pudo preparar el PDF. Reintenta la descarga.')}})();
     return()=>{active=false;controller.abort();if(url)URL.revokeObjectURL(url)};
   },[quote,retry]);
-  const message=`Hola ${quote.input.customer.name}, comparto la propuesta ${quote.folio} de ${quote.settings.name}.${quote.calculation.official?'':' Es un borrador pendiente de validación.'}`;
+  const message=`Hola ${quote.input.customer.name}, comparto la propuesta ${quote.folio} de ${quote.settings.name}.${isIssued(quote)?'':' Es un borrador pendiente de validación.'}`;
   const chat=whatsappUrl(phone,message);
   async function shareFile(){
     if(!prepared)return;setError('');setStatus('');setSharing(true);
