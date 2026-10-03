@@ -15,3 +15,11 @@
 .equipment-category-menu [data-slot=select-item]{min-height:40px;padding:9px 30px 9px 12px;font-size:15px;line-height:1.4;overflow-wrap:anywhere;cursor:pointer}
 .equipment-category-menu [data-slot=select-item][data-highlighted]{background:#e4f0ed;color:#123f4b}
 .equipment-category-menu [data-slot=select-item][data-state=checked]{font-weight:650}
+.equipment-row-action .equipment-remove{margin-top:8px;color:#a43b37;background:transparent;border:0}
+.equipment-row-action .equipment-remove:hover{background:#fff0ed;color:#8d302b}
+.equipment-delete-dialog{color:#143e4e}
+.equipment-delete-dialog p{font-size:15px;line-height:1.6;color:#456572}
+.equipment-delete-summary{display:grid;gap:6px;padding:16px;background:#f2f6f6;border:1px solid #d4e2e5;border-radius:8px;overflow-wrap:anywhere}
+.equipment-delete-summary strong{font-size:18px}.equipment-delete-summary span{font-size:14px;color:#456572}
+.equipment-delete-dialog .equipment-remove-confirm{background:#a43b37;color:#fff}
+.equipment-delete-dialog .equipment-remove-confirm:hover{background:#8d302b}

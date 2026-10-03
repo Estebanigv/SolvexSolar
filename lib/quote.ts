@@ -32,6 +32,13 @@ export function panelQuantities(input:Pick<QuoteInput,'system'|'quantities'>,pro
  return quantities;
 }
 export function newQuote():QuoteInput{return {financingNote:greenCreditNote,showItemDetails:true,proposalType:'preliminary',discountPercent:0,system:'ON GRID',customer:{name:'',email:'',phone:'',region:'',commune:'',address:'',bill:0},quantities:{'0-10':8,'0-13':8,'0-26':1,'0-35':15,'0-37':15,'0-43':1,'0-45':1,'0-47':1},extra:0,extraLabel:'',discount:0,installationOverride:null,installationNote:'',payment:'Transferencia bancaria',notes:'',technicalReviewed:false}}
+// Reconcile editable drafts only. Saved snapshots and server validation stay intact.
+export function reconcileQuoteProducts(input:QuoteInput,products:Product[]):QuoteInput{
+ const ids=new Set(products.map(p=>p.id));
+ if(!Object.keys(input.quantities).some(id=>!ids.has(id))&&!input.hiddenLineIds?.some(id=>!ids.has(id)&&!['installation','extra'].includes(id)))return input;
+ const next={...input,quantities:Object.fromEntries(Object.entries(input.quantities).filter(([id])=>ids.has(id))),hiddenLineIds:input.hiddenLineIds?.filter(id=>ids.has(id)||['installation','extra'].includes(id)),technicalReviewed:false};
+ return {...next,quantities:panelQuantities(next,products)};
+}
 export function calculate(input:QuoteInput,products:Product[],settings:Settings,installationRates:InstallationRates=installation):Calculation{
  const parsed=quoteSchema.parse(input); const q={...parsed,quantities:panelQuantities(parsed,products)}; const warnings:string[]=[];
  const selected=products.filter(p=>p.system===q.system&&!isInstallation(p)&&(q.quantities[p.id]||0)>0);
