@@ -4,7 +4,8 @@ import {protectedApi} from '@/lib/supabase/api';
 export async function GET(request:Request){return protectedApi(async()=>{
   const {db}=await requireMember(true);
   const f=activityFilterSchema.parse(Object.fromEntries(new URL(request.url).searchParams));
-  let query=db.from('activity_log').select('*',{count:'exact'});
+  // Hide the Dev account in this feed, before counting and paginating; retain the audit trail.
+  let query=db.from('activity_log').select('*',{count:'exact'}).not('actor_email','ilike','contacto@solvexsolar.cl');
   if(f.kind)query=query.eq('entity_type',f.kind);
   if(f.action)query=query.eq('action',f.action);
   if(f.actor)query=query.ilike('actor_name','%'+f.actor.replace(/[\\%_]/g,'\\$&')+'%');

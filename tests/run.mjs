@@ -9,3 +9,5 @@ for (const name of ['app-install','gemini','automatic-savings','additional-servi
 }
 
 await import('./members-route.test.mjs');
+
+await import('./activity-route.test.mjs');
