@@ -9,7 +9,7 @@ export function workflowReadiness(quote: QuoteInput, products: Product[], calcul
       (quote.system !== 'OFF GRID' || selected.some(p => p.category.includes('BATER'))) &&
       selected.every(p => p.price !== null && (!['panel','unidad'].includes(productUnit(p)) || Number.isInteger(quantities[p.id])) && (p.category !== 'PANEL FOTOVOLTAICO' || !!p.watts)),
     installation: !!calculation && (quote.installationOverride !== null ? !!quote.installationNote.trim() : rates.some(i => i.panels === calculation.panels)) &&
-      (quote.extra === 0 || !!quote.extraLabel.trim()) && (quote.discountPercent!==undefined ? Number.isInteger(quote.discountPercent)&&quote.discountPercent>=0&&quote.discountPercent<=30 : quote.discount===0),
+      (quote.customServices??[]).every(s=>s.quantity===0||(!!s.name.trim()&&s.price!==null)) && (quote.extra === 0 || !!quote.extraLabel.trim()) && (quote.discountPercent!==undefined ? Number.isInteger(quote.discountPercent)&&quote.discountPercent>=0&&quote.discountPercent<=30 : quote.discount===0),
     customer: !!quote.customer.name.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(quote.customer.email) &&
       !!quote.customer.phone.trim() && !!quote.customer.region.trim() && !!quote.customer.commune.trim() &&
       (quote.proposalType==='preliminary' || (quote.customer.bill > 0 && !!consumptionSummary(quote.energy) && !!quote.energy?.billReviewed)),

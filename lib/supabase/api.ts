@@ -1,3 +1,5 @@
+import {resolvedProjection} from '@/lib/projection';
+import {persistentQuote} from '@/lib/quote-persistence';
 import {z} from 'zod';
 import {calculate,panelQuantities,isInstallation,installationSchema,productSchema,quoteSchema,settingsSchema} from '@/lib/quote';
 import {AccessError,requireMember,checkOrigin,databaseError,privateHeaders} from './server';
@@ -39,7 +41,8 @@ export async function quotesPost(request:Request){return protectedApi(async()=>{
   const id=crypto.randomUUID(),date=new Date().toISOString(),folio=`SVX-${date.slice(0,4)}-${id.slice(0,8).toUpperCase()}`;
   let projectId=id;
   if(body.sourceQuoteId){const parent=await db.from('quotes').select('project_id,client_id').eq('id',body.sourceQuoteId).is('deleted_at',null).maybeSingle();if(parent.error)databaseError(parent.error);if(!parent.data||parent.data.client_id!==body.clientId)throw new AccessError('La revisión debe pertenecer al mismo cliente y a una propuesta activa.',409);projectId=parent.data.project_id}
-  const snapshot={id,projectId,parentQuoteId:body.sourceQuoteId??null,folio,date,input:body.input,settings,calculation:calculate(body.input,products,settings,installationSchema.parse(config.data!.installation))};
+  const snapshot={id,projectId,parentQuoteId:body.sourceQuoteId??null,folio,date,input:persistentQuote(body.input),settings,calculation:calculate(body.input,products,settings,installationSchema.parse(config.data!.installation))};
+  snapshot.input.projection=resolvedProjection(snapshot);
   const {data,error}=await db.rpc('save_quote',{snapshot,expected_revision:body.revision,customer_id:body.clientId??null});
   if(error?.code==='55000')throw new AccessError('Este cliente está en la papelera. Restáuralo antes de cotizar.',409);
   if(error)databaseError(error);return reply(data,201);

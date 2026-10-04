@@ -16,6 +16,7 @@
     "build:sites": "node scripts/run-framework.mjs build",
     "start:sites": "node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js dev --config dist/server/wrangler.json --local --persist-to .wrangler/state --ip 127.0.0.1 --inspector-port 0",
     "test": "node tests/run.mjs",
+    "gemini:check": "node scripts/gemini-check.mjs",
     "prebuild": "node scripts/prepare-ocr.mjs",
     "predev": "node scripts/prepare-ocr.mjs"
   },

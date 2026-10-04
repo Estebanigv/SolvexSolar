@@ -4,7 +4,7 @@ import {Activity, ExternalLink, MapPin, Sun, LoaderCircle} from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Checkbox} from '@/components/ui/checkbox';
-import {consumptionSummary, newEnergyInput, solarSourceUrl, type EnergyInput, type SolarEstimate} from '@/lib/energy';
+import {consumptionSummary, solarGenerationContext, newEnergyInput, solarSourceUrl, type EnergyInput, type SolarEstimate} from '@/lib/energy';
 import {ProjectLocation} from './project-location';
 import {CneReferencePanel} from './cne-reference';
 import type {AddressQuery} from '@/lib/geocoding';
@@ -16,6 +16,8 @@ export function EnergyPanel({value, peakPower, onChange, address, mode = 'consum
   address?:AddressQuery; mode?: 'consumption' | 'solar'; value?: EnergyInput; peakPower: number; onChange: (value: EnergyInput) => void;
 }) {
   const energy = value ?? newEnergyInput();
+  const latestEnergy=useRef(energy);latestEnergy.current=energy;
+  const latestOnChange=useRef(onChange);latestOnChange.current=onChange;
   const consumption = consumptionSummary(energy);
   const [result, setResult] = useState<{key: string; data: SolarEstimate} | null>(null);
   const [error, setError] = useState('');
@@ -42,13 +44,23 @@ export function EnergyPanel({value, peakPower, onChange, address, mode = 'consum
       const response = await fetch(`/api/energy/solar?${params}`, {signal: control.signal});
       const body = await response.json() as SolarEstimate & {error?: string};
       if (!response.ok) throw new Error(body.error || 'No se pudo obtener la estimación solar.');
-      if (currentKey.current === queryKey) setResult({key: queryKey, data: body as SolarEstimate});
+      if (!control.signal.aborted && currentKey.current === queryKey){
+        setResult({key: queryKey, data: body as SolarEstimate});
+        const currentEnergy=latestEnergy.current;
+        latestOnChange.current({...currentEnergy,solarGeneration:{annualKwh:body.annualKwh,context:solarGenerationContext(currentEnergy,peakPower),retrievedAt:body.retrievedAt,source:body.source.name}});
+      }
     } catch (e) {
       if (!control.signal.aborted && currentKey.current === queryKey) setError((e as Error).message);
     } finally {
       if (controller.current === control) setLoading(false);
     }
   }
+  useEffect(()=>{
+    if(mode!=='solar'||energy.latitude===null||energy.longitude===null||peakPower<=0)return;
+    if(energy.solarGeneration?.context===solarGenerationContext(energy,peakPower))return;
+    const timer=setTimeout(()=>void consult(),700);
+    return()=>{clearTimeout(timer);controller.current?.abort()};
+  },[queryKey,mode]);
   return <section className="energy-panel" aria-label={mode === 'consumption' ? 'Perfil energético del cliente' : 'Estudio de generación solar'}>
     {mode === 'consumption' && <><div className="energy-heading"><span className="energy-icon"><Activity size={20}/></span><div><h3 id="energy-title">Perfil energético</h3><p>El consumo de la boleta es la base del estudio.</p></div><span className="energy-badge">{energy.billReviewed && consumption ? 'Boleta revisada' : 'Por completar'}</span></div>
     <div className="field-grid energy-fields">
@@ -71,13 +83,14 @@ export function EnergyPanel({value, peakPower, onChange, address, mode = 'consum
         </div>
         <p className="energy-explanation"><MapPin size={15}/>La consulta envía únicamente coordenadas y parámetros técnicos. No envía la boleta ni los datos de contacto.</p>
         <Button className="solar-consult" variant="outline" disabled={loading || energy.latitude === null || energy.longitude === null || peakPower <= 0} onClick={consult}>{loading ? <LoaderCircle className="animate-spin"/> : <Sun/>}{loading ? 'Consultando fuente solar…' : current ? 'Actualizar estimación' : 'Consultar generación solar'}</Button>
+        {!current&&energy.solarGeneration?.context===solarGenerationContext(energy,peakPower)&&<p className="energy-explanation">Generación guardada: {number(energy.solarGeneration.annualKwh)} kWh/año · usada en el análisis del proyecto.</p>}
         {error && <p className="energy-error" role="alert">{error}</p>}
         {result && !current && <p className="energy-explanation" role="status">Los parámetros cambiaron. Consulta nuevamente para actualizar la estimación.</p>}
         {current && <div className="solar-result" aria-live="polite">
           <span>Generación anual estimada</span><strong>{number(current.annualKwh)} <small>kWh/año</small></strong>
           <p>{current.source.database} · Datos meteorológicos {current.source.firstYear}–{current.source.lastYear}</p>
           <div className="solar-months" aria-label="Generación estimada por mes">{current.monthly.map(row => <div key={row.month}><span className="solar-bar-track" aria-hidden="true"><span style={{height: `${Math.max(2, row.kwh / Math.max(1, ...current.monthly.map(m => m.kwh)) * 100)}%`}}/></span><strong>{number(row.kwh)}</strong><span>{months[row.month-1]}</span><span className="sr-only">kWh estimados</span></div>)}</div>
-          <p>Estimación preliminar de producción fotovoltaica. No equivale a ahorro ni autoconsumo y no modela baterías, sombras cercanas o límites del inversor. Requiere revisión técnica; no se incorpora al PDF comercial.</p>
+          <p>Estimación preliminar de producción fotovoltaica. No equivale a ahorro ni autoconsumo y no modela baterías, sombras cercanas o límites del inversor. Requiere revisión técnica; alimenta el cálculo automático de ahorro. El escenario solo se incluye en el PDF cuando lo validas.</p>
           <a href={current.source.url} target="_blank" rel="noreferrer">Consultar fuente y metodología <ExternalLink size={13}/></a>
         </div>}
         {!current && <a className="energy-source" href={solarSourceUrl} target="_blank" rel="noreferrer">Fuente: PVGIS / JRC <ExternalLink size={13}/></a>}

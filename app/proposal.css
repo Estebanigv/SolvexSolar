@@ -1,145 +1,113 @@
-/* Client proposal, composed as three editorial sheets following the supplied references. */
-.proposal.proposal-brochure{max-width:900px;width:100%;background:transparent;box-shadow:none;color:#103842;font-family:Manrope,Arial,sans-serif;line-height:1.55;overflow-wrap:anywhere;display:grid;gap:24px}
-.proposal-brochure .proposal-sheet{background:#fff;box-shadow:0 3px 18px #163c4810;min-width:0}
-.proposal-brochure .proposal-masthead{display:flex;align-items:center;justify-content:space-between;gap:24px;background:#082c38;color:#fff;padding:20px 34px;border:0}
-.proposal-brochure .proposal-brand{display:flex;align-items:center;gap:16px;min-width:0}
-.proposal-brochure .proposal-brand img{width:95px;height:64px;object-fit:contain;mix-blend-mode:lighten;margin:-5px 0 -5px -12px}
-.proposal-brochure .proposal-brand strong{font-size:20px;font-weight:800;letter-spacing:-.6px}
-.proposal-brochure .proposal-brand p{font-size:10px;margin:4px 0 0;letter-spacing:1.4px;color:#b7ccce}
-.proposal-brochure .proposal-ref{text-align:right;flex-shrink:0}
-.proposal-brochure .proposal-ref p{font-size:10px;font-weight:700;color:#c7dc57;margin:0 0 6px;letter-spacing:.5px}
-.proposal-brochure .proposal-ref strong{font-size:12px;font-weight:500;letter-spacing:0;color:#fff}
-.proposal-brochure .proposal-hero{display:grid;grid-template-columns:1.1fr 1fr;min-height:330px;background:#103f48;color:white}
-.proposal-brochure .proposal-hero-copy{padding:32px 34px;align-self:center}
-.proposal-brochure .proposal-hero-copy>p:first-child{font-size:13px;color:#d0e38b;font-weight:650;margin:0 0 14px}
-.proposal-brochure .proposal-hero h2{font-size:clamp(29px,3.6vw,40px);line-height:1.1;letter-spacing:-1.3px;color:#fff;font-weight:800;margin:0 0 20px}
-.proposal-brochure .proposal-hero-copy>strong{font-size:35px;line-height:1.25;letter-spacing:-1px;color:#c8dc60;font-weight:750}
-.proposal-brochure .proposal-hero-copy>strong small{font-size:20px;letter-spacing:0;font-weight:500}
-.proposal-brochure .proposal-hero-copy>p:last-child{font-size:13px;color:#d0e0e1;margin:8px 0 0}
-.proposal-brochure .proposal-hero figure{position:relative;min-width:0;margin:0;overflow:hidden}
-.proposal-brochure .proposal-hero figure img{position:absolute;width:100%;height:100%;object-fit:cover;object-position:center 42%;display:block}
-.proposal-brochure .proposal-hero figcaption{position:absolute;bottom:12px;right:14px;font-size:9px;color:#fff;background:#082c38bf;padding:3px 7px;border-radius:3px}
-.proposal-brochure .proposal-sheet-content{padding:28px 34px}
-.proposal-brochure .proposal-facts{display:grid;grid-template-columns:1fr .9fr 1.25fr;gap:22px 20px;padding-bottom:20px}
+/* Solvex: a photographic cover followed by a clear, editable project dossier. */
+.proposal.proposal-brochure{--proposal-ink:#103b45;--proposal-muted:#48636a;--proposal-green:#bdd548;max-width:900px;width:100%;display:grid;gap:28px;background:transparent;box-shadow:none;color:var(--proposal-ink);font-family:Manrope,Arial,sans-serif;line-height:1.6;overflow-wrap:anywhere}
+.proposal-brochure .proposal-sheet{background:#fff;box-shadow:0 8px 30px #123c4817;min-width:0;overflow:hidden}
+.proposal-brochure .proposal-cover-visual{position:relative;isolation:isolate;min-height:530px;background:#092f38;color:#fff;display:flex;flex-direction:column;justify-content:space-between}
+.proposal-brochure .proposal-cover-photo{position:absolute;inset:0;z-index:-2;width:100%;height:100%;object-fit:cover;object-position:center 55%}
+.proposal-brochure .proposal-cover-visual::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,#062d38c4 0%,#062d3840 35%,#062d38e8 100%)}
+.proposal-brochure .proposal-masthead{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;padding:24px 44px 0;background:none;border:0;color:white}
+.proposal-brochure .proposal-brand img{width:140px;height:94px;object-fit:contain;display:block;mix-blend-mode:normal}
+.proposal-brochure .proposal-ref{text-align:right;padding-top:15px;max-width:50%}
+.proposal-brochure .proposal-ref p{font-size:11px;font-weight:700;color:#d9e994;margin:0 0 6px}
+.proposal-brochure .proposal-ref strong{font-size:13px;font-weight:600;color:#fff}
+.proposal-brochure .proposal-cover-copy{padding:55px 44px 48px}
+.proposal-brochure .proposal-cover-copy h2{font-size:clamp(34px,4.5vw,55px);line-height:1.1;letter-spacing:-1.7px;color:#fff;font-weight:750;margin:15px 0 20px;max-width:680px}
+.proposal-brochure .proposal-cover-copy p{font-size:15px;color:#fff;margin:0;max-width:610px}
+.proposal-brochure .proposal-cover-copy>p:first-child{color:#d9e994;font-weight:650}
+.proposal-brochure .proposal-image-caption{position:absolute;bottom:15px;right:24px;font-size:9px;color:#e9eeee}
+.proposal-brochure .proposal-sheet-content{padding:32px 44px 40px}
+.proposal-brochure .proposal-sheet:first-child>.proposal-sheet-content{padding-top:0}
+.proposal-brochure h3{font-size:23px;line-height:1.35;letter-spacing:-.5px;font-weight:750;margin:0 0 20px;color:var(--proposal-ink)}
+.proposal-brochure .proposal-overview{margin:0 -44px 32px}
+.proposal-brochure .proposal-keyfigures{display:grid;grid-template-columns:1.2fr 1fr;gap:0;background:#103e47;color:#fff;padding:30px 44px}
+.proposal-brochure .proposal-keyfigures>div{padding-right:24px;min-width:0}
+.proposal-brochure .proposal-keyfigures>div+div{padding-left:28px;padding-right:0;border-left:1px solid #537079}
+.proposal-brochure .proposal-keyfigures span{font-size:12px;display:block;color:#dce8e8;margin-bottom:7px}
+.proposal-brochure .proposal-keyfigures strong{font-size:37px;letter-spacing:-1px;line-height:1.25;display:block;color:#fff;font-weight:750;font-variant-numeric:tabular-nums}
+.proposal-brochure .proposal-keyfigures>div+div strong{color:#d2e37d}
+.proposal-brochure .proposal-keyfigures strong small{font-size:20px;display:inline}
+.proposal-brochure .proposal-keyfigures small{font-size:11px;display:block;color:#dce8e8;margin-top:7px}
+.proposal-brochure .proposal-discount{display:flex;align-items:center;gap:26px;padding:20px 44px;background:#eff5dd;break-inside:avoid}
+.proposal-brochure .proposal-discount-badge{display:flex;flex-direction:column;flex-shrink:0;color:#285343}
+.proposal-brochure .proposal-discount-badge strong{font-size:36px;font-weight:800;line-height:1.1;letter-spacing:-1px}
+.proposal-brochure .proposal-discount-badge span{font-size:11px;font-weight:600}
+.proposal-brochure .proposal-discount-copy>strong{font-size:15px;color:#234e40}
+.proposal-brochure .proposal-discount-copy p{font-size:14px;color:#285343;margin:3px 0 0}
+.proposal-brochure .proposal-discount-copy .proposal-discount-before{font-size:11px;color:#476453}
+.proposal-brochure .proposal-facts{display:grid;grid-template-columns:1fr 1fr 1.25fr;gap:24px 20px;padding:0 0 24px}
 .proposal-brochure .proposal-facts>div{display:flex;align-items:flex-start;gap:10px;min-width:0}
-.proposal-brochure .proposal-facts svg{flex-shrink:0;box-sizing:content-box;padding:7px;background:#eff4df;color:#355e49;border-radius:8px;margin-top:2px}
-.proposal-brochure .proposal-facts small{display:block;color:#587078;font-size:10px;margin-bottom:4px;font-weight:650}
-.proposal-brochure .proposal-facts strong{font-size:12px;line-height:1.5;display:block;font-weight:700;color:#173945}
-.proposal-brochure .proposal-location{display:flex;gap:8px;align-items:flex-start;color:#587078;font-size:11px;margin:0 0 22px;padding-bottom:20px;border-bottom:1px solid #e0e8e9}
-.proposal-brochure .proposal-location svg{flex-shrink:0;margin-top:2px}
-.proposal-brochure h3{font-size:19px;line-height:1.4;font-weight:800;letter-spacing:-.4px;margin:0 0 17px;color:#103842}
-.proposal-brochure .proposal-overview{margin:5px 0 25px}
-.proposal-brochure .proposal-keyfigures{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.proposal-brochure .proposal-keyfigures>div{padding:22px;background:#103f48;color:#fff;border-radius:10px}
-.proposal-brochure .proposal-keyfigures>div+div{background:#b1cc3e;color:#103842}
-.proposal-brochure .proposal-keyfigures span{font-size:11px;display:block;font-weight:650;opacity:.85;margin:0 0 9px}
-.proposal-brochure .proposal-keyfigures strong{font-size:31px;letter-spacing:-1px;line-height:1.3;display:block;font-weight:800;font-variant-numeric:tabular-nums}
-.proposal-brochure .proposal-keyfigures strong small{font-size:19px;display:inline}
-.proposal-brochure .proposal-keyfigures small{font-size:10px;display:block;margin-top:7px;line-height:1.6}
-.proposal-brochure .proposal-equipment-summary{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
-.proposal-brochure .proposal-equipment-summary>div{display:flex;gap:12px;align-items:center;border:1px solid #dce5e7;border-radius:8px;padding:13px;min-width:0}
-.proposal-brochure .proposal-equipment-summary svg{color:#658422;flex-shrink:0}
-.proposal-brochure .proposal-equipment-summary small{font-size:10px;display:block;color:#5a7178;margin-bottom:4px}
-.proposal-brochure .proposal-equipment-summary strong{font-size:12px;line-height:1.5;font-weight:650;display:block}
-.proposal-brochure .proposal-consumption{padding-top:20px;border-top:1px solid #e0e8e9}
-.proposal-brochure .proposal-consumption>div{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:12px}
-.proposal-brochure .proposal-consumption small{display:block;font-size:10px;color:#5a7178;margin-bottom:5px}
-.proposal-brochure .proposal-consumption strong{font-size:22px;letter-spacing:-.6px;font-weight:750;line-height:1.35}
+.proposal-brochure .proposal-facts svg{flex-shrink:0;color:#648735;margin-top:4px}
+.proposal-brochure .proposal-facts small{display:block;color:var(--proposal-muted);font-size:11px;margin-bottom:4px}
+.proposal-brochure .proposal-facts strong{font-size:13px;line-height:1.5;display:block;font-weight:650;color:var(--proposal-ink)}
+.proposal-brochure .proposal-location{display:flex;gap:9px;align-items:flex-start;font-size:12px;color:var(--proposal-muted);margin:0;padding-top:16px;border-top:1px solid #dbe3e1}
+.proposal-brochure .proposal-location svg{flex-shrink:0;margin-top:3px}
+.proposal-brochure .proposal-section-title{padding:38px 44px 28px;border-bottom:1px solid #d6e0dc;background:#f4f7f3}
+.proposal-brochure .proposal-section-title p{font-size:13px;color:var(--proposal-muted);margin:0}
+.proposal-brochure .proposal-section-title p:first-child{font-size:11px;color:#46705a}
+.proposal-brochure .proposal-section-title h2{font-size:36px;line-height:1.16;letter-spacing:-1.2px;font-weight:750;margin:12px 0 16px;color:var(--proposal-ink)}
+.proposal-brochure .proposal-project-includes>h3{font-size:17px;margin-bottom:12px;color:var(--proposal-muted)}
+.proposal-brochure .proposal-project-equipment-row{display:flex;gap:24px;padding:26px 0;border-bottom:1px solid #d6e0dc;break-inside:avoid}
+.proposal-brochure .proposal-project-equipment-icon{flex:none;width:46px;height:46px;display:grid;place-items:center;color:#55752b;border:1px solid #b9cd99;border-radius:50%;margin-top:3px}
+.proposal-brochure .proposal-project-equipment-row h4{font-size:24px;line-height:1.3;color:var(--proposal-ink);margin:0 0 12px;letter-spacing:-.4px;font-weight:750}
+.proposal-brochure .proposal-project-model{font-size:16px;color:#244c51;margin:0 0 6px;font-weight:600}
+.proposal-brochure .proposal-project-note{font-size:13px;color:var(--proposal-muted);margin:0}
+.proposal-brochure .proposal-validity{font-size:12px;color:var(--proposal-muted);margin:18px 0 0}
+.proposal-brochure .proposal-payments{margin-top:36px;break-inside:avoid}
+.proposal-brochure .proposal-payments>p{font-size:13px;color:var(--proposal-muted);margin:-8px 0 20px}
+.proposal-brochure .proposal-payments>div{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:22px}
+.proposal-brochure .proposal-payments>div>div{position:relative;border-top:3px solid #9fb946;padding-top:18px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start}
+.proposal-brochure .proposal-payments>div>div>span{color:#57722c;font-size:12px;width:23px;flex-shrink:0}
+.proposal-brochure .proposal-payments p{font-size:14px;font-weight:650;margin:0}
+.proposal-brochure .proposal-payments small{font-size:11px;color:var(--proposal-muted)}
+.proposal-brochure .proposal-payments strong{font-size:25px;line-height:1.3;letter-spacing:-.5px;flex-basis:100%;font-weight:750;margin-top:4px}
+.proposal-brochure .proposal-consumption{margin-top:32px;padding-top:24px;border-top:1px solid #d6e0dc;break-inside:avoid}
+.proposal-brochure .proposal-consumption h3{font-size:18px}
+.proposal-brochure .proposal-consumption>div{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:12px}
+.proposal-brochure .proposal-consumption small{display:block;font-size:11px;color:var(--proposal-muted);margin-bottom:5px}
+.proposal-brochure .proposal-consumption strong{font-size:23px;line-height:1.2;letter-spacing:-.5px}
 .proposal-brochure .proposal-consumption strong small{display:inline;font-size:12px}
-.proposal-brochure .proposal-consumption p{font-size:10px;color:#5a7178;margin:5px 0;line-height:1.6}
-.proposal-brochure .proposal-sheet-footer{display:flex;justify-content:space-between;gap:12px;padding:16px 34px;border-top:1px solid #dfe8e9;font-size:10px;color:#60777f;background:#f7f9f9;align-items:center}
-.proposal-brochure .proposal-sheet-footer strong{font-size:11px;color:#234852;font-weight:750}
-.proposal-brochure .proposal-section-title{padding:30px 34px 24px;border-bottom:1px solid #dfe8e9;background:#f7faf8}
-.proposal-brochure .proposal-section-title h2{font-size:29px;line-height:1.25;letter-spacing:-.9px;font-weight:800;margin:9px 0;color:#103842}
-.proposal-brochure .proposal-section-title p{font-size:12px;color:#577078;margin:0}
-.proposal-brochure .proposal-section-title p:first-child{font-size:10px;color:#789039;font-weight:650}
-.proposal-brochure .proposal-items table{width:100%;border-collapse:collapse;table-layout:fixed}
-.proposal-brochure .proposal-items th{background:#edf3ee;text-align:left;padding:10px 8px!important;font-size:10px!important;font-weight:700;color:#45616a;white-space:normal;border:0}
-.proposal-brochure .proposal-items td{padding:10px 8px!important;border-bottom:1px solid #e3e9e9;font-size:12px;line-height:1.6;color:#24434e}
-.proposal-brochure .proposal-items th:first-child{width:55%}.proposal-brochure .proposal-items th:nth-child(2){width:20%}.proposal-brochure .proposal-items th:last-child{width:25%}
-.proposal-brochure .proposal-items th:last-child,.proposal-brochure .proposal-items td:last-child{text-align:right;font-variant-numeric:tabular-nums}
-.proposal-brochure .proposal-items td small{font-size:10px;display:block;color:#61767d}
-.proposal-brochure .proposal-costs{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin:25px 0;padding:20px 0;border-top:1px solid #c9d8da;border-bottom:1px solid #c9d8da;break-inside:avoid}
-.proposal-brochure .proposal-costs h3{font-size:17px}.proposal-brochure .proposal-costs p{font-size:11px;color:#60777f;margin:5px 0}
-.proposal-brochure .proposal-costs dl{margin:0;display:grid;gap:7px;font-size:12px}
-.proposal-brochure .proposal-costs dl>div{display:flex;justify-content:space-between;align-items:center;gap:14px}
-.proposal-brochure .proposal-costs dd{margin:0;text-align:right;font-variant-numeric:tabular-nums;font-weight:650}
-.proposal-brochure .proposal-cost-total{border-top:1px solid #dbe5e6;padding-top:12px;margin-top:6px;font-weight:750}
-.proposal-brochure .proposal-cost-total dd{font-size:24px;color:#2e6544;letter-spacing:-.7px}
-.proposal-brochure .proposal-payments{break-inside:avoid;margin:24px 0 0}
-.proposal-brochure .proposal-payments>p{font-size:13px;color:#587078;margin:-6px 0 15px}
-.proposal-brochure .proposal-payments>div{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
-.proposal-brochure .proposal-payments>div>div{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;background:#f2f6ec;padding:16px;border-radius:8px}
-.proposal-brochure .proposal-payments>div>div>span{display:grid;place-items:center;flex-shrink:0;width:24px;height:24px;background:#b1cc3e;color:#173e3d;border-radius:50%;font-size:11px;font-weight:750}
-.proposal-brochure .proposal-payments p{font-size:12px;margin:0;font-weight:650}
-.proposal-brochure .proposal-payments small{font-size:10px;color:#5a7178}
-.proposal-brochure .proposal-payments strong{display:block;flex-basis:100%;font-size:21px;line-height:1.4;font-weight:750;letter-spacing:-.5px;margin-top:6px}
-.proposal-brochure .proposal-pending{padding:16px;margin:24px 0 0;border:1px solid #e3d8b2;background:#fcfaee;border-radius:8px}
-.proposal-brochure .proposal-pending h3{font-size:14px;color:#79622d;margin:0 0 10px}
-.proposal-brochure .proposal-pending ul{margin:0;padding-left:16px;font-size:11px;line-height:1.7;color:#79622d}
-.proposal-brochure .proposal-photo-band{position:relative;height:128px;overflow:hidden}
+.proposal-brochure .proposal-consumption p{font-size:11px;color:var(--proposal-muted);margin:5px 0}
+.proposal-brochure .proposal-photo-band{position:relative;height:185px;overflow:hidden}
 .proposal-brochure .proposal-photo-band img{display:block;width:100%;height:100%;object-fit:cover}
-.proposal-brochure .proposal-photo-band>p{position:absolute;bottom:8px;right:14px;background:#082c38bf;padding:3px 6px;color:white;font-size:9px;margin:0}
-.proposal-brochure .proposal-assurance h3{display:flex;gap:10px;align-items:center}.proposal-brochure .proposal-assurance h3 svg{color:#789a2c}
-.proposal-brochure .proposal-warranties{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;background:#103f48;color:#fff;border-radius:10px;padding:22px;margin:18px 0}
-.proposal-brochure .proposal-warranties strong{font-size:33px;line-height:1.2;color:#c8dc60;font-weight:800;letter-spacing:-1px}
-.proposal-brochure .proposal-warranties small{font-size:15px;font-weight:500;letter-spacing:0;color:#d1dfc4}
-.proposal-brochure .proposal-warranties p{font-size:12px;color:#d0e0e1;margin:8px 0 0}
-.proposal-brochure .proposal-warranty-text,.proposal-brochure .proposal-terms p{font-size:12px;line-height:1.8;white-space:pre-wrap;margin:0 0 10px;color:#47616b}
-.proposal-brochure .proposal-terms{margin:26px 0 0}.proposal-brochure .proposal-terms h3{font-size:17px;margin-bottom:12px}
-.proposal-brochure .proposal-contact{display:grid;grid-template-columns:1.1fr 1fr;gap:26px;border-top:1px solid #d7e2e4;padding-top:22px;margin-top:28px;break-inside:avoid}
-.proposal-brochure .proposal-contact h3{font-size:17px;margin:0 0 14px}.proposal-brochure .proposal-contact strong{font-size:13px;font-weight:750}
-.proposal-brochure .proposal-contact p{font-size:11px;color:#47616b;margin:5px 0 0;line-height:1.7}
-.proposal-brochure .proposal-disclaimer{font-size:10px;color:#6a7d83;line-height:1.65;margin:22px 0 0}
-@media screen and (max-width:600px){
- .preview-dialog{padding:10px!important}.proposal.proposal-brochure{gap:16px}.proposal-brochure .proposal-masthead{padding:16px;gap:12px}.proposal-brochure .proposal-brand{gap:5px}.proposal-brochure .proposal-brand img{width:67px;height:46px;margin-left:-8px}.proposal-brochure .proposal-brand strong{font-size:14px}.proposal-brochure .proposal-brand p{display:none}.proposal-brochure .proposal-ref strong{font-size:9px}.proposal-brochure .proposal-ref p{font-size:8px;max-width:120px}.proposal-brochure .proposal-hero{grid-template-columns:1fr;min-height:0}.proposal-brochure .proposal-hero-copy{padding:24px}.proposal-brochure .proposal-hero h2{font-size:34px}.proposal-brochure .proposal-hero figure{height:190px}.proposal-brochure .proposal-hero figure img{object-position:center 42%}.proposal-brochure .proposal-sheet-content{padding:24px 18px}.proposal-brochure .proposal-facts{grid-template-columns:1fr 1fr;gap:20px 12px}.proposal-brochure .proposal-facts>div:nth-child(3){grid-column:1/-1}.proposal-brochure .proposal-facts strong{font-size:12px}.proposal-brochure .proposal-keyfigures{grid-template-columns:1fr;gap:10px}.proposal-brochure .proposal-keyfigures>div{padding:18px}.proposal-brochure .proposal-keyfigures strong{font-size:30px}.proposal-brochure .proposal-equipment-summary{grid-template-columns:1fr}.proposal-brochure .proposal-consumption>div{grid-template-columns:1fr 1fr;gap:18px}.proposal-brochure .proposal-consumption strong{font-size:21px}.proposal-brochure .proposal-sheet-footer{padding:14px 18px;font-size:9px;flex-wrap:wrap}.proposal-brochure .proposal-sheet-footer>span:first-of-type{display:none}.proposal-brochure .proposal-section-title{padding:24px 18px}.proposal-brochure .proposal-section-title h2{font-size:26px}.proposal-brochure .proposal-items th{padding:9px 3px!important;font-size:10px!important}.proposal-brochure .proposal-items td{padding:11px 3px!important;font-size:11px}.proposal-brochure .proposal-items th:first-child{width:45%}.proposal-brochure .proposal-items th:nth-child(2){width:20%}.proposal-brochure .proposal-items th:last-child{width:35%}.proposal-brochure .proposal-costs{grid-template-columns:1fr;gap:18px}.proposal-brochure .proposal-payments>div{grid-template-columns:1fr}.proposal-brochure .proposal-payments>div>div{align-items:center}.proposal-brochure .proposal-payments strong{margin:0 0 0 auto;flex-basis:auto;font-size:19px}.proposal-brochure .proposal-warranties{padding:18px 12px;gap:8px}.proposal-brochure .proposal-warranties strong{font-size:27px}.proposal-brochure .proposal-warranties small{font-size:11px}.proposal-brochure .proposal-warranties p{font-size:10px}.proposal-brochure .proposal-contact{grid-template-columns:1fr}
-}
-@media print{
- @page{size:A4;margin:12mm}
- .proposal.proposal-brochure{display:block;max-width:none!important}.proposal-brochure .proposal-sheet{box-shadow:none;break-after:page}.proposal-brochure .proposal-sheet:last-child{break-after:auto}.proposal-brochure .proposal-masthead{padding:14px 22px;print-color-adjust:exact;-webkit-print-color-adjust:exact}.proposal-brochure .proposal-sheet-content{padding:22px}.proposal-brochure .proposal-hero{min-height:220px;print-color-adjust:exact;-webkit-print-color-adjust:exact}.proposal-brochure .proposal-hero-copy{padding:24px}.proposal-brochure .proposal-hero h2{font-size:28px}.proposal-brochure .proposal-hero-copy>strong{font-size:29px}.proposal-brochure .proposal-hero p,.proposal-brochure .proposal-brand p{color:#d0e0e1!important}.proposal-brochure .proposal-hero figcaption,.proposal-brochure .proposal-photo-band p{color:#fff!important}.proposal-brochure .proposal-keyfigures,.proposal-brochure .proposal-warranties{print-color-adjust:exact;-webkit-print-color-adjust:exact;break-inside:avoid}.proposal-brochure .proposal-keyfigures>div{padding:16px}.proposal-brochure .proposal-keyfigures strong{font-size:27px}.proposal-brochure .proposal-equipment-summary>div{padding:10px}.proposal-brochure .proposal-warranties p{color:#d0e0e1!important}.proposal-brochure h3{break-after:avoid}.proposal-brochure .proposal-items td{padding:8px 6px!important;font-size:10px}.proposal-brochure .proposal-sheet-footer{padding:12px 22px}.proposal-brochure .proposal-facts,.proposal-brochure .proposal-consumption,.proposal-brochure .proposal-masthead,.proposal-brochure .proposal-hero{break-inside:avoid}.proposal-brochure .proposal-terms p{orphans:3;widows:3}.proposal-brochure .proposal-terms{break-inside:auto}
-}
-
-/* Reading layout: coverage pairs, a clear scope, and separate commercial terms. */
-.proposal-brochure .proposal-reading-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px 28px;margin:26px 0 32px}
+.proposal-brochure .proposal-photo-band p{position:absolute;bottom:8px;right:16px;background:#08333ccf;padding:3px 8px;color:white;font-size:9px;margin:0}
+.proposal-brochure .proposal-assurance h3{display:flex;gap:12px;align-items:center}
+.proposal-brochure .proposal-assurance h3 svg{color:#648735}
+.proposal-brochure .proposal-warranties{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;padding:26px 0;border-block:1px solid #bfd0b5;margin:24px 0 30px}
+.proposal-brochure .proposal-warranties strong{font-size:43px;line-height:1;color:#497127;font-weight:750;letter-spacing:-1.2px}
+.proposal-brochure .proposal-warranties small{font-size:17px;letter-spacing:0}
+.proposal-brochure .proposal-warranties p{font-size:13px;color:var(--proposal-ink);margin:10px 0 0}
+.proposal-brochure .proposal-reading-grid{display:grid;grid-template-columns:1fr 1fr;gap:26px 32px;margin:26px 0 32px}
 .proposal-brochure .proposal-reading-block{min-width:0;break-inside:avoid}
-.proposal-brochure .proposal-reading-block h4{font-size:15px;font-weight:800;line-height:1.4;color:#153e48;margin:0 0 10px}
-.proposal-brochure .proposal-reading-block ul{list-style:disc;margin:0;padding-left:17px;color:#405e68;font-size:13px;line-height:1.75}
-.proposal-brochure .proposal-reading-block li+li{margin-top:7px}
-.proposal-brochure .proposal-reading-block li::marker{color:#779727}
-.proposal-brochure .proposal-reading-block p{font-size:13px;line-height:1.75;color:#405e68;margin:0}
-.proposal-brochure .proposal-scope{padding-top:26px;border-top:1px solid #d7e2e4}
-.proposal-brochure .proposal-technical-note{padding:16px 20px;background:#f0f4e5;border-left:3px solid #95b435;margin:0 0 24px;break-inside:avoid}
-.proposal-brochure .proposal-technical-note strong{font-size:13px;color:#345239}
-.proposal-brochure .proposal-technical-note p{font-size:13px;line-height:1.7;margin:7px 0 0;color:#405b49}
-.proposal-brochure .proposal-scope-list{display:grid;gap:22px}
-.proposal-brochure .proposal-commercial-list{display:grid;gap:0}
-.proposal-brochure .proposal-commercial-list>.proposal-reading-block{display:grid;grid-template-columns:180px 1fr;gap:24px;padding:22px 0;border-bottom:1px solid #e0e8e9}
+.proposal-brochure .proposal-reading-block h4{font-size:16px;font-weight:750;line-height:1.4;color:var(--proposal-ink);margin:0 0 12px}
+.proposal-brochure .proposal-reading-block ul{list-style:disc;margin:0;padding-left:17px;color:var(--proposal-muted);font-size:14px;line-height:1.75}
+.proposal-brochure .proposal-reading-block li+li{margin-top:8px}
+.proposal-brochure .proposal-reading-block li::marker{color:#688c30}
+.proposal-brochure .proposal-reading-block p,.proposal-brochure .proposal-terms p{font-size:14px;line-height:1.75;color:var(--proposal-muted);margin:0;white-space:pre-wrap}
+.proposal-brochure .proposal-scope{padding-top:30px;border-top:1px solid #d6e0dc}
+.proposal-brochure .proposal-technical-note{padding:16px 20px;background:#f1f5e7;border-left:3px solid #94ae42;margin-bottom:26px;break-inside:avoid}
+.proposal-brochure .proposal-technical-note strong{font-size:14px}
+.proposal-brochure .proposal-technical-note p{font-size:13px;line-height:1.7;margin:7px 0 0;color:var(--proposal-muted)}
+.proposal-brochure .proposal-scope-list{display:grid;gap:26px}
+.proposal-brochure .proposal-commercial-list>.proposal-reading-block{display:grid;grid-template-columns:175px 1fr;gap:30px;padding:26px 0;border-bottom:1px solid #d6e0dc}
 .proposal-brochure .proposal-commercial-list>.proposal-reading-block:first-child{padding-top:0}
-.proposal-brochure .proposal-netbilling{margin-top:25px;padding:20px;background:#eff5f5}
+.proposal-brochure .proposal-netbilling{margin-top:30px;padding-left:20px;border-left:3px solid #94ae42}
+.proposal-brochure .proposal-contact{display:grid;grid-template-columns:1.4fr 1fr;gap:25px;padding:28px 32px;margin:34px -44px -1px;background:#103e47;color:white;break-inside:avoid}
+.proposal-brochure .proposal-contact h3{font-size:23px;color:#fff;margin:0 0 20px}
+.proposal-brochure .proposal-contact strong{font-size:14px;color:#d9e994}
+.proposal-brochure .proposal-contact p{font-size:13px;color:#fff;margin:6px 0 0}
+.proposal-brochure .proposal-disclaimer{font-size:11px;color:var(--proposal-muted);line-height:1.65;margin:24px 0 0}
+.proposal-brochure .proposal-sheet-footer{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:18px 44px;border-top:1px solid #d6e0dc;font-size:10px;color:var(--proposal-muted)}
+.proposal-brochure .proposal-sheet-footer strong{font-size:11px;color:var(--proposal-ink)}
+.proposal-brochure .proposal-pending{padding:18px;margin-top:28px;border-left:3px solid #b69037;background:#fcf8e9}
+.proposal-brochure .proposal-pending h3{font-size:15px;margin-bottom:10px}
+.proposal-brochure .proposal-pending ul{padding-left:18px;font-size:12px;color:#785b22}
+.proposal-brochure .proposal-terms{margin-top:28px}
+.proposal-brochure .projection-metrics>div{border-radius:0;background:#f0f5ed;color:var(--proposal-ink);border-top:2px solid #8cab43}
+.proposal-brochure .projection-metrics small{color:var(--proposal-muted)}
+.proposal-brochure .projection-metrics strong{color:var(--proposal-ink)}
+.proposal-brochure .projection-assumptions p{font-size:12px}
 @media screen and (max-width:600px){
- .proposal-brochure .proposal-reading-grid{grid-template-columns:1fr;gap:23px}
- .proposal-brochure .proposal-commercial-list>.proposal-reading-block{grid-template-columns:1fr;gap:0;padding:20px 0}
- .proposal-brochure .proposal-reading-block h4{font-size:15px}
+ .preview-dialog{padding:10px!important}.proposal.proposal-brochure{gap:18px}.proposal-brochure .proposal-cover-visual{min-height:460px}.proposal-brochure .proposal-masthead{padding:20px 20px 0;gap:14px}.proposal-brochure .proposal-brand img{width:112px;height:75px}.proposal-brochure .proposal-ref{padding-top:4px}.proposal-brochure .proposal-ref strong{font-size:10px}.proposal-brochure .proposal-ref p{font-size:9px}.proposal-brochure .proposal-cover-copy{padding:48px 22px 50px}.proposal-brochure .proposal-cover-copy h2{font-size:37px;letter-spacing:-1.2px}.proposal-brochure .proposal-cover-copy p{font-size:13px}.proposal-brochure .proposal-sheet-content{padding:26px 22px}.proposal-brochure .proposal-overview{margin:0 -22px 28px}.proposal-brochure .proposal-keyfigures{padding:25px 22px;grid-template-columns:1fr;gap:22px}.proposal-brochure .proposal-keyfigures>div+div{padding:20px 0 0;border-left:0;border-top:1px solid #537079}.proposal-brochure .proposal-keyfigures strong{font-size:34px}.proposal-brochure .proposal-discount{padding:20px 22px;gap:18px}.proposal-brochure .proposal-discount-copy p{font-size:13px}.proposal-brochure .proposal-facts{grid-template-columns:1fr 1fr;gap:22px 14px}.proposal-brochure .proposal-facts>div:nth-child(3){grid-column:1/-1}.proposal-brochure .proposal-section-title{padding:28px 22px}.proposal-brochure .proposal-section-title h2{font-size:30px}.proposal-brochure .proposal-project-equipment-row{gap:15px}.proposal-brochure .proposal-project-equipment-icon{width:35px;height:35px}.proposal-brochure .proposal-project-equipment-row h4{font-size:21px}.proposal-brochure .proposal-project-model{font-size:15px}.proposal-brochure .proposal-payments>div{grid-template-columns:1fr;gap:22px}.proposal-brochure .proposal-payments strong{margin-left:auto;flex-basis:auto;font-size:24px}.proposal-brochure .proposal-consumption>div{grid-template-columns:1fr 1fr}.proposal-brochure .proposal-reading-grid{grid-template-columns:1fr}.proposal-brochure .proposal-commercial-list>.proposal-reading-block{grid-template-columns:1fr;gap:0}.proposal-brochure .proposal-warranties{gap:10px}.proposal-brochure .proposal-warranties strong{font-size:33px}.proposal-brochure .proposal-warranties small{font-size:12px}.proposal-brochure .proposal-warranties p{font-size:11px}.proposal-brochure .proposal-contact{grid-template-columns:1fr;margin-inline:-22px;padding:28px 22px}.proposal-brochure .proposal-sheet-footer{padding:16px 22px;flex-wrap:wrap}.proposal-brochure .proposal-sheet-footer>span:first-of-type{display:none}
 }
 @media print{
- .proposal-brochure .proposal-reading-grid{gap:18px;margin:18px 0 24px}
- .proposal-brochure .proposal-reading-block h4{font-size:12px}
- .proposal-brochure .proposal-reading-block ul,.proposal-brochure .proposal-reading-block p,.proposal-brochure .proposal-technical-note p{font-size:10px;line-height:1.6}
- .proposal-brochure .proposal-commercial-list>.proposal-reading-block{padding:14px 0;grid-template-columns:140px 1fr;gap:18px}
+ @page{size:A4;margin:10mm}.proposal.proposal-brochure{display:block;max-width:none!important;print-color-adjust:exact;-webkit-print-color-adjust:exact}.proposal-brochure .proposal-sheet{box-shadow:none;break-after:page}.proposal-brochure .proposal-sheet:last-child{break-after:auto}.proposal-brochure .proposal-cover-visual{min-height:370px}.proposal-brochure .proposal-cover-copy h2{font-size:43px}.proposal-brochure .proposal-sheet-content{padding:24px 30px}.proposal-brochure .proposal-overview{margin-inline:-30px}.proposal-brochure .proposal-keyfigures{padding:24px 30px}.proposal-brochure .proposal-keyfigures strong{font-size:30px}.proposal-brochure .proposal-masthead{padding:20px 30px 0}.proposal-brochure .proposal-cover-copy{padding:30px}.proposal-brochure .proposal-section-title{padding:26px 30px}.proposal-brochure .proposal-section-title h2{font-size:30px}.proposal-brochure .proposal-project-equipment-row{padding:20px 0}.proposal-brochure .proposal-project-equipment-row h4{font-size:21px}.proposal-brochure .proposal-reading-block ul,.proposal-brochure .proposal-reading-block p{font-size:11px}.proposal-brochure .proposal-reading-block h4{font-size:13px}.proposal-brochure .proposal-commercial-list>.proposal-reading-block{grid-template-columns:135px 1fr;padding:18px 0}.proposal-brochure .proposal-contact{margin-inline:-30px}.proposal-brochure .proposal-cover-visual,.proposal-brochure .proposal-keyfigures,.proposal-brochure .proposal-discount,.proposal-brochure .proposal-facts,.proposal-brochure .proposal-consumption,.proposal-brochure .proposal-warranties{break-inside:avoid}.proposal-brochure h3{break-after:avoid}.proposal-brochure .proposal-sheet-footer{padding:14px 30px}
 }
-.proposal-brochure .proposal-project-includes{margin-bottom:26px}
-.proposal-brochure .proposal-project-includes>h3{font-size:29px;letter-spacing:-.7px;margin:0 0 22px}
-.proposal-brochure .proposal-project-equipment{display:grid;gap:0}
-.proposal-brochure .proposal-project-equipment-row{display:flex;gap:18px;padding:22px 0;border-bottom:1px solid #dce6e5;break-inside:avoid}
-.proposal-brochure .proposal-project-equipment-row:first-child{padding-top:0}
-.proposal-brochure .proposal-project-equipment-icon{color:#6a8b21;padding-top:3px;flex-shrink:0}
-.proposal-brochure .proposal-project-equipment-row h4{color:#325d36;font-size:20px;font-weight:800;line-height:1.4;letter-spacing:-.35px;margin:0 0 9px}
-.proposal-brochure .proposal-project-model{color:#163d47;font-size:15px;font-weight:650;line-height:1.65;margin:0 0 5px}
-.proposal-brochure .proposal-project-note,.proposal-brochure .proposal-validity{color:#49656c;font-size:13px;line-height:1.6;margin:0}
-.proposal-brochure .proposal-validity{margin:0 0 26px}
-@media screen and (max-width:600px){.proposal-brochure .proposal-project-equipment-row{gap:12px}.proposal-brochure .proposal-project-equipment-row h4{font-size:18px}.proposal-brochure .proposal-project-includes>h3{font-size:25px}}
-@media print{.proposal-brochure .proposal-project-equipment-row h4{font-size:16px}.proposal-brochure .proposal-project-model{font-size:12px}.proposal-brochure .proposal-project-note,.proposal-brochure .proposal-validity{font-size:10px}}
-
-.quote-issue-panel{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:22px 24px;margin:8px 0 18px;background:#e8f2ed;border:1px solid #b5d1c4;border-radius:12px;color:#123f4b}.quote-issue-panel strong{font-size:18px}.quote-issue-panel p{margin:6px 0 0;line-height:1.5;font-size:15px}.quote-issue-panel button{flex-shrink:0}@media(max-width:700px){.quote-issue-panel{align-items:stretch;flex-direction:column}}
-
-.document-edit-fields{margin:24px 0;padding:22px;border:1px solid #b8cfd4;border-radius:12px;display:grid;gap:18px;background:#f5f9fa}.document-edit-fields legend{padding:0 8px;font-size:18px;font-weight:650;color:#123f4b}.document-edit-fields label{display:grid;gap:8px}.document-edit-fields textarea{font-size:16px;line-height:1.6}.document-edit-fields input{max-width:180px}.document-edit-fields button{justify-self:start}

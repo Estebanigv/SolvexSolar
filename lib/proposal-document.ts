@@ -1,7 +1,18 @@
 import type {SavedQuote} from './quote';
 import {customerTerms,customerDocumentSettings} from './commercial';
 
-export const proposalImages={roof:'/proposal/solar-roof.jpg',home:'/proposal/solar-home.jpg'};
+export const proposalImages={logo:'/proposal/logo-transparent-v2.png',roof:'/proposal/solar-roof.jpg',home:'/proposal/solar-home.jpg'};
+
+// Compare final payable amounts, including VAT in net-price catalogs.
+// Older quotes keep their existing presentation until explicitly enabled.
+export function proposalDiscount(q:SavedQuote){
+ const c=q.calculation;
+ if(q.input.showDiscount!==true||c.discount<=0)return null;
+ const before=c.subtotal+(q.settings.taxMode==='net'?Math.round(c.subtotal*q.settings.taxRate/100):0);
+ const amount=before-c.total;
+ if(amount<=0)return null;
+ return {percent:q.input.discountPercent,amount,before,total:c.total};
+}
 
 // Visibility only affects the customer document; the saved calculation remains intact.
 export function proposalLines(q:SavedQuote){

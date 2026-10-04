@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 // deployment must not impersonate that gateway or import Workers built-ins.
 const sites = !process.env.VERCEL && process.env.SOLVEX_RUNTIME === "sites";
 const nextConfig: NextConfig = {
+  devIndicators: {position:'top-right'},
   env: { NEXT_PUBLIC_APP_RUNTIME: sites ? "sites" : "nextjs" },
   ...(sites ? {} : {
     turbopack: {

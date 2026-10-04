@@ -7,6 +7,8 @@ export const energyInputSchema = z.object({
   tariff: z.string().max(50),
   latitude: z.number().finite().min(-56.6).max(-17).nullable(),
   longitude: z.number().finite().min(-110).max(-66).nullable(),
+  googlePlaceId: z.string().min(1).max(500).optional(),
+  solarGeneration: z.object({annualKwh:z.number().finite().min(0).max(1e10),context:z.string().max(1500),retrievedAt:z.string().datetime(),source:z.string().max(200)}).optional(),
   tilt: z.number().finite().min(0).max(90),
   azimuth: z.number().finite().min(-180).max(180),
   loss: z.number().finite().min(0).max(50),
@@ -17,6 +19,17 @@ export const newEnergyInput = (): EnergyInput => ({
   consumptionKwh: null, billingDays: null, distributor: '', tariff: '',
   latitude: null, longitude: null, tilt: 30, azimuth: 180, loss: 14, billReviewed: false,
 });
+
+// Google permits indefinite storage of place IDs, not of its geocoded coordinates.
+// Keep coordinates in the current session and refresh them when a proposal is reopened.
+export function persistentEnergy(input?:EnergyInput){
+  return input?.googlePlaceId?{...input,latitude:null,longitude:null}:input;
+}
+
+// Bind generation to the actual project parameters; omit Google coordinates from persisted keys.
+export function solarGenerationContext(input:EnergyInput,peakPower:number){
+ return JSON.stringify({location:input.googlePlaceId?{placeId:input.googlePlaceId}:{latitude:input.latitude,longitude:input.longitude},peakPower,tilt:input.tilt,azimuth:input.azimuth,loss:input.loss});
+}
 
 export function consumptionSummary(input?: EnergyInput) {
   if (!input || input.consumptionKwh === null || input.billingDays === null) return null;

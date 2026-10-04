@@ -23,5 +23,6 @@
   "id": "/",
   "scope": "/",
   "description": "Tu espacio de clientes, equipos y propuestas fotovoltaicas.",
-  "prefer_related_applications": false
+  "prefer_related_applications": false,
+  "related_applications": [{"platform":"webapp","url":"/manifest.webmanifest","id":"/"}]
 }

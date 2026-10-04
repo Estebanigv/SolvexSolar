@@ -3,7 +3,7 @@ import {locationKey,findCommune,regionMatches} from './chile-location';
 
 export const addressQuerySchema=z.object({address:z.string().trim().min(3).max(300),commune:z.string().trim().min(2).max(100),region:z.string().trim().min(2).max(100)}).strict().refine(input=>{const place=findCommune(input.commune);return !!place&&regionMatches(input.region,place.region)},{message:'Selecciona una comuna que pertenezca a la región indicada.'});
 export type AddressQuery=z.infer<typeof addressQuerySchema>;
-export type LocationCandidate={latitude:number;longitude:number;label:string;approximate:boolean};
+export type LocationCandidate={latitude:number;longitude:number;label:string;approximate:boolean;provider?:'google';placeId?:string};
 const feature=z.object({geometry:z.object({type:z.literal('Point'),coordinates:z.tuple([z.number().finite(),z.number().finite()])}),properties:z.object({countrycode:z.string(),type:z.string().optional(),name:z.string().optional(),street:z.string().optional(),housenumber:z.string().optional(),city:z.string().optional(),district:z.string().optional(),locality:z.string().optional(),county:z.string().optional(),state:z.string().optional()})});
 export function parseLocations(raw:unknown,input:AddressQuery):LocationCandidate[]{
   const data=z.object({features:z.array(z.unknown())}).parse(raw),seen=new Set<string>();

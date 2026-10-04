@@ -1,10 +1,12 @@
 import type {SavedQuote} from './quote';
 import {proposalTitle} from './commercial';
+import {hasCertificationConflict,certificationConflictMessage} from './additional-services';
 
 export function isIssued(q:SavedQuote){return !!q.issuedAt&&/^SVX-\d{4}-\d{6,}$/.test(q.folio);}
 export function documentTitle(q:SavedQuote){return isIssued(q)?'COTIZACIÓN':proposalTitle(q.input,q.id!=='draft'&&q.calculation.official);}
 export function issuanceProblems(q:SavedQuote):string[]{
  const problems:string[]=[];
+ if(hasCertificationConflict(q.calculation.lines.filter(line=>line.qty>0)))problems.push(certificationConflictMessage);
  if(!q.input.customer.name.trim())problems.push('Completa el nombre del cliente.');
  if(!q.input.customer.email.trim()&&!q.input.customer.phone.trim())problems.push('Completa el correo o teléfono del cliente.');
  if(!q.calculation.complete||!Number.isFinite(q.calculation.total)||q.calculation.total<=0)problems.push('Completa los equipos, sus precios y la instalación para emitir un total válido.');

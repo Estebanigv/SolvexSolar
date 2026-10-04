@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
+import {newEnergyInput} from '../lib/energy';
+import {persistentQuote} from '../lib/quote-persistence';
 import {newProjection,calculateProjection,projectionContext,publishedProjection} from '../lib/projection';
 import {newQuote,initialSettings,quoteSchema,type SavedQuote} from '../lib/quote';
-const p={...newProjection(),monthlySavings:100000,savingsSource:'Estudio técnico QA',degradation:0,years:10};
+const p={...newProjection(),savingsMode:'manual' as const,monthlySavings:100000,savingsSource:'Estudio técnico QA',degradation:0,years:10};
 let r=calculateProjection(p,6000000)!;
 assert.equal(r.payback,5);assert.equal(r.cumulative,12000000);assert.equal(r.net,6000000);assert.equal(r.co2Tonnes,null);
 r=calculateProjection({...p,annualMaintenance:200000,replacementYear:5,replacementCost:2000000},6000000)!;
@@ -22,3 +24,9 @@ assert.equal(publishedProjection({...q,input:{...q.input,customer:{...q.input.cu
 assert.equal(publishedProjection({...q,input:{...q.input,projection:{...q.input.projection,monthlySavings:110000}}}),null);
 assert.equal(publishedProjection({...q,calculation:{...q.calculation,complete:false}}),null);
 console.log('Proyección, costos, emisiones, validación y snapshots: OK');
+
+const googleQuote={...q,input:{...q.input,energy:{...newEnergyInput(),latitude:-33.36,longitude:-70.51,googlePlaceId:'test-place'}}};
+const context=projectionContext(googleQuote,p);
+assert.equal(context,projectionContext({...googleQuote,input:persistentQuote(googleQuote.input)},p));
+assert.ok(!context.includes('-33.36'));
+assert.notEqual(context,projectionContext({...googleQuote,input:{...googleQuote.input,energy:{...googleQuote.input.energy,googlePlaceId:'different-place'}}},p));

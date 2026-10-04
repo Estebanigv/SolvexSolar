@@ -1,11 +1,11 @@
 import {documentTitle,isIssued} from './quote-issuance';
-import {BlendMode,PDFDocument,StandardFonts,rgb,pushGraphicsState,popGraphicsState,rectangle,clip,endPath,type PDFImage} from 'pdf-lib';
+import {PDFDocument,StandardFonts,rgb,pushGraphicsState,popGraphicsState,rectangle,clip,endPath,type PDFImage} from 'pdf-lib';
 import {customerDocumentSettings,assignedAdviser,paymentBreakdown,netbillingScope,preliminaryNote} from './commercial';
 import {consumptionSummary} from './energy';
-import {proposalEquipment,proposalWarranties,proposalReadingSections,type ProposalTextBlock} from './proposal-document';
+import {proposalDiscount,proposalEquipment,proposalWarranties,proposalReadingSections,type ProposalTextBlock} from './proposal-document';
 import type {SavedQuote} from './quote';
 import {money,systemNames} from './quote';
-import {publishedProjection,projectionAssumptions} from './projection';
+import {publishedProjection,projectionAssumptions,savingsBillComparison} from './projection';
 
 type ProposalPhotos={roof?:ArrayBuffer;home?:ArrayBuffer};
 export async function quotePdf(q:SavedQuote,logoBytes?:ArrayBuffer,photos:ProposalPhotos={}){
@@ -13,7 +13,7 @@ export async function quotePdf(q:SavedQuote,logoBytes?:ArrayBuffer,photos:Propos
  const pdf=await PDFDocument.create();pdf.setTitle(`${q.folio} - ${q.settings.name}`);pdf.setAuthor(q.settings.name);
  const regular=await pdf.embedFont(StandardFonts.Helvetica),bold=await pdf.embedFont(StandardFonts.HelveticaBold);
  const ink=rgb(.05,.20,.25),brand=rgb(.03,.17,.22),teal=rgb(.06,.25,.28),green=rgb(.69,.80,.24),muted=rgb(.34,.44,.48),rule=rgb(.84,.89,.90),pale=rgb(.94,.96,.93),white=rgb(1,1,1),light=rgb(.79,.86,.86),lime=rgb(.79,.86,.38);
- const logo=logoBytes?await pdf.embedJpg(logoBytes):null,roof=photos.roof?await pdf.embedJpg(photos.roof):null,home=photos.home?await pdf.embedJpg(photos.home):null;
+ const logo=logoBytes?(new Uint8Array(logoBytes)[0]===137?await pdf.embedPng(logoBytes):await pdf.embedJpg(logoBytes)):null,roof=photos.roof?await pdf.embedJpg(photos.roof):null,home=photos.home?await pdf.embedJpg(photos.home):null;
  const W=595.28,H=841.89,M=36,R=W-M,CW=R-M;
  let page=pdf.addPage([W,H]),y=0,count=0,section='Resumen del proyecto';const sections:string[]=[];
  const clean=(s:string)=>s.replace(/[\u2010-\u2015]/g,'-').replace(/\u202f|\u00a0/g,' ').replace(/×/g,'x').replace(/[^\x20-\x7e\xa0-\xff\u2022\n]/g,'');
@@ -26,31 +26,52 @@ export async function quotePdf(q:SavedQuote,logoBytes?:ArrayBuffer,photos:Propos
  function imageCover(img:PDFImage,x:number,top:number,width:number,height:number){const scale=Math.max(width/img.width,height/img.height);page.pushOperators(pushGraphicsState(),rectangle(x,top-height,width,height),clip(),endPath());page.drawImage(img,{x:x+(width-img.width*scale)/2,y:top-height+(height-img.height*scale)/2,width:img.width*scale,height:img.height*scale});page.pushOperators(popGraphicsState())}
  const newPage=(nextSection=section)=>{if(count)page=pdf.addPage([W,H]);count++;section=nextSection;sections.push(section);if(count>1){draw(q.settings.name,M,H-30,11,true);right(q.folio,R,H-30,9,false,muted);line(H-42);y=H-64}};
  const space=(height:number)=>{if(y-height<57)newPage()};
- function text(s:string,size=9.5,isBold=false,color=muted){for(const row of wrap(s,size,CW,isBold)){space(size+4.5);draw(row,M,y-size,size,isBold,color);y-=size+4.5}}
+ function text(s:string,size=9.5,isBold=false,color=muted){const rows=wrap(s,size,CW,isBold);space(Math.min(rows.length,3)*(size+4.5));for(const row of rows){space(size+4.5);draw(row,M,y-size,size,isBold,color);y-=size+4.5}}
  function block(s:string,x:number,top:number,width:number,size=10,isBold=false,color=muted){const rows=wrap(s,size,width,isBold);rows.forEach((row,i)=>draw(row,x,top-size-i*(size+4.5),size,isBold,color));return rows.length*(size+4.5)}
- const heading=(s:string)=>{space(63);y-=6;draw(s,M,y-13,13,true);y-=27;};
- const title=(s:string,subtitle:string)=>{space(90);draw(s,M,y-25,25,true);y-=36;text(subtitle,10);y-=8};
+ const heading=(s:string)=>{space(63);y-=6;draw(s,M,y-16,15,true);y-=30;};
+ const title=(s:string,subtitle:string)=>{const rows=wrap(s,30,CW,true);space(rows.length*35+55);for(const row of rows){draw(row,M,y-30,30,true);y-=35}y-=8;text(subtitle,10);y-=16};
  newPage();
- box(0,H,W,84,brand);if(logo)page.drawImage(logo,{x:M-10,y:H-70,width:91,height:61,blendMode:BlendMode.Lighten});
- draw(q.settings.name,M+86,H-37,fitted(q.settings.name,17,235),true,white);draw('Proyectos que iluminan',M+86,H-54,8,false,light);
- right(documentTitle(q),R,H-32,8,true,lime);right(q.folio,R,H-51,9,false,white);
- const heroTop=H-84;box(0,heroTop,W,208,teal);if(roof)imageCover(roof,326,heroTop,W-326,208);
- draw(systemNames[q.input.system],M,heroTop-33,10,true,lime);draw('Tu proyecto',M,heroTop-78,29,true,white);draw('fotovoltaico',M,heroTop-113,29,true,white);
- draw(q.calculation.kwp.toLocaleString('es-CL',{maximumFractionDigits:3})+' kWp',M,heroTop-156,28,true,lime);draw(q.calculation.panels+' paneles para tu proyecto',M,heroTop-179,10,false,light);
- if(roof){box(W-127,heroTop-187,112,14,brand);draw('Imagen referencial',W-119,heroTop-197,8,false,white)}
- y=heroTop-228;
+ // Full-bleed photography and transparent branding form one continuous cover.
+ const heroHeight=350;
+ box(0,H,W,heroHeight,brand);if(roof)imageCover(roof,0,H,W,heroHeight);
+ page.drawRectangle({x:0,y:H-heroHeight,width:W,height:heroHeight,color:brand,opacity:.24});
+ for(let i=0;i<70;i++){
+  const progress=i/69,opacity=.68*Math.pow(Math.abs(progress-.36)/.64,1.4);
+  page.drawRectangle({x:0,y:H-(i+1)*5,width:W,height:5,color:brand,opacity:Math.min(.78,opacity)});
+ }
+ if(logo)page.drawImage(logo,{x:M,y:H-102,width:117,height:78});
+ right(documentTitle(q),R,H-43,8,true,lime);right(q.folio,R,H-60,10,false,white);
+ draw(systemNames[q.input.system],M,H-188,11,true,lime);
+ draw('Tu proyecto solar,',M,H-235,37,true,white);draw('en detalle.',M,H-279,37,true,white);
+ const customer='Preparado para '+(q.input.customer.name||'ti');
+ block(customer,M,H-297,CW-95,12,false,white);
+ if(roof)right('Imagen referencial',R,H-337,7,false,light);
+ y=H-heroHeight;
+ box(0,y,W,96,teal);const half=CW*.55;
+ draw(q.calculation.complete?'Inversión total':'Subtotal parcial',M,y-23,10,false,light);
+ draw(money(q.calculation.total),M,y-58,fitted(money(q.calculation.total),32,half-28),true,white);
+ draw(q.calculation.tax===null?'IVA pendiente · CLP':'Valor final con IVA · CLP',M,y-79,9,false,light);
+ page.drawLine({start:{x:M+half,y:y-20},end:{x:M+half,y:y-79},thickness:.6,color:muted});
+ draw('Potencia del sistema',M+half+24,y-23,10,false,light);
+ draw(q.calculation.kwp.toLocaleString('es-CL',{maximumFractionDigits:3})+' kWp',M+half+24,y-58,29,true,lime);
+ draw(q.calculation.panels+' paneles',M+half+24,y-79,9,false,light);y-=96;
+ const discount=proposalDiscount(q);
+ if(discount){
+  box(0,y,W,75,pale);
+  const badge=discount.percent!==undefined?`${discount.percent}%`:'Beneficio';
+  draw(badge,M,y-34,fitted(badge,30,82),true,teal);draw('de descuento',M,y-53,9,true,teal);
+  draw('Descuento para tu proyecto',M+113,y-20,11,true,ink);
+  draw('Ahorras '+money(discount.amount)+' en tu inversión.',M+113,y-40,fitted('Ahorras '+money(discount.amount)+' en tu inversión.',12,CW-113),true,teal);
+  const previous='Precio anterior: '+money(discount.before);draw(previous,M+113,y-58,9,false,muted);
+  const start=M+113+regular.widthOfTextAtSize('Precio anterior: ',9);page.drawLine({start:{x:start,y:y-55},end:{x:start+regular.widthOfTextAtSize(money(discount.before),9),y:y-55},thickness:.6,color:muted});y-=75;
+ }
+ y-=30;
  const facts=[['Cliente',q.input.customer.name||'Por completar'],['Teléfono',q.input.customer.phone||'Por completar'],['Correo',q.input.customer.email||'Por completar'],['Región',q.input.customer.region||'Por completar'],['Comuna',q.input.customer.commune||'Por completar'],['Emisión',new Date(q.issuedAt??q.date).toLocaleDateString('es-CL',{timeZone:'America/Santiago'})]];
  const factWidth=(CW-28)/3;
  for(let row=0;row<2;row++){const values=facts.slice(row*3,row*3+3),height=Math.max(...values.map(([,v])=>wrap(v,9.5,factWidth,true).length*14))+23;space(height);values.forEach(([label,value],i)=>{const x=M+i*(factWidth+14);draw(label,x,y-8,8,false,muted);block(value,x,y-16,factWidth,9.5,true,ink)});y-=height+8}
  if(q.input.customer.address){text(q.input.customer.address,9);y-=7}line(y);y-=3;
- heading('Sistema cotizado');space(84);const half=(CW-12)/2;
- box(M,y,half,76,teal);box(M+half+12,y,half,76,green);
- draw(q.calculation.complete?'Inversión total':'Subtotal parcial',M+15,y-18,9,false,light);draw(money(q.calculation.total),M+15,y-47,fitted(money(q.calculation.total),26,half-30),true,white);draw(q.calculation.tax===null?'IVA pendiente · CLP':'Valor final con IVA · CLP',M+15,y-64,8,false,light);
- draw('Potencia del sistema',M+half+27,y-18,9,false,ink);draw(q.calculation.kwp.toLocaleString('es-CL',{maximumFractionDigits:3})+' kWp',M+half+27,y-47,25,true);draw(q.calculation.panels+' paneles',M+half+27,y-64,8,false,ink);y-=87;
  const equipment=proposalEquipment(q);
- const consumption=consumptionSummary(q.input.energy);
- if(consumption&&q.input.energy){space(104);heading('Consumo de referencia');const values=[['Boleta informada',money(q.input.customer.bill)],['Consumo del período',q.input.energy.consumptionKwh?.toLocaleString('es-CL')+' kWh'],['Período facturado',q.input.energy.billingDays+' días']];values.forEach(([label,value],i)=>{const x=M+i*(factWidth+14);draw(label,x,y-8,8,false,muted);draw(value,x,y-29,17,true)});y-=41;text([q.input.energy.distributor,q.input.energy.tariff,q.input.energy.billReviewed?'Revisado con la boleta':'Pendiente de revisión'].filter(Boolean).join(' · '),8);text(`Equivalente a 30 días: ${consumption.equivalent30DaysKwh.toLocaleString('es-CL',{maximumFractionDigits:1})} kWh. No representa una proyección anual.`,8);}
- newPage('Equipos y pagos');title('Equipos y alcance','Los equipos seleccionados para tu proyecto y su forma de pago.');
+ newPage('Equipos y pagos');title('La tecnología de tu proyecto','Equipos seleccionados, potencia y forma de pago.');
  heading('Tu proyecto incluye');y-=5;
  for(const item of equipment){
   const width=CW-30;
@@ -65,17 +86,30 @@ export async function quotePdf(q:SavedQuote,logoBytes?:ArrayBuffer,photos:Propos
  text(`Vigencia de ${q.settings.validDays} días desde la emisión.`,10);y-=10;
  const c=q.calculation;
  const payments=paymentBreakdown(c.total,q.settings);const paymentHeight=payments.length?72:0;space(58+paymentHeight);heading('Forma de pago');text(q.input.payment,10,true);y-=10;
- for(let i=0;i<payments.length;i+=3){const group=payments.slice(i,i+3),col=(CW-20)/3;const height=Math.max(...group.map(row=>wrap(row.label,9,col-20,true).length*13.5))+54;space(height);group.forEach((row,j)=>{const x=M+j*(col+10);box(x,y,col,height,pale);block(row.label,x+10,y-10,col-20,9,true,ink);const labelHeight=wrap(row.label,9,col-20,true).length*13.5;draw(`${row.percent}% del total`,x+10,y-23-labelHeight,8,false,muted);draw(money(row.amount),x+10,y-height+12,fitted(money(row.amount),17,col-20),true,ink)});y-=height+10}
+ for(let i=0;i<payments.length;i+=3){const group=payments.slice(i,i+3),col=(CW-20)/3;const height=Math.max(...group.map(row=>wrap(row.label,9,col-20,true).length*13.5))+54;space(height);group.forEach((row,j)=>{const x=M+j*(col+10);page.drawLine({start:{x,y},end:{x:x+col,y},thickness:2,color:green});block(row.label,x+10,y-10,col-20,9,true,ink);const labelHeight=wrap(row.label,9,col-20,true).length*13.5;draw(`${row.percent}% del total`,x+10,y-23-labelHeight,8,false,muted);draw(money(row.amount),x+10,y-height+12,fitted(money(row.amount),17,col-20),true,ink)});y-=height+10}
+ y-=16;
+ const consumption=consumptionSummary(q.input.energy);
+ if(consumption&&q.input.energy){space(104);heading('Consumo de referencia');const values=[['Boleta informada',money(q.input.customer.bill)],['Consumo del período',q.input.energy.consumptionKwh?.toLocaleString('es-CL')+' kWh'],['Período facturado',q.input.energy.billingDays+' días']];values.forEach(([label,value],i)=>{const x=M+i*(factWidth+14);draw(label,x,y-8,8,false,muted);draw(value,x,y-29,17,true)});y-=41;text([q.input.energy.distributor,q.input.energy.tariff,q.input.energy.billReviewed?'Revisado con la boleta':'Pendiente de revisión'].filter(Boolean).join(' · '),8);text(`Equivalente a 30 días: ${consumption.equivalent30DaysKwh.toLocaleString('es-CL',{maximumFractionDigits:1})} kWh. No representa una proyección anual.`,8);}
  if(!isIssued(q)&&c.warnings.length){heading('Propuesta en revisión');for(const warning of c.warnings)text('- '+warning,9,false,rgb(.46,.36,.16))}
  const forecast=publishedProjection(q);
  if(forecast){
   newPage('Proyección y supuestos');title('El valor de tu energía','Escenario estimado, sujeto a los supuestos revisados del proyecto.');
+  const comparison=savingsBillComparison(q,forecast.input);
+  if(comparison){
+   space(157);draw('Ahorro respecto de tu boleta',M,y-15,15,true);
+   right(comparison.percent.toLocaleString('es-CL',{maximumFractionDigits:1})+'%',R,y-31,34,true,teal);
+   draw('Referencia mensual del primer año',M,y-34,9,false,muted);
+   box(M,y-51,CW,8,pale);if(comparison.barPercent>0)box(M,y-51,CW*comparison.barPercent/100,8,green);
+   draw('Boleta mensualizada',M,y-80,9,false,muted);right('Beneficio mensual estimado',R,y-80,9,false,muted);
+   draw(money(comparison.monthlyBill),M,y-102,19,true);right(money(comparison.monthlySavings),R,y-102,19,true);
+   y-=114;text('Boleta de '+comparison.billingDays+' días ajustada a un mes promedio (365 / 12 días). El beneficio puede incluir excedentes; no representa una boleta futura ni un ahorro garantizado.',8);y-=17;
+  }
   const metrics=[['Ahorro mensual inicial',money(forecast.input.monthlySavings!)],['Recuperación estimada',forecast.payback!==null?forecast.payback.toLocaleString('es-CL',{maximumFractionDigits:1})+' años':'Fuera del horizonte'],['Balance neto a '+forecast.input.years+' años',money(forecast.net)]];
-  const col=(CW-20)/3;space(80);metrics.forEach(([label,value],i)=>{const x=M+i*(col+10);box(x,y,col,70,teal);draw(label,x+10,y-18,8,false,light);draw(value,x+10,y-45,fitted(value,19,col-20),true,lime)});y-=86;
+  const col=(CW-20)/3;space(80);metrics.forEach(([label,value],i)=>{const x=M+i*(col+10);box(x,y,col,70,pale);draw(label,x+10,y-18,8,false,muted);draw(value,x+10,y-45,fitted(value,19,col-20),true,ink)});y-=86;
   text('Inversión total: '+money(c.total)+'. Ahorro del primer año después de costos: '+money(forecast.annual)+'.',10,true);y-=6;heading('Ahorro acumulado');text('Después de mantenciones y reposición; antes de descontar la inversión inicial de '+money(c.total)+'.',10);y-=15;
   const max=Math.max(1,c.total,...forecast.rows.map(r=>r.cumulative));
   for(const row of forecast.rows.filter(r=>r.year===1||r.year%5===0||r.year===forecast.input.years)){
-   space(35);draw('Año '+row.year,M,y-14,10,true);box(M+60,y-3,285,17,pale);if(row.cumulative>0)box(M+60,y-3,285*row.cumulative/max,17,teal);right(money(row.cumulative),R,y-15,10,true);y-=32;
+   space(29);draw('Año '+row.year,M,y-14,10,true);box(M+60,y-3,285,17,pale);if(row.cumulative>0)box(M+60,y-3,285*row.cumulative/max,17,teal);right(money(row.cumulative),R,y-15,10,true);y-=26;
   }
   y-=8;text('Ahorro acumulado: '+money(forecast.cumulative)+'. Balance después de inversión: '+money(forecast.net)+'.',10,true);
   if(forecast.co2Tonnes!==null){heading('Impacto ambiental estimado');text(forecast.co2Tonnes.toLocaleString('es-CL',{maximumFractionDigits:2})+' t CO2 evitadas en el primer año',15,true,teal);text(forecast.input.avoidedKwh?.toLocaleString('es-CL')+' kWh sustituidos x '+forecast.input.emissionFactor+' kg CO2/kWh. Fuente: '+forecast.input.emissionSource,9)}
@@ -89,9 +123,9 @@ export async function quotePdf(q:SavedQuote,logoBytes?:ArrayBuffer,photos:Propos
  }
  function readingBlock(group:ProposalTextBlock){space(64);draw(group.title,M,y-12,12,true);y-=23;bulletList(group.items);y-=10}
  newPage('Garantías y alcance');
- if(home){imageCover(home,M,y,CW,65);box(R-115,y-48,115,14,brand);draw('Imagen referencial',R-107,y-58,8,false,white);y-=80}
+ if(home){imageCover(home,0,y+5,W,112);box(R-108,y-87,108,14,brand);draw('Imagen referencial',R-101,y-97,8,false,white);y-=136}
  heading('Respaldo para tu proyecto');const warranties=proposalWarranties(q.settings.warranty);
- if(warranties.length){space(70);box(M,y,CW,58,teal);warranties.forEach((w,i)=>{const x=M+15+i*(CW/3);draw(w.years+' '+(w.years===1?'año':'años'),x,y-28,23,true,lime);draw(w.label,x,y-48,9,false,light)});y-=78}
+ if(warranties.length){space(70);line(y);warranties.forEach((w,i)=>{const x=M+i*(CW/3);draw(w.years+' '+(w.years===1?'año':'años'),x,y-32,26,true,teal);draw(w.label,x,y-53,10,false,muted)});line(y-67);y-=86}
  const coverageWidth=(CW-28)/2;
  for(let i=0;i<reading.warranty.length;i+=2){
   const pair=reading.warranty.slice(i,i+2),height=Math.max(...pair.map(g=>28+g.items.reduce((h,item)=>h+wrap(item,10,coverageWidth-12).length*14.5+6,0)))+14;
@@ -113,7 +147,17 @@ export async function quotePdf(q:SavedQuote,logoBytes?:ArrayBuffer,photos:Propos
  const netbilling=netbillingScope(q.input,q.settings);
  if(netbilling){heading('Certificación y Netbilling');bulletList([netbilling])}
  if(q.input.financingNote?.trim()){heading('Acompañamiento financiero');bulletList([q.input.financingNote])}
- const adviser=assignedAdviser(q.input,q.settings);heading('Conversemos sobre tu proyecto');text(adviser?.name||q.settings.legal||q.settings.name,11,true,ink);text([adviser?.email||q.settings.email,adviser?.phone||q.settings.phone].filter(Boolean).join(' · '),9);y-=8;if(adviser)text(q.settings.legal||q.settings.name,9,true);if(adviser&&adviser.email!==q.settings.email)text(q.settings.email,9);y-=8;text('Las fotografías son referenciales y no representan la instalación cotizada. No se incluyen estimaciones de ahorro, generación o retorno sin parámetros técnicos validados.',8);
+ const adviser=assignedAdviser(q.input,q.settings);
+ const contactLines=[{text:adviser?.name||q.settings.legal||q.settings.name,bold:true},
+  {text:[adviser?.email||q.settings.email,adviser?.phone||q.settings.phone].filter(Boolean).join(' · '),bold:false},
+  ...(adviser?[{text:q.settings.legal||q.settings.name,bold:true}]:[]),
+  ...(adviser&&adviser.email!==q.settings.email?[{text:q.settings.email,bold:false}]:[])];
+ const contactHeight=75+contactLines.reduce((height,item)=>height+wrap(item.text,10,CW,item.bold).length*14.5+6,0);
+ space(contactHeight+24);y-=12;box(0,y,W,contactHeight,teal);
+ draw('Conversemos sobre tu proyecto',M,y-33,19,true,white);
+ let contactTop=y-51;
+ for(const item of contactLines)contactTop-=block(item.text,M,contactTop,CW,10,item.bold,item.bold?lime:white)+6;
+ y-=contactHeight+18;text('Las fotografías son referenciales y no representan la instalación cotizada. No se incluyen estimaciones de ahorro, generación o retorno sin parámetros técnicos validados.',8);
  const pages=pdf.getPages();pages.forEach((p,i)=>{page=p;line(42);draw(q.settings.name+' · '+sections[i],M,27,8,false,muted);right(`${q.folio} · ${i+1} / ${pages.length}`,R,27,8,false,muted)});
  return new Uint8Array(await pdf.save());
 }

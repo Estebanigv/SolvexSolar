@@ -1,0 +1,25 @@
+/* One tab list preserves continuous keyboard navigation across work areas. */
+.app-root .app-toolbar [data-slot=sidebar-trigger] {display:inline-flex;flex-shrink:0;width:auto;min-width:44px;height:44px;padding:0 12px;gap:8px;border:1px solid #bdcfd5;border-radius:9px;background:#f5f9fa;color:#154652;font-size:13px;font-weight:650;box-shadow:none}
+.app-root .app-toolbar [data-slot=sidebar-trigger]:hover {background:#e5f0f1;border-color:#8babaf}
+.app-root .app-toolbar [data-slot=sidebar-trigger]:focus-visible {outline:3px solid #8da83e;outline-offset:3px}
+.app-root .app-toolbar [data-slot=sidebar-trigger] svg {width:19px;height:19px}
+@media(max-width:700px){.sidebar-trigger-label {display:none}.app-root .app-toolbar [data-slot=sidebar-trigger] {width:44px;padding:0}}
+@media(prefers-reduced-motion:reduce){[data-slot=sidebar-container],[data-slot=sidebar-gap] {transition:none!important}}
+.grouped-navigation .nav-brand {padding:20px 16px 18px!important;margin:0 18px}
+.grouped-navigation .nav-brand img {width:124px;height:80px;object-fit:contain;mix-blend-mode:normal}
+.grouped-navigation .nav-content {padding:18px 14px!important;gap:0!important}
+.grouped-tabs .nav-section+.nav-section {margin-top:20px;padding-top:18px;border-top:1px solid #ffffff24}
+.grouped-tabs .nav-section-heading {padding:0 12px 10px;text-align:left;white-space:normal}
+.grouped-tabs .nav-section-heading h2 {color:#d4e67d;font-size:15px;line-height:1.4;font-weight:750;letter-spacing:0}
+.grouped-tabs .nav-section-heading p {color:#b7cdd1;font-size:12px;line-height:1.5;margin:3px 0 0;font-weight:450}
+.grouped-tabs [data-slot=sidebar-menu] {gap:3px}
+.side-tabs.grouped-tabs [role=tab] {height:44px;font-size:15px;gap:10px;letter-spacing:0}
+.side-tabs.grouped-tabs [role=tab] span {white-space:normal;text-align:left}
+@media(max-height:800px) and (min-width:1024px){
+ .grouped-navigation .nav-brand {flex-direction:row;gap:10px;padding:12px 0!important}
+ .grouped-navigation .nav-brand img {width:76px;height:50px}
+ .grouped-navigation .nav-brand>span {font-size:12px;max-width:90px;margin:0}
+ .grouped-navigation .nav-content {padding-block:12px!important}
+ .grouped-tabs .nav-section+.nav-section {margin-top:12px;padding-top:12px}
+ .grouped-tabs .nav-section-heading p {display:none}
+}

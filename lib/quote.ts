@@ -3,6 +3,7 @@ import {projectionSchema} from './projection';
 import {z} from 'zod';
 import {adviserSchema,roiReferenceSchema,paymentScheduleSchema,greenCreditNote} from './commercial';
 import {energyInputSchema,consumptionSummary} from './energy';
+import {customServiceSchema,hasCertificationConflict,certificationConflictMessage} from './additional-services';
 export const systems=['ON GRID','ON GRID TRIFASICO','OFF GRID','HIBRIDO','HIBRIDO TRIFASICO'] as const;
 export const systemNames:Record<string,string>={'ON GRID':'On Grid monofásico','ON GRID TRIFASICO':'On Grid trifásico','OFF GRID':'Off Grid','HIBRIDO':'Híbrido monofásico','HIBRIDO TRIFASICO':'Híbrido trifásico'};
 export const productSchema=z.object({id:z.string().min(1).max(60),system:z.enum(systems),category:z.string().min(1).max(100),name:z.string().min(1).max(180),price:z.number().finite().min(0).max(1e10).nullable(),unit:z.string().min(1).max(50),source:z.string().max(200),watts:z.number().finite().min(0).max(2000).nullable()});
@@ -14,7 +15,7 @@ export const installation:InstallationRates=raw.installation;
 export const settingsSchema=z.object({advisers:z.array(adviserSchema).max(50).optional(),roiReference:roiReferenceSchema.optional(),paymentSchedule:paymentScheduleSchema.optional(),netbillingTerms:z.string().max(2000).optional(),requirementsVersion:z.string().max(50).optional(),name:z.string().min(1).max(100),legal:z.string().max(150),rut:z.string().max(30),address:z.string().max(250),email:z.union([z.literal(''),z.string().email()]),phone:z.string().max(40),validDays:z.number().int().min(1).max(365),taxMode:z.enum(['pending','included','net']),taxRate:z.number().min(0).max(100),terms:z.string().max(5000),warranty:z.string().max(3000),approved:z.boolean()});
 export type Settings=z.infer<typeof settingsSchema>;
 export const initialSettings:Settings={name:'Solvex Solar',legal:'',rut:'',address:'',email:'contacto@solvexsolar.cl',phone:'',validDays:15,taxMode:'pending',taxRate:19,terms:'',warranty:'',approved:false};
-export const quoteSchema=z.object({documentTerms:z.string().max(5000).optional(),documentWarranty:z.string().max(3000).optional(),documentValidDays:z.number().int().min(1).max(365).optional(),projection:projectionSchema.optional(),financingNote:z.string().max(1000).optional(),showItemDetails:z.boolean().optional(),hiddenLineIds:z.array(z.string().min(1).max(60)).max(1000).optional(),proposalType:z.enum(['preliminary','final']).optional(),adviserId:z.string().max(80).optional(),discountPercent:z.number().int().min(0).max(30).optional(),energy:energyInputSchema.optional(),system:z.enum(systems),customer:z.object({name:z.string().max(150),email:z.union([z.literal(''),z.string().email()]),phone:z.string().max(40),region:z.string().max(100),commune:z.string().max(100),address:z.string().max(300),bill:z.number().finite().min(0).max(1e9)}),quantities:z.record(z.number().finite().min(0).max(100000)),extra:z.number().finite().min(0).max(1e10),extraLabel:z.string().max(300),discount:z.number().finite().min(0).max(1e10),installationOverride:z.number().finite().min(0).max(1e10).nullable(),installationNote:z.string().max(300),payment:z.string().min(1).max(100),notes:z.string().max(5000),technicalReviewed:z.boolean()});
+export const quoteSchema=z.object({customServices:z.array(customServiceSchema).max(50).refine(rows=>new Set(rows.map(r=>r.id)).size===rows.length,{message:"Hay servicios adicionales duplicados."}).optional(),documentTerms:z.string().max(5000).optional(),documentWarranty:z.string().max(3000).optional(),documentValidDays:z.number().int().min(1).max(365).optional(),projection:projectionSchema.optional(),financingNote:z.string().max(1000).optional(),showDiscount:z.boolean().optional(),showItemDetails:z.boolean().optional(),hiddenLineIds:z.array(z.string().min(1).max(60)).max(1000).optional(),proposalType:z.enum(['preliminary','final']).optional(),adviserId:z.string().max(80).optional(),discountPercent:z.number().int().min(0).max(30).optional(),energy:energyInputSchema.optional(),system:z.enum(systems),customer:z.object({name:z.string().max(150),email:z.union([z.literal(''),z.string().email()]),phone:z.string().max(40),region:z.string().max(100),commune:z.string().max(100),address:z.string().max(300),bill:z.number().finite().min(0).max(1e9)}),quantities:z.record(z.number().finite().min(0).max(100000)),extra:z.number().finite().min(0).max(1e10),extraLabel:z.string().max(300),discount:z.number().finite().min(0).max(1e10),installationOverride:z.number().finite().min(0).max(1e10).nullable(),installationNote:z.string().max(300),payment:z.string().min(1).max(100),notes:z.string().max(5000),technicalReviewed:z.boolean()});
 export type QuoteInput=z.infer<typeof quoteSchema>;
 export type Line={id:string;name:string;qty:number;unit:string;price:number|null;total:number|null;source:string;category:string};
 export type Calculation={lines:Line[];panelWatts?:number[];panels:number;kwp:number;subtotal:number;discount:number;net:number;tax:number|null;total:number;warnings:string[];complete:boolean;official:boolean};
@@ -31,7 +32,7 @@ export function panelQuantities(input:Pick<QuoteInput,'system'|'quantities'>,pro
  for(const p of products)if(p.system===input.system&&followsPanelCount(p)&&quantities[p.id]>0)quantities[p.id]=panels;
  return quantities;
 }
-export function newQuote():QuoteInput{return {financingNote:greenCreditNote,showItemDetails:true,proposalType:'preliminary',discountPercent:0,system:'ON GRID',customer:{name:'',email:'',phone:'',region:'',commune:'',address:'',bill:0},quantities:{'0-10':8,'0-13':8,'0-26':1,'0-35':15,'0-37':15,'0-43':1,'0-45':1,'0-47':1},extra:0,extraLabel:'',discount:0,installationOverride:null,installationNote:'',payment:'Transferencia bancaria',notes:'',technicalReviewed:false}}
+export function newQuote():QuoteInput{return {customServices:[],financingNote:greenCreditNote,showDiscount:false,showItemDetails:true,proposalType:'preliminary',discountPercent:0,system:'ON GRID',customer:{name:'',email:'',phone:'',region:'',commune:'',address:'',bill:0},quantities:{'0-10':8,'0-13':8,'0-26':1,'0-35':15,'0-37':15,'0-43':1,'0-45':1,'0-47':1},extra:0,extraLabel:'',discount:0,installationOverride:null,installationNote:'',payment:'Transferencia bancaria',notes:'',technicalReviewed:false}}
 // Reconcile editable drafts only. Saved snapshots and server validation stay intact.
 export function reconcileQuoteProducts(input:QuoteInput,products:Product[]):QuoteInput{
  const ids=new Set(products.map(p=>p.id));
@@ -42,6 +43,7 @@ export function reconcileQuoteProducts(input:QuoteInput,products:Product[]):Quot
 export function calculate(input:QuoteInput,products:Product[],settings:Settings,installationRates:InstallationRates=installation):Calculation{
  const parsed=quoteSchema.parse(input); const q={...parsed,quantities:panelQuantities(parsed,products)}; const warnings:string[]=[];
  const selected=products.filter(p=>p.system===q.system&&!isInstallation(p)&&(q.quantities[p.id]||0)>0);
+ if(hasCertificationConflict([...selected,...(q.customServices??[]).filter(s=>s.quantity>0).map(s=>({name:s.name,category:'ADICIONALES'}))]))throw new z.ZodError([{code:'custom',path:['quantities'],message:certificationConflictMessage}]);
  const ids=new Set(products.map(p=>p.id));
  if(Object.entries(q.quantities).some(([id,n])=>n>0&&!ids.has(id))) throw Error('La propuesta contiene un equipo que ya no está en el catálogo.');
  const lines:Line[]=selected.map(p=>({id:p.id,name:p.name,qty:q.quantities[p.id],unit:productUnit(p),price:p.price,total:p.price===null?null:Math.round(p.price*q.quantities[p.id]),source:p.source,category:p.category}));
@@ -60,6 +62,12 @@ export function calculate(input:QuoteInput,products:Product[],settings:Settings,
  if(installationPrice!==null&&settings.taxMode==='net')installationPrice/=1+settings.taxRate/100;
  lines.push({id:'installation',name:'Servicio de instalación',qty:1,unit:'servicio',price:installationPrice,total:installationPrice===null?null:Math.round(installationPrice),source:q.installationOverride!==null?'Valor total manual: '+q.installationNote:install?.source||'Sin tarifa',category:'INSTALACIÓN'});
  if(q.extra>0){lines.push({id:'extra',name:q.extraLabel||'Costos adicionales',qty:1,unit:'servicio',price:q.extra,total:Math.round(q.extra),source:'Ingreso del ejecutivo',category:'ADICIONALES'});if(!q.extraLabel.trim())warnings.push('Describe qué cubren los costos adicionales.');}
+ for(const service of q.customServices??[]){
+  if(service.quantity===0)continue;
+  if(!service.name.trim()){complete=false;warnings.push('Describe cada servicio adicional en Otros.');}
+  if(service.price===null){complete=false;warnings.push(`Indica el precio de ${service.name.trim()||'Otros servicios adicionales'}.`);}
+  lines.push({id:`custom:${service.id}`,name:service.name.trim()||'Otro servicio adicional',qty:service.quantity,unit:'servicio',price:service.price,total:service.price===null?null:Math.round(service.quantity*service.price),source:'Servicio ingresado en esta cotización',category:'ADICIONALES'});
+ }
  const subtotal=lines.reduce((s,l)=>s+(l.total??0),0);
  if(q.discountPercent===undefined&&q.discount>subtotal){complete=false;warnings.push('El descuento supera el subtotal.');}
  const discount=q.discountPercent!==undefined?Math.round(subtotal*q.discountPercent/100):Math.min(subtotal,Math.round(q.discount));
@@ -82,7 +90,7 @@ export function calculate(input:QuoteInput,products:Product[],settings:Settings,
 export function mergeQuotePatch(quote:QuoteInput,patch:Partial<QuoteInput>):QuoteInput{
   const next={...quote,...patch,technicalReviewed:patch.technicalReviewed??false};
   if(patch.customer&&(['address','commune','region'] as const).some(key=>patch.customer![key]!==quote.customer[key])&&next.energy){
-    next.energy={...next.energy,latitude:null,longitude:null};
+    next.energy={...next.energy,latitude:null,longitude:null,googlePlaceId:undefined,solarGeneration:undefined};
   }
   return next;
 }

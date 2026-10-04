@@ -22,12 +22,12 @@ export function AddressLocation({address,onChoose,lookup}:{address:AddressQuery;
   return <div className="address-location">
     <strong>Buscar el lugar de instalación</strong>
     <p>{[address.address,address.commune,address.region].filter(Boolean).join(', ')||'Completa la dirección del cliente en el paso 1.'}</p>
-    <p className="energy-explanation">Al buscar se envían la dirección, comuna y región a Photon (Komoot), basado en OpenStreetMap. Confirma que el resultado corresponda al lugar de instalación.</p>
+    <p className="energy-explanation">Al buscar se envían la dirección, comuna y región a Google Maps. No se envían la boleta ni los datos de contacto. Confirma que el resultado corresponda al lugar de instalación.</p>
     <Button variant="outline" disabled={loading||!addressQuerySchema.safeParse(address).success} onClick={search}>{loading?<LoaderCircle className="animate-spin"/>:<MapPin/>}{loading?'Buscando ubicación…':'Buscar coordenadas por dirección'}</Button>
     {!addressQuerySchema.safeParse(address).success&&<p className="energy-explanation">Completa calle y número, región y una comuna de esa región para buscar.</p>}
     {error&&<p className="energy-error" role="alert">{error}</p>}
-    <div className="location-candidates">{locations.map(point=><div key={`${point.latitude},${point.longitude}`}><strong>{point.label}</strong><p>{point.approximate?'Ubicación aproximada de calle o sector; ajusta el punto de instalación.':'Dirección con numeración; verifica el punto de instalación.'}</p><small>{point.latitude.toFixed(6)}, {point.longitude.toFixed(6)}</small><div><a href={`https://www.openstreetmap.org/?mlat=${point.latitude}&mlon=${point.longitude}#map=18/${point.latitude}/${point.longitude}`} target="_blank" rel="noreferrer">Ver en mapa</a><Button variant="outline" onClick={()=>{onChoose(point);setSelected(point.label)}}>Usar esta ubicación</Button></div></div>)}</div>
+    <div className="location-candidates">{locations.map(point=><div key={`${point.latitude},${point.longitude}`}><strong>{point.label}</strong><p>{point.approximate?'Ubicación aproximada de calle o sector; ajusta el punto de instalación.':'Dirección con numeración; verifica el punto de instalación.'}</p><small>{point.latitude.toFixed(6)}, {point.longitude.toFixed(6)}</small><div><a href={`https://www.google.com/maps/search/?api=1&query=${point.latitude},${point.longitude}${point.placeId?`&query_place_id=${encodeURIComponent(point.placeId)}`:""}`} target="_blank" rel="noreferrer">Ver en Google Maps</a><Button variant="outline" onClick={()=>{onChoose(point);setSelected(point.label)}}>Usar esta ubicación</Button></div></div>)}</div>
     {selected&&<p role="status">Latitud y longitud cargadas. Puedes ajustarlas en los campos de abajo.</p>}
-    <small>Fuente: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">© OpenStreetMap contributors</a> · Photon / Komoot</small>
+    <small>Fuente de la búsqueda: <span translate="no" style={{color:"#5e5e5e",fontWeight:400,whiteSpace:"nowrap"}}>Google Maps</span> · <a href="/privacidad">Privacidad y condiciones</a></small>
   </div>;
 }

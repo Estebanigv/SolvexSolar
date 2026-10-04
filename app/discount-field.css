@@ -1,0 +1,7 @@
+.discount-field{min-width:0}
+.discount-field .discount-visibility{display:flex;align-items:flex-start;gap:12px;margin-top:16px;padding:15px;background:#edf4e7;border:1px solid #c5d6af;border-radius:8px;cursor:pointer}
+.discount-field .discount-visibility input{width:20px;height:20px;min-height:20px;margin:2px 0 0;flex-shrink:0;accent-color:#145c4c}
+.discount-field .discount-visibility strong{display:block;font-size:15px;line-height:1.5;color:#153f35}
+.discount-field .discount-visibility small{display:block;font-size:13px;line-height:1.6;margin-top:4px;color:#405f51}
+.discount-field .discount-visibility:has(input:disabled){background:#f4f7f7;border-color:#d6e1e3;cursor:default}
+.discount-field .discount-visibility input:focus-visible{outline:3px solid #819e32;outline-offset:3px}

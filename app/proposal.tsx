@@ -4,12 +4,13 @@ import {ProposalProjection} from './proposal-projection';
 import {money,systemNames} from '@/lib/quote';
 import {customerDocumentSettings,assignedAdviser,netbillingScope,paymentBreakdown,preliminaryNote} from '@/lib/commercial';
 import {consumptionSummary} from '@/lib/energy';
-import {proposalEquipment,proposalImages,proposalWarranties,proposalReadingSections} from '@/lib/proposal-document';
+import {proposalDiscount,proposalEquipment,proposalImages,proposalWarranties,proposalReadingSections} from '@/lib/proposal-document';
 import {UserRound,Phone,Mail,MapPin,CalendarDays,Sun,Zap,BatteryCharging,ShieldCheck} from 'lucide-react';
 
 export function Proposal({q}:{q:SavedQuote}){
  q={...q,settings:customerDocumentSettings(q.input,q.settings)};
  const {input,settings,calculation:c}=q;
+ const discount=proposalDiscount(q);
  const adviser=assignedAdviser(input,settings),consumption=consumptionSummary(input.energy);
  const payments=paymentBreakdown(c.total,settings),netbilling=netbillingScope(input,settings);
  const equipment=proposalEquipment(q),warranties=proposalWarranties(settings.warranty),reading=proposalReadingSections(q);
@@ -17,23 +18,29 @@ export function Proposal({q}:{q:SavedQuote}){
  const footer=(section:string)=><div className="proposal-sheet-footer"><strong>{settings.name}</strong><span>{section}</span><span>{q.folio}</span></div>;
  return <article className="proposal proposal-brochure">
   <section className="proposal-sheet">
-   <header className="proposal-masthead"><div className="proposal-brand"><img src="/logo.jpg" alt={settings.name}/><div><strong>{settings.name}</strong><p>Proyectos que iluminan</p></div></div><div className="proposal-ref"><p>{documentTitle(q)}</p><strong>{q.folio}</strong></div></header>
-   <div className="proposal-hero"><div className="proposal-hero-copy"><p>{systemNames[input.system]}</p><h2>Tu proyecto<br/>fotovoltaico</h2><strong>{c.kwp.toLocaleString('es-CL',{maximumFractionDigits:3})} <small>kWp</small></strong><p>{c.panels} paneles para tu proyecto</p></div><figure><img src={proposalImages.roof} alt="Paneles solares sobre una vivienda, imagen referencial"/><figcaption>Imagen referencial</figcaption></figure></div>
+   <div className="proposal-cover-visual">
+    <img className="proposal-cover-photo" src={proposalImages.roof} alt="Vivienda con paneles solares, imagen referencial"/>
+    <header className="proposal-masthead"><div className="proposal-brand"><img src={proposalImages.logo} alt={settings.name}/></div><div className="proposal-ref"><p>{documentTitle(q)}</p><strong>{q.folio}</strong></div></header>
+    <div className="proposal-cover-copy"><p>{systemNames[input.system]}</p><h2>Tu proyecto solar,<br/>en detalle.</h2><p>Preparado para {input.customer.name||'ti'}</p></div>
+    <small className="proposal-image-caption">Imagen referencial</small>
+   </div>
    <div className="proposal-sheet-content">
+    <section className="proposal-overview"><div className="proposal-keyfigures"><div><span>{c.complete?'Inversión total':'Subtotal parcial'}</span><strong>{money(c.total)}</strong><small>{c.tax===null?'IVA pendiente de confirmar':'Valor final con IVA'} · Pesos chilenos</small></div><div><span>Potencia del sistema</span><strong>{c.kwp.toLocaleString('es-CL',{maximumFractionDigits:3})} <small>kWp</small></strong><small>{c.panels} paneles · {systemNames[input.system]}</small></div></div>
+
+    {discount&&<div className="proposal-discount" aria-label="Descuento aplicado"><div className="proposal-discount-badge"><strong>{discount.percent!==undefined?`${discount.percent}%`:'Beneficio'}</strong><span>de descuento</span></div><div className="proposal-discount-copy"><strong>Descuento para tu proyecto</strong><p>Ahorras <b>{money(discount.amount)}</b> en tu inversión.</p><p className="proposal-discount-before">Precio anterior: <s>{money(discount.before)}</s></p></div></div>}
+    </section>
     <div className="proposal-facts">{facts.map(fact=><div key={fact.label}><fact.icon size={17}/><div><small>{fact.label}</small><strong>{fact.value}</strong></div></div>)}</div>
     {input.customer.address&&<p className="proposal-location"><MapPin size={15}/><span>{input.customer.address}</span></p>}
-    <section className="proposal-overview"><h3>Sistema cotizado</h3><div className="proposal-keyfigures"><div><span>{c.complete?'Inversión total':'Subtotal parcial'}</span><strong>{money(c.total)}</strong><small>{c.tax===null?'IVA pendiente de confirmar':'Valor final con IVA'} · Pesos chilenos</small></div><div><span>Potencia del sistema</span><strong>{c.kwp.toLocaleString('es-CL',{maximumFractionDigits:3})} <small>kWp</small></strong><small>{c.panels} paneles · {systemNames[input.system]}</small></div></div>
 
-    </section>
-    {consumption&&input.energy&&<section className="proposal-consumption"><h3>Consumo de referencia</h3><div><div><small>Boleta informada</small><strong>{money(input.customer.bill)}</strong></div><div><small>Consumo del período</small><strong>{input.energy.consumptionKwh?.toLocaleString('es-CL')} <small>kWh</small></strong></div><div><small>Período facturado</small><strong>{input.energy.billingDays} <small>días</small></strong></div></div><p>{[input.energy.distributor,input.energy.tariff,input.energy.billReviewed?'Revisado con la boleta':'Pendiente de revisión'].filter(Boolean).join(' · ')}</p><p>Equivalente a 30 días: {consumption.equivalent30DaysKwh.toLocaleString('es-CL',{maximumFractionDigits:1})} kWh. No representa una proyección anual.</p></section>}
    </div>{footer('Resumen del proyecto')}
   </section>
   <section className="proposal-sheet">
-   <header className="proposal-section-title"><p>{q.folio}</p><h2>Equipos y alcance</h2><p>Los equipos seleccionados para tu proyecto y su forma de pago.</p></header>
+   <header className="proposal-section-title"><p>{q.folio}</p><h2>La tecnología de tu proyecto</h2><p>Equipos seleccionados, potencia y forma de pago.</p></header>
    <div className="proposal-sheet-content">
     <section className="proposal-project-includes"><h3>Tu proyecto incluye</h3><div className="proposal-project-equipment">{equipment.map((item,index)=><div className="proposal-project-equipment-row" key={item.kind+'-'+index}><span className="proposal-project-equipment-icon">{item.kind==='panels'?<Sun size={26}/>:item.kind==='battery'?<BatteryCharging size={26}/>:<Zap size={26}/>}</span><div><h4>{item.label}</h4><p className="proposal-project-model">{item.value}</p><p className="proposal-project-note">{item.note}</p></div></div>)}</div></section>
     <p className="proposal-validity">Vigencia de {settings.validDays} días desde la emisión.</p>
     <section className="proposal-payments"><h3>Forma de pago</h3><p>{input.payment}</p>{payments.length>0&&<div>{payments.map((row,index)=><div key={row.label}><span>{index+1}</span><div><p>{row.label}</p><small>{row.percent}% del total</small></div><strong>{money(row.amount)}</strong></div>)}</div>}</section>
+    {consumption&&input.energy&&<section className="proposal-consumption"><h3>Consumo de referencia</h3><div><div><small>Boleta informada</small><strong>{money(input.customer.bill)}</strong></div><div><small>Consumo del período</small><strong>{input.energy.consumptionKwh?.toLocaleString('es-CL')} <small>kWh</small></strong></div><div><small>Período facturado</small><strong>{input.energy.billingDays} <small>días</small></strong></div></div><p>{[input.energy.distributor,input.energy.tariff,input.energy.billReviewed?'Revisado con la boleta':'Pendiente de revisión'].filter(Boolean).join(' · ')}</p><p>Equivalente a 30 días: {consumption.equivalent30DaysKwh.toLocaleString('es-CL',{maximumFractionDigits:1})} kWh. No representa una proyección anual.</p></section>}
     {!isIssued(q)&&c.warnings.length>0&&<section className="proposal-pending"><h3>Propuesta en revisión</h3><ul>{c.warnings.map(w=><li key={w}>{w}</li>)}</ul></section>}
    </div>{footer('Equipos y pagos')}
   </section>

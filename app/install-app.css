@@ -1,20 +1,29 @@
 .nav-account-footer.nav-footer {
   flex-direction: column!important;
   align-items: stretch;
-  gap: 0!important;
-  margin: 0 18px;
-  padding: 20px 0 18px!important;
-  border-top: 1px solid #ffffff0d;
+  gap: 14px!important;
+  margin: 0 16px;
+  padding: 18px 0 20px!important;
+  border-top: 1px solid #ffffff24;
 }
+.nav-account-summary {padding:14px;border-radius:12px;background:#ffffff08;border:1px solid #ffffff14}
+.nav-account-summary .nav-person {gap:12px;align-items:center}
+.nav-account-summary .nav-person-avatar {width:42px;height:42px;border-radius:12px}
+.nav-account-summary .nav-person-details strong {font-size:15px;font-weight:700;line-height:1.45;color:#fff}
+.nav-account-summary .nav-person-details span {font-size:12px;line-height:1.5;color:#bdd4d8;margin-top:4px}
+.nav-account-summary .nav-person-email {font-size:12px;line-height:1.6;color:#bdd4d8;margin:12px 0 0;white-space:normal;overflow-wrap:anywhere}
 .nav-person { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .nav-person-avatar { width: 40px; height: 40px; flex-shrink: 0; border-radius: 12px; display: grid; place-items: center; background: #c3d79e; color: #153b43; font-size: 16px; font-weight: 650; box-shadow: inset 0 0 0 1px #ffffff24; }
 .nav-person-details { min-width: 0; }
 .nav-person-details strong { font-size: 14px; overflow-wrap: anywhere; }
 .nav-person-details span { font-size: 11px; color: #b1c8cc; }
 .nav-person-email { font-size: 10px; color: #96b4bf; margin: 10px 0 17px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.nav-install { display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%; min-height: 42px; border: 1px solid #b8cfa638; border-radius: 8px; background: #ffffff07; color: #e3ecd9; cursor: pointer; transition: background .15s; }
-.nav-install span { color: inherit; font-size: 12px; font-weight: 550; margin: 0; }
-.nav-install:hover { background: #ffffff10; border-color: #b8cfa669; }
+.nav-install-option {padding:0 4px}
+.nav-install { display: flex; align-items: center; justify-content: flex-start; gap: 10px; width: 100%; min-height: 44px; padding:8px 10px; border:0; border-radius:8px; background:transparent; color:#e3ecd9; cursor:pointer; transition:background .15s; }
+.nav-account-footer .nav-install span { color:inherit; font-size:14px; font-weight:600; margin:0; }
+.nav-install>svg:last-child {margin-left:auto;color:#a9c88a}
+.nav-install-option p {font-size:12px;line-height:1.6;color:#b5cbd0;margin:3px 10px 0;max-width:27ch}
+.nav-install:hover {background:#ffffff0b}
 .nav-install:focus-visible { outline: 2px solid #c3d79e; outline-offset: 3px; }
 .nav-company-caption { text-align: center; font-size: 9px; letter-spacing: .02em; color: #89a7b1; margin-top: 12px; }
 .install-dialog { color: #153b48; padding: 30px!important; border-radius: 16px!important; max-width: 460px!important; }
@@ -34,7 +43,7 @@
 @media(max-width:480px){.install-dialog { padding: 24px!important; }.install-dialog [data-slot=dialog-title] { font-size: 21px; }}
 
 .nav-account-footer .nav-signout {
-  width: 100%; min-height: 42px; margin-top: 8px; gap: 8px;
+  width: 100%; min-height: 42px; margin-top: 0; gap: 8px;
   border: 1px solid transparent; border-radius: 8px;
   background: transparent; color: #b1c8cc; font-size: 12px; font-weight: 500;
 }

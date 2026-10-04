@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {proposalLines,proposalEquipment,proposalReadingSections,proposalSentences} from '../lib/proposal-document';
+import {proposalDiscount,proposalLines,proposalEquipment,proposalReadingSections,proposalSentences} from '../lib/proposal-document';
 import {customerTerms} from '../lib/commercial';
 import {newQuote,initialSettings,initialProducts,calculate,quoteSchema,type SavedQuote} from '../lib/quote';
 const input={...newQuote(),notes:'Incluye paneles de 5.5 kWp. Excluye obras civiles. Sujeto a visita técnica. Condición especial acordada con el cliente.'};
@@ -38,3 +38,21 @@ assert.ok(proposalEquipment({...quote,input:{...input,hiddenLineIds:['0-10']}}).
 assert.ok(customerTerms(reopened,settings).includes('configuración cotizada'));
 assert.equal(JSON.stringify(quote),before,'No se modifica el cálculo ni la cotización original');
 console.log('Detalle por ítem: persistencia, compatibilidad, importes y restauración: OK');
+
+for(const taxMode of ['net','included','pending'] as const){
+ const config={...settings,taxMode};
+ const discountedInput={...input,discountPercent:10,showDiscount:true};
+ const discounted={...quote,input:discountedInput,settings:config,calculation:calculate(discountedInput,initialProducts,config)};
+ const display=proposalDiscount(discounted)!;
+ assert.equal(display.percent,10);
+ assert.equal(display.before,calculate({...discountedInput,discountPercent:0},initialProducts,config).total);
+ assert.equal(display.amount,display.before-discounted.calculation.total,'El ahorro compara precios finales con el mismo IVA y redondeo');
+ const hiddenInput={...discountedInput,showDiscount:false};
+ assert.equal(proposalDiscount({...discounted,input:hiddenInput}),null);
+ assert.deepEqual(calculate(hiddenInput,initialProducts,config),discounted.calculation,'La visibilidad nunca cambia precio ni pagos');
+ const reopened=quoteSchema.parse(JSON.parse(JSON.stringify(discountedInput)));
+ assert.equal(reopened.showDiscount,true,'La opción se conserva al guardar y reabrir');
+ assert.equal(proposalDiscount({...discounted,input:{...discountedInput,showDiscount:undefined}}),null,'Cotizaciones antiguas no exponen descuentos sin optar por ello');
+ assert.equal(proposalDiscount({...discounted,calculation:calculate({...discountedInput,discountPercent:0},initialProducts,config)}),null,'No destacar un descuento de cero');
+}
+console.log('Descuento al cliente: visibilidad, persistencia y montos con IVA y redondeo: OK');
