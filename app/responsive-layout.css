@@ -1,0 +1,200 @@
+/* Final screen layout rules: component styles above keep their print layouts. */
+@media screen {
+  .workspace :is(.page-heading, .section-heading, .equipment-heading, .client-record-contact) > div,
+  .workspace :is(.field-grid, .equipment-grid, .energy-fields, .cne-filters) > *,
+  [data-slot=dialog-content] :is(form, fieldset, label) { min-width: 0; }
+  .workspace :is(input:not([type=checkbox]):not([type=radio]), select, textarea) { max-width: 100%; }
+  .workspace :is(.page-heading, .equipment-actions, .client-record-actions, .client-banner-actions, .custom-services-heading) { flex-wrap: wrap; }
+  .workspace :is(.page-heading, .section-heading) { overflow-wrap: anywhere; }
+  .workspace :is(.summary-row, .qty-line, .equipment-results, .qh-results, .qh-pagination, .activity-footer > div) { flex-wrap: wrap; }
+  .workspace :is(.summary-row strong, .equipment-price strong, .custom-service-total strong) { overflow-wrap: anywhere; }
+  .workspace :is(.equipment-actions, .qh-actions, .client-record-actions, .stage-actions, .doc-actions) button,
+  [data-slot=dialog-content] [data-slot=button] { height: auto; min-height: 44px; white-space: normal; }
+  .workspace :is(.equipment-save-state, .qh-value strong) { white-space: normal; overflow-wrap: anywhere; }
+  [data-slot=dialog-content] { max-height: calc(100dvh - 24px); scroll-padding-block: 20px; }
+  [data-slot=dialog-content] > * { min-width: 0; }
+  [data-slot=dialog-close] { min-width: 44px; min-height: 44px; }
+  [data-slot=dialog-header] { padding-right: 36px; overflow-wrap: anywhere; }
+  .app-root .workspace-toolbar .toolbar-icon,
+  .app-root .workspace-toolbar [data-slot=sidebar-trigger] { width: 44px; height: 44px; min-height: 44px; }
+  .toolbar-location { flex: 1; }
+  .toolbar-location > strong { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .workspace :is(.qh-month button, .qh-views button, .qh-calendar-controls button, .team-filters button, .management-refresh) { min-height: 44px; }
+  .quote-history { container-name: quote-history; container-type: inline-size; }
+  .qh-day-detail { display: none; }
+  .qh-calendar-counts .qh-day:focus-visible { outline: 3px solid #68852b; outline-offset: -3px; z-index: 1; }
+  .workspace .activity-filters { grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr)); }
+  .workspace .activity-filters > button { min-height: 44px; white-space: normal; }
+  .workspace :is(.clients-grid, .pending-grid) { grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
+  .workspace .projection-metrics { grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)); }
+  .workspace .system-options { grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr)); }
+  .workspace .stage-workspace { scroll-margin-top: 88px; }
+  .workspace :is(input, select, textarea, button, summary) { scroll-margin-block: 90px 130px; }
+  .workspace footer { overflow-wrap: anywhere; }
+  .workspace .custom-services { container-type: inline-size; container-name: custom-services; }
+  @container custom-services (max-width: 720px) {
+    .workspace .custom-service-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .workspace .custom-service-fields > label:first-child { grid-column: 1 / -1; }
+  }
+}
+
+@media screen and (min-width: 1024px) and (max-width: 1279px) {
+  .app-root .mobile-quote-bar { left: var(--sidebar-width, 248px); }
+  [data-slot=sidebar-wrapper]:has(> [data-state=collapsed]) .mobile-quote-bar { left: 0; }
+  .workspace .stage-navigation [role=tab] { padding: 10px !important; gap: 8px; }
+  .workspace .stage-copy strong { font-size: 14px; }
+  .workspace .stage-copy small { font-size: 12px; }
+  .workspace .stage-navigation .stage-check { display: none; }
+}
+
+@media screen and (max-width: 1279px) {
+  .app-root .quote-layout { grid-template-columns: minmax(0, 1fr); }
+  .app-root .summary { position: static; }
+  .app-root .workspace { padding-bottom: 32px; }
+  .app-root .workspace:has(.mobile-quote-bar) { padding-bottom: calc(120px + env(safe-area-inset-bottom)); }
+  .app-root .mobile-quote-bar { padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
+}
+
+/* Work with the available panel width, including when the desktop rail is open. */
+@media screen {
+  @container (max-width: 850px) {
+    .management-body { grid-template-columns: minmax(0, 1fr); }
+    .management-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @container (max-width: 450px) {
+    .management-kpis { grid-template-columns: minmax(0, 1fr); }
+    .management-people > header { flex-direction: column; align-items: flex-start; gap: 8px; }
+  }
+  @container quote-history (max-width: 700px) {
+    .qh-top { flex-wrap: wrap; gap: 16px; padding: 24px 18px; }
+    .qh-top > div { flex: 1 1 240px; min-width: 0; }
+    .qh-top > button { margin-left: 0; }
+    .qh-toolbar { padding: 18px; }
+    .qh-views { display: flex; flex-wrap: wrap; gap: 6px; }
+    .qh-views button { flex: 1 1 90px; justify-content: center; padding-inline: 8px; font-size: 14px; }
+    .qh-filters { flex-direction: column; align-items: stretch; }
+    .qh-filters :is(.qh-search, select) { width: 100%; min-width: 0; max-width: none; flex: auto; }
+    .qh-month { padding-inline: 18px; flex-wrap: wrap; gap: 16px; }
+    .qh-note { margin-inline: 18px; }
+    .qh-calendar-scroll { margin: 18px 10px; }
+    .qh-calendar-counts { min-width: 0; }
+    .qh-calendar-counts .qh-week > span { padding: 10px 0; font-size: 12px; }
+    .qh-calendar-counts .qh-day { min-height: 76px; padding: 6px 2px; gap: 4px; }
+    .qh-calendar-counts .qh-day-heading { flex-direction: column; align-items: center; gap: 5px; }
+    .qh-calendar-counts .qh-day-number { font-size: 13px; }
+    .qh-calendar-counts .qh-day-total { display: grid; place-items: center; min-width: 24px; min-height: 24px; padding: 2px 4px; border-radius: 8px; background: #145c52; color: white; font-size: 12px; }
+    .qh-calendar-counts .qh-day-total-label,
+    .qh-calendar-counts .qh-person-count { display: none; }
+    .qh-day-detail { display: block; margin: 18px; padding: 16px; background: #edf4ef; border: 1px solid #c4d6ce; border-radius: 10px; }
+    .qh-day-detail h4 { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
+    .qh-day-detail p { font-size: 14px; line-height: 1.6; }
+    .qh-day-detail > div { display: flex; flex-wrap: wrap; gap: 8px; }
+    .qh-day-detail .qh-person-count { display: flex; max-width: 100%; gap: 12px; padding: 8px 10px; font-size: 14px; }
+    .qh-day-detail .qh-person-count strong { flex-shrink: 0; }
+    .qh-results { padding-inline: 18px; flex-wrap: wrap; gap: 12px; }
+    .qh-rows { padding: 0; }
+    .workspace .qh-row { grid-template-columns: minmax(0, 1fr); padding: 24px 18px; gap: 18px; }
+    .qh-row :is(.qh-client, .qh-owner, .qh-value, .qh-actions) { grid-column: 1; grid-row: auto; min-width: 0; }
+    .qh-row .qh-value { text-align: left; }
+    .qh-row .qh-actions { display: flex; flex-direction: row; flex-wrap: wrap; justify-content: flex-start; }
+    .qh-row .qh-actions > :is(button, details) { flex: 1 1 160px; }
+    .qh-row .qh-actions > details { flex-basis: 100%; text-align: left; }
+    .qh-pagination { padding-inline: 18px; }
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .app-root .workspace { padding-inline: 16px; }
+  .workspace .stage-navigation { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px !important; height: auto !important; }
+  .workspace .stage-navigation [role=tab] { flex-direction: row; justify-content: flex-start !important; min-height: 82px; height: auto; padding: 12px !important; gap: 10px; }
+  .workspace .stage-navigation .stage-number { display: grid; width: 28px; height: 28px; flex: 0 0 28px; }
+  .workspace .stage-copy { text-align: left; min-width: 0; white-space: normal; }
+  .workspace .stage-copy strong { font-size: 14px; line-height: 1.35; }
+  .workspace .stage-copy small { font-size: 12px; line-height: 1.4; margin-top: 4px; }
+  .workspace .stage-navigation .stage-check { display: none; }
+  .workspace .stage-workspace .section-heading { flex-wrap: wrap; align-items: flex-start; }
+  .workspace .stage-workspace .section-heading > div { flex: 1 1 170px; }
+  .workspace .stage-workspace .section-heading h2 { font-size: 21px; }
+  .workspace .stage-workspace .section-heading > button { flex-basis: 100%; margin-left: 0; }
+  .workspace .equipment-grid { grid-template-columns: minmax(0, 1fr); }
+  .workspace .system-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .workspace .system-option { padding: 16px 12px; }
+  .workspace .system-option strong { font-size: 15px; }
+  .workspace .system-option > span { font-size: 13px; }
+  .workspace :is(.bill-upload, .projection-editor, .project-location, .commercial-options, .payment-summary) { min-width: 0; }
+  .workspace .bill-upload-heading { flex-wrap: wrap; }
+  .workspace .bill-upload-heading > div { flex: 1 1 180px; min-width: 0; }
+  .workspace .bill-upload h3 { font-size: 19px; }
+  .workspace .bill-upload { padding: 18px 14px; }
+  .workspace :is(.field-grid, .energy-fields, .custom-service-fields) { grid-template-columns: minmax(0, 1fr); }
+  .workspace .custom-service-fields > * { grid-column: 1 / -1; }
+  .workspace :is(.client-picker, .draft-recovery, .custom-services-heading) button { white-space: normal; min-height: 44px; height: auto; }
+  .workspace .service-row { flex-wrap: wrap; }
+  .workspace .additional-services-internal .additional-service { grid-template-columns: minmax(0, 1fr) 88px; gap: 12px; }
+  .workspace .additional-service-quantity > span { display: block; font-size: 12px; margin-bottom: 5px; }
+  .workspace .service-include { min-height: 44px; }
+  .workspace .projection-editor { padding: 20px 14px; }
+  .workspace :is(.savings-comparison-heading, .savings-comparison dl) { flex-wrap: wrap; gap: 16px; }
+  .workspace .savings-comparison dl > div:last-child { text-align: left; }
+  .workspace .projection-chart > div { grid-template-columns: 44px minmax(0, 1fr); }
+  .workspace .projection-chart > div > div { grid-column: 1 / -1; grid-row: 2; }
+  .workspace .projection-chart strong { grid-column: 2; grid-row: 1; }
+  .workspace .team-heading > div:nth-child(2) { min-width: 0; flex-basis: 170px; }
+  .workspace .team-actions { flex-wrap: wrap; }
+  .workspace .team-identity > div { min-width: 0; }
+  .workspace .team-email { overflow-wrap: anywhere; }
+  .workspace .activity-heading { flex-wrap: wrap; }
+  .workspace .activity-heading > div { min-width: 0; flex: 1 1 170px; }
+  .workspace .activity-heading > button { margin-left: 0; }
+  .workspace .activity-footer > div { flex-shrink: 1; }
+  .workspace .cne-filters { grid-template-columns: minmax(0, 1fr); }
+  .workspace .cne-filters label { grid-column: auto; }
+  .workspace :is(.manual-controls, .manual-pagination) button { min-width: 44px; min-height: 44px; }
+  .workspace :is(.guide-mode-switch button, .manual-page-select select) { font-size: 14px; }
+  :is(.auth-card, .workspace, [data-slot=dialog-content]) :is(input:not([type=checkbox]):not([type=radio]), textarea, select, [role=combobox]) { font-size: 16px !important; }
+  [data-slot=dialog-content]:not(.preview-dialog) { width: calc(100vw - 24px) !important; padding: 24px 18px !important; }
+  [data-slot=dialog-content] :is(.field-grid, .equipment-editor-grid, .client-edit-grid) { grid-template-columns: minmax(0, 1fr); }
+  [data-slot=dialog-content] :is(.qh-dialog-actions, .equipment-editor-footer, .client-dialog-actions) { flex-wrap: wrap; }
+  [data-slot=dialog-content] :is(.qh-dialog-actions, .equipment-editor-footer, .client-dialog-actions) > button { flex: 1 1 160px; }
+  .app-root .workspace-toolbar { padding-inline: 8px; gap: 4px; }
+  .app-root .workspace-toolbar .toolbar-location { gap: 4px; }
+  .app-root .workspace-toolbar .toolbar-utilities { gap: 2px; }
+  .toolbar-account { min-width: 44px; justify-content: center; }
+  .app-root .mobile-quote-bar { left: 0; gap: 10px; }
+  .app-root .mobile-quote-bar button { flex-shrink: 1; white-space: normal; min-width: 100px; }
+  .app-root .mobile-quote-bar strong { font-size: 20px; }
+}
+
+@media screen and (max-width: 420px) {
+  .app-root .workspace { padding-inline: 12px; }
+  .workspace .stage-navigation [role=tab] { padding: 10px 8px !important; gap: 6px; }
+  .workspace .stage-navigation .stage-number { width: 24px; height: 24px; flex-basis: 24px; }
+  .workspace .stage-workspace .card { padding: 20px 14px; }
+  .workspace .team-member { grid-template-columns: minmax(0, 1fr); }
+  .workspace .team-member :is(.team-role, .team-status, .team-actions) { grid-column: 1; grid-row: auto; }
+  .workspace .equipment-price strong { font-size: 20px; }
+  .workspace .equipment-actions > button { flex: 1 1 160px; }
+  .workspace .activity-filters { grid-template-columns: minmax(0, 1fr); }
+  .workspace .activity-filters > * { grid-column: auto; }
+  .auth-card { width: calc(100% - 24px); padding: 24px 18px; }
+  .proposal.proposal-brochure .proposal-masthead { gap: 12px; padding-inline: 18px; flex-wrap: wrap; }
+  .proposal-brochure .proposal-ref { max-width: 100%; }
+  .proposal-brochure .proposal-brand img { width: 100px; height: 70px; }
+  .proposal-brochure .proposal-cover-copy h2 { font-size: 32px; letter-spacing: -1px; }
+  .proposal-brochure .proposal-discount { flex-wrap: wrap; }
+  .proposal-brochure .proposal-project-equipment-row { flex-wrap: wrap; }
+  .proposal-brochure .proposal-facts,
+  .proposal-brochure .proposal-consumption > div { grid-template-columns: minmax(0, 1fr); }
+  .proposal-brochure .proposal-warranties { grid-template-columns: minmax(0, 1fr); gap: 22px; }
+  .proposal-brochure .proposal-warranties > div { display: flex; gap: 14px; align-items: center; }
+  .proposal-brochure .proposal-warranties p { font-size: 14px; margin: 0; }
+  .proposal-brochure .savings-comparison-heading,
+  .proposal-brochure .savings-comparison dl { flex-wrap: wrap; }
+  .proposal-brochure .savings-comparison dl > div:last-child { text-align: left; }
+}
+
+@media screen and (max-height: 520px) and (max-width: 1023px) {
+  .app-root .workspace-toolbar { position: static; }
+  .app-root .mobile-quote-bar { position: static; border-radius: 10px; margin-top: 18px; }
+  .app-root .workspace:has(.mobile-quote-bar) { padding-bottom: 24px; }
+}
