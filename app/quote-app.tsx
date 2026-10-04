@@ -43,7 +43,8 @@ import {serviceQuantities} from '@/lib/additional-services';
 import {InstallationPanel} from './installation-panel';
 import {ProjectionPanel} from './projection-panel';
 import {proposalImages} from '@/lib/proposal-document';
-import {quotePdf} from '@/lib/pdf';import {documents,pending,received,remaining} from '@/lib/documents';
+import {SWRConfig} from 'swr';
+import {documents,pending,received,remaining} from '@/lib/documents';
 
 function Choice({label,value,onChange,options}:{label:string;value:string;onChange:(v:string)=>void;options:{value:string;label:string}[]}){return <label>{label}<Select value={value} onValueChange={onChange}><SelectTrigger className="select-control" aria-label={label}><SelectValue/></SelectTrigger><SelectContent>{options.map(o=><SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent></Select></label>}
 function NumberField({label,value,onChange,step=1}:{label:string;value:number;onChange:(v:number)=>void;step?:number}){return <label>{label}<Input aria-label={label} type="number" min={0} max={1e10} step={step} value={value} onChange={e=>onChange(Math.max(0,Number(e.target.value)||0))}/></label>}
@@ -53,6 +54,10 @@ async function request<T=Record<string,any>>(path:string,init?:RequestInit):Prom
 function downloadBlob(bytes:Uint8Array,name:string){const a=document.createElement('a');const blob=new Blob([bytes as BlobPart],{type:'application/pdf'});const url=URL.createObjectURL(blob);a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),60000);}
 
 export default function QuoteApp(){
+ const [cacheConfig]=useState(()=>({provider:()=>new Map()}));
+ return <SWRConfig value={cacheConfig}><QuoteWorkspace/></SWRConfig>;
+}
+function QuoteWorkspace(){
 
  const [profile,setProfile]=useState<MemberProfile|null>(null),[clientId,setClientId]=useState<string|null>(null),[installation,setInstallation]=useState(defaultInstallation);
  const backup=useQuoteBillBackup(profile?.id);
@@ -151,7 +156,7 @@ export default function QuoteApp(){
  }
 
  function snapshot():SavedQuote|null{if(emailInvalid){setStep('customer');toast.error('Revisa el correo electrónico del cliente.');return null}if(!calculation){toast.error('Revisa los datos, especialmente el correo electrónico.');return null}return saved||{id:'draft',folio:'BORRADOR-SVX',date:new Date().toISOString(),input:quote,settings,calculation}}
- async function pdfBytes(q:SavedQuote){const assets=await Promise.all(['/proposal/logo-transparent-v2.png',proposalImages.roof,proposalImages.home].map(async path=>{const response=await fetch(path);if(!response.ok)throw Error('No se pudo cargar una imagen de la propuesta.');return response.arrayBuffer()}));return quotePdf(q,assets[0],{roof:assets[1],home:assets[2]})}
+ async function pdfBytes(q:SavedQuote){const [pdf,assets]=await Promise.all([import('@/lib/pdf'),Promise.all(['/proposal/logo-transparent-v2.png',proposalImages.roof,proposalImages.home].map(async path=>{const response=await fetch(path);if(!response.ok)throw Error('No se pudo cargar una imagen de la propuesta.');return response.arrayBuffer()}))]);return pdf.quotePdf(q,assets[0],{roof:assets[1],home:assets[2]})}
  async function download(q:SavedQuote){setBusy(true);try{downloadBlob(await pdfBytes(q),q.folio+'.pdf');toast.success('PDF preparado para descargar.')}catch{toast.error('No se pudo generar el PDF. Inténtalo nuevamente.')}finally{setBusy(false)}}
  function openEmail(q:SavedQuote){if(!q.input.customer.email){toast.error('Completa el correo del cliente.');return}const text=`Hola ${q.input.customer.name}, comparto la propuesta ${q.folio} de ${q.settings.name}. ${isIssued(q)?'':'Es un borrador pendiente de validación.'}`;window.open(`mailto:${encodeURIComponent(q.input.customer.email)}?subject=${encodeURIComponent(q.settings.name+' · '+q.folio)}&body=${encodeURIComponent(text)}`,'_blank','noopener,noreferrer');toast.info('Se abrió el correo. Descarga el PDF y adjúntalo antes de enviar.');}
 

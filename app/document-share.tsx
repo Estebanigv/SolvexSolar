@@ -5,7 +5,7 @@ import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Dialog,DialogContent,DialogHeader,DialogTitle,DialogDescription} from '@/components/ui/dialog';
 import {isIssued} from '@/lib/quote-issuance';
-import {quotePdf} from '@/lib/pdf';
+
 import {whatsappUrl} from '@/lib/document-share';
 import type {SavedQuote} from '@/lib/quote';
 
@@ -14,7 +14,7 @@ export function DocumentShare({quote,whatsapp,onClose}:{quote:SavedQuote;whatsap
   useEffect(()=>{
     let active=true,url='';const controller=new AbortController();setPrepared(null);setError('');
     void (async()=>{try{
-      const logo=await fetch('/logo.jpg',{signal:controller.signal});
+      const [{quotePdf},logo]=await Promise.all([import('@/lib/pdf'),fetch('/logo.jpg',{signal:controller.signal})]);
       const bytes=await quotePdf(quote,logo.ok?await logo.arrayBuffer():undefined);
       if(!active)return;
       const file=new File([bytes as BlobPart],`${quote.folio}.pdf`,{type:'application/pdf'});

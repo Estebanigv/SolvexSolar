@@ -9,9 +9,9 @@
 .workspace .team-member small{font-size:13px;line-height:1.6;color:#456572}
 .workspace .team-column-head{font-size:13px;color:#244e5b;background:#e3eef0;font-weight:650}
 .workspace :is(.qh-top,.team-heading){background:linear-gradient(110deg,#f4f8f8,#e4f0ed);border-bottom:1px solid #c7dcd7}
-.workspace .qh-top{color:#123f4b}
-.workspace .qh-top h2{color:#123f4b;line-height:1.25}
-.workspace .qh-top p{color:#456572;font-size:16px;line-height:1.6}
+.workspace :is(.qh-top,.team-heading){color:#123f4b}
+.workspace :is(.qh-top,.team-heading) h2{color:#123f4b;line-height:1.25}
+.workspace :is(.qh-top,.team-heading) p{color:#456572;font-size:16px;line-height:1.6}
 .draft-recovery{display:flex;align-items:center;flex-wrap:wrap;gap:12px;color:#315c66;margin:0 0 18px;font-size:14px}
 .draft-recovery:has(strong){padding:18px 22px;background:#e5f1e9;border:1px solid #a5cbbb;border-radius:12px}
 .draft-recovery div{margin-right:auto}.draft-recovery p{margin-top:4px}.draft-recovery small{font-size:13px}

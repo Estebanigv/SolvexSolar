@@ -7,3 +7,5 @@ for (const name of ['app-install','gemini','automatic-savings','additional-servi
   const result=spawnSync(process.execPath,[`.sites-runtime/${name}-test.cjs`],{stdio:'inherit'});
   if (result.status !== 0) process.exit(result.status ?? 1);
 }
+
+await import('./members-route.test.mjs');
