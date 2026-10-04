@@ -9,10 +9,10 @@ import {browserDatabase} from '@/lib/supabase/client';
 import {backupBills,validateBackupFiles,type BillBackupJob} from '@/lib/bill-backup';
 export type MemberProfile={id:string;email:string;full_name:string;role:'admin'|'sales';identification_color?:string|null};
 async function api<T=Record<string,unknown>>(path:string,init?:RequestInit):Promise<T>{const response=await fetch(path,init);const body=await response.json() as T&{error?:string};if(!response.ok)throw Error(body.error||'No se pudo completar la operación.');return body}
-export function SignOutButton(){
+export function SignOutButton({compact=false,preview=false}:{compact?:boolean;preview?:boolean}){
   const [busy,setBusy]=useState(false);
   async function logout(){setBusy(true);try{await api('/auth/signout',{method:'POST'});window.location.assign('/acceso')}catch(e){toast.error((e as Error).message);setBusy(false)}}
-  return <Button type="button" variant="ghost" className="nav-signout" disabled={busy} onClick={logout}><LogOut size={16} aria-hidden="true"/>{busy?'Cerrando sesión…':'Cerrar sesión'}</Button>;
+  return <Button type="button" variant="ghost" className={compact?"toolbar-icon toolbar-signout":"nav-signout"} title="Cerrar sesión" aria-label={busy?"Cerrando sesión…":"Cerrar sesión"} disabled={busy||preview} onClick={logout}><LogOut size={16} aria-hidden="true"/><span className={compact?'sr-only':undefined}>{busy?'Cerrando sesión…':'Cerrar sesión'}</span></Button>;
 }
 type Client={id:string;details:QuoteInput['customer']};
 export function ClientPicker({customer,clientId,onSelect,onSave,refresh=0,onManage}:{refresh?:number;onManage?:()=>void;customer:QuoteInput['customer'];clientId:string|null;onSelect:(client:Client|null)=>void;onSave:(id:string)=>void}){

@@ -10,13 +10,14 @@ import {Select,SelectTrigger,SelectValue,SelectContent,SelectItem} from '@/compo
 import {Table,TableHeader,TableBody,TableRow,TableCell,TableHead} from '@/components/ui/table';
 import {Checkbox} from '@/components/ui/checkbox';
 import {Dialog,DialogContent,DialogTitle,DialogDescription,DialogHeader} from '@/components/ui/dialog';
-import {SidebarProvider,SidebarInset,SidebarTrigger} from '@/components/ui/sidebar';
+import {SidebarProvider,SidebarInset} from '@/components/ui/sidebar';
 import {RadioGroup,RadioGroupItem} from '@/components/ui/radio-group';
 import {AlertDialog,AlertDialogContent,AlertDialogHeader,AlertDialogTitle,AlertDialogDescription,AlertDialogFooter,AlertDialogCancel,AlertDialogAction} from '@/components/ui/alert-dialog';
 import {isDemoDeployment} from '@/lib/deployment';
 import {usesSupabase} from '@/lib/supabase/config';
 import {ClientPicker,Members,useQuoteBillBackup,BillBackupStatus,OpenBills,type MemberProfile} from './workspace-access';
 import {AppNavigation} from './navigation';
+import {AppToolbar} from './app-toolbar';
 import {ManagementDashboard} from './management-dashboard';
 import {UserGuide} from './user-guide';
 import {EquipmentCatalog} from './catalog';
@@ -177,7 +178,7 @@ export default function QuoteApp(){
  <div className="doc-actions"><Button disabled={busy||!isIssued(q)} onClick={()=>download(q)}><Download/>Descargar PDF</Button><Button variant="outline" disabled={busy||!isIssued(q)} onClick={()=>{setPreview(q);setTimeout(()=>window.print(),250)}}><Printer/>Imprimir</Button><Button variant="outline" disabled={busy||!isIssued(q)} onClick={()=>setShareTarget({quote:q,whatsapp:true})}><MessageCircle/>WhatsApp</Button><Button variant="outline" disabled={busy||!isIssued(q)} onClick={()=>openEmail(q)}><Mail/>Correo</Button><Button variant="outline" disabled={busy||!isIssued(q)} onClick={()=>setShareTarget({quote:q,whatsapp:false})}><Share2/>Compartir archivo</Button></div></>;
 
  if(usesSupabase&&!loaded)return <WorkspaceStatus error={loadError||undefined} onRetry={()=>void load()}/>;
- return <Tabs className="app-root" orientation="vertical" value={tab} onValueChange={setTab}><SidebarProvider style={{'--sidebar-width':'248px'} as React.CSSProperties}><AppNavigation tab={tab} isAdmin={isAdmin} usesSupabase={usesSupabase} profile={profile}/><SidebarInset className="app-main"><Toaster richColors position="top-center"/><header className="app-toolbar screen-only"><div><SidebarTrigger/><span>Solvex Solar</span><ChevronRight size={14}/><strong>Gestión comercial</strong></div><span className="toolbar-status"><span/> {isDemoDeployment?'Demostración':loaded?'Espacio conectado':loadError?'Sin conexión':'Conectando…'}</span></header><div className="workspace"><div className="screen-only">
+ return <Tabs className="app-root" orientation="vertical" value={tab} onValueChange={setTab}><SidebarProvider style={{'--sidebar-width':'248px'} as React.CSSProperties}><AppNavigation tab={tab} isAdmin={isAdmin} usesSupabase={usesSupabase}/><SidebarInset className="app-main"><Toaster richColors position="top-center"/><AppToolbar profile={profile} status={isDemoDeployment?"Demostración":loaded?"Espacio conectado":loadError?"Sin conexión":"Conectando…"}/><div className="workspace"><div className="screen-only">
  <div className="page-heading"><div><h1>{({quote:'Prepara tu próxima propuesta',dashboard:'Resumen de gestión',guide:'Manual de uso',clients:'Directorio de clientes',catalog:'Equipos y precios',history:'Tus cotizaciones',settings:'Tu empresa',members:'Usuarios del equipo',activity:'Historial de actividad',pending:'Documentación'} as Record<string,string>)[tab]}</h1><p className="heading-sub">{({quote:'Del consumo del cliente a una propuesta solar, paso a paso.',dashboard:'Actividad comercial del equipo, mes a mes.',guide:'Consulta el manual visual o encuentra una respuesta por tema.',clients:'Contactos, ubicaciones y datos de cada proyecto en un solo lugar.',catalog:'Un catálogo organizado para cotizar con confianza.',history:'Cada proyecto, con sus precios y versiones a mano.',settings:'La información que representa a Solvex Solar en cada propuesta.',members:'Un equipo de administradores para gestionar cada proyecto.',activity:'Quién cambió qué, cuándo y cómo quedó.',pending:'Respaldo técnico y comercial para tus proyectos.'} as Record<string,string>)[tab]}</p></div>{tab==='quote'&&<Button className="heading-preview" disabled={!calculation} onClick={()=>setPreview(snapshot())}><FileText size={17}/>Vista previa<ArrowUpRight size={16}/></Button>}</div>
 
  <BillBackupStatus backup={backup}/>{tab==='quote'&&<DraftStatus draft={draft}/>}

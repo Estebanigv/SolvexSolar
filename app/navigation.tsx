@@ -1,19 +1,14 @@
 "use client";
 import {useEffect} from 'react';
 import Image from 'next/image';
-import {FileText,Package,History,Settings,ClipboardList,ShieldCheck,ChevronRight,X,Users,ChartNoAxesCombined,BookOpen} from 'lucide-react';
-import {SignOutButton,type MemberProfile} from './workspace-access';
-import {InstallAppButton} from './install-app';
-import {memberColorStyle} from '@/lib/member-color';
+import {FileText,Package,History,Settings,ClipboardList,ChevronRight,X,Users,ChartNoAxesCombined,BookOpen} from 'lucide-react';
 import {TabsList,TabsTrigger} from '@/components/ui/tabs';
-import {Sidebar,SidebarHeader,SidebarContent,SidebarFooter,SidebarMenu,SidebarMenuItem,SidebarMenuButton,useSidebar} from '@/components/ui/sidebar';
+import {Sidebar,SidebarHeader,SidebarContent,SidebarTrigger,SidebarMenu,SidebarMenuItem,SidebarMenuButton,useSidebar} from '@/components/ui/sidebar';
 import './navigation.css';
 
-export function AppNavigation({tab,isAdmin=true,usesSupabase=false,profile}:{tab:string;isAdmin?:boolean;usesSupabase?:boolean;profile?:MemberProfile|null}){
+export function AppNavigation({tab,isAdmin=true,usesSupabase=false}:{tab:string;isAdmin?:boolean;usesSupabase?:boolean}){
  const {setOpenMobile,isMobile}=useSidebar();
  useEffect(()=>setOpenMobile(false),[tab,setOpenMobile]);
- const name=profile?.full_name?.trim()||profile?.email||'Mi cuenta';
- const initials=profile?.full_name?.trim().split(/\s+/).slice(0,2).map(part=>part[0]).join('').toUpperCase()||'SS';
  const groups=[
   {id:'commercial',name:'Cotizador',description:'Proyectos y clientes',items:[
    {id:'quote',name:'Cotizador',icon:FileText},
@@ -30,6 +25,7 @@ export function AppNavigation({tab,isAdmin=true,usesSupabase=false,profile}:{tab
  ];
  return <Sidebar className="app-sidebar grouped-navigation screen-only" collapsible="offcanvas">
   <SidebarHeader className="nav-brand">
+   {!isMobile&&<SidebarTrigger className="nav-collapse" onClick={()=>requestAnimationFrame(()=>document.getElementById("workspace-menu-toggle")?.focus())}/> }
    {isMobile&&<button type="button" className="nav-close" aria-label="Cerrar navegación" onClick={()=>setOpenMobile(false)}><X size={20}/></button>}
    <Image src="/proposal/logo-transparent-v2.png" alt="Solvex Solar" width={140} height={90} unoptimized/>
    <span>Plataforma comercial</span>
@@ -44,11 +40,6 @@ export function AppNavigation({tab,isAdmin=true,usesSupabase=false,profile}:{tab
     </div>)}
    </TabsList>
   </SidebarContent>
-  <SidebarFooter className="nav-footer nav-account-footer">
-   <div className="nav-account-summary"><div className="nav-person"><div className="nav-person-avatar team-person-color" style={memberColorStyle(profile?.identification_color,profile?.id||'workspace')} aria-hidden="true">{initials}</div><div className="nav-person-details"><strong>{name}</strong><span><ShieldCheck size={12}/>{profile?.role==='admin'?'Administrador':profile?.role==='sales'?'Ejecutivo comercial':'Espacio de trabajo'}</span></div></div>
-   {profile?.email&&<p className="nav-person-email" title={profile.email}>{profile.email}</p>}</div>
-   <InstallAppButton/>{profile&&<SignOutButton/>}
-  </SidebarFooter>
  </Sidebar>
 }
 
