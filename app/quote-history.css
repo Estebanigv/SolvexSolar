@@ -41,8 +41,19 @@
 .qh-day-heading{display:flex;align-items:center;justify-content:space-between;gap:4px}
 .qh-calendar-counts .qh-day-number{font-size:15px;width:30px;height:30px}
 .qh-day-total{font-size:12px;color:#456572;font-weight:600;white-space:nowrap}
-.qh-person-count{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:7px 8px;border-radius:7px;min-width:0;border-left:3px solid var(--person-dot);font-size:13px;line-height:1.35;font-weight:600}
+.qh-person-count{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:7px 8px;border-radius:7px;min-width:0;border:1px solid var(--person-dot);font-size:13px;line-height:1.35;font-weight:600}
 .qh-person-count>span{min-width:0;overflow-wrap:anywhere}
 .qh-person-count strong{display:grid;place-items:center;min-width:25px;height:25px;padding:0 5px;border-radius:999px;background:var(--person-fg);color:#fff;font-size:13px;flex-shrink:0;font-variant-numeric:tabular-nums}
 .workspace .qh-month p{font-size:15px;color:#456572}
 @media(max-width:640px){.qh-calendar-scroll{margin:16px 12px}.qh-calendar-controls{margin:8px 18px 0}.qh-calendar-controls button{font-size:14px}.qh-month{flex-wrap:wrap}}
+
+/* Keep the month in place while data is loading, without showing false zero counts. */
+.qh-loading-message{display:flex;align-items:center;gap:14px;margin:20px 28px 0;padding:16px 18px;border:1px solid #c5d9de;border-radius:10px;background:#f3f8f6;color:#164b50}
+.qh-loading-message>div{min-width:0}.qh-loading-message strong{font-size:16px;font-weight:700}.qh-loading-message p{font-size:14px;line-height:1.6;color:#456572;margin-top:3px}
+.qh-loading-spinner{flex-shrink:0;animation:qh-loading-rotate .9s linear infinite}
+.qh-calendar-loading .qh-day{cursor:default}.qh-calendar-loading .qh-day:hover{background:white}
+.qh-loading-placeholder{display:block;height:32px;width:85%;border:1px solid #dbe7e5;border-radius:7px;background:#edf3f1;animation:qh-loading-pulse 1.5s ease-in-out infinite}
+@keyframes qh-loading-rotate{to{transform:rotate(360deg)}}
+@keyframes qh-loading-pulse{50%{opacity:.45}}
+@container quote-history (max-width:700px){.qh-loading-message{margin:18px 10px 0;padding:14px;align-items:flex-start}.qh-loading-placeholder{height:18px;width:65%;align-self:center}.qh-loading-day .qh-day-number{align-self:center}}
+@media(prefers-reduced-motion:reduce){.qh-loading-spinner,.qh-loading-placeholder{animation:none}}
