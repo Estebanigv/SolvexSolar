@@ -1,3 +1,5 @@
+import {AtlasProposal} from './atlas-proposal';
+import {usesAtlasProposal} from '@/lib/proposal-layout';
 import {documentTitle,isIssued} from '@/lib/quote-issuance';
 import type {SavedQuote} from '@/lib/quote';
 import {ProposalProjection} from './proposal-projection';
@@ -7,7 +9,8 @@ import {consumptionSummary} from '@/lib/energy';
 import {proposalDiscount,proposalEquipment,proposalImages,proposalWarranties,proposalReadingSections} from '@/lib/proposal-document';
 import {UserRound,Phone,Mail,MapPin,CalendarDays,Sun,Zap,BatteryCharging,ShieldCheck} from 'lucide-react';
 
-export function Proposal({q}:{q:SavedQuote}){
+export function Proposal({q}:{q:SavedQuote}){return usesAtlasProposal(q)?<AtlasProposal q={q}/>:<LegacyProposal q={q}/>;}
+function LegacyProposal({q}:{q:SavedQuote}){
  q={...q,settings:customerDocumentSettings(q.input,q.settings)};
  const {input,settings,calculation:c}=q;
  const discount=proposalDiscount(q);

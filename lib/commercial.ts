@@ -42,7 +42,7 @@ export function customerTerms(q:QuoteInput, settings:Settings){
 }
 
 export function customerDocumentSettings(q:QuoteInput,settings:Settings):Settings{
- return {...settings,terms:customerTerms(q,settings),warranty:q.documentWarranty??settings.warranty,validDays:q.documentValidDays??settings.validDays};
+ return {...settings,paymentSchedule:q.documentPaymentSchedule??settings.paymentSchedule,terms:customerTerms(q,settings),warranty:q.documentWarranty??settings.warranty,validDays:q.documentValidDays??settings.validDays};
 }
 
 export const greenCreditNote='Solvex Solar puede acompañarte en la gestión de alternativas de financiamiento verde con entidades financieras. Solvex Solar no otorga el crédito. La aprobación, tasas y condiciones dependen de la institución financiera correspondiente.';
