@@ -11,7 +11,9 @@ export function proposalDiscount(q:SavedQuote){
  const before=c.subtotal+(q.settings.taxMode==='net'?Math.round(c.subtotal*q.settings.taxRate/100):0);
  const amount=before-c.total;
  if(amount<=0)return null;
- return {percent:q.input.discountPercent,amount,before,total:c.total};
+ // A negotiated closing price changes the effective saving. Do not advertise
+ // the original percentage as if it still described the amount being paid.
+ return {percent:c.totalAdjustment?undefined:q.input.discountPercent,amount,before,total:c.total};
 }
 
 // Visibility only affects the customer document; the saved calculation remains intact.

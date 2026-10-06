@@ -1,0 +1,7 @@
+.final-quote-total{margin-top:28px;padding:24px;border:1px solid #b9cdd0;border-radius:12px;background:#f4f8f7;color:#163e49}
+.final-total-heading{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:18px}
+.final-total-heading h3{font-size:20px;margin:0}.final-total-heading>strong{font-size:30px;font-variant-numeric:tabular-nums}
+.final-quote-total p{font-size:13px;line-height:1.7;color:#45626c;margin:8px 0}
+.final-total-controls{display:flex;align-items:flex-end;flex-wrap:wrap;gap:12px;margin:18px 0 10px}.final-total-controls>label{flex:1 1 250px;min-width:0;margin:0}.final-total-controls input{margin-top:8px;background:white;font-size:18px}.final-total-controls>button{min-height:44px}
+.final-total-adjustment{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;padding-top:16px;margin-top:16px;border-top:1px solid #cbdcde;font-size:14px}.final-quote-total .field-error{color:#9d3425}
+@media(max-width:600px){.final-quote-total{padding:18px}.final-total-controls>button{flex:1 1 100%}.final-total-heading>strong{font-size:26px}}
