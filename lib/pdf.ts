@@ -11,7 +11,7 @@ import {publishedProjection,projectionAssumptions,savingsBillComparison} from '.
 
 type ProposalPhotos={roof?:ArrayBuffer;home?:ArrayBuffer};
 export async function quotePdf(q:SavedQuote,logoBytes?:ArrayBuffer,photos:ProposalPhotos={}){
- if(usesAtlasProposal(q))return atlasPdf(q,logoBytes,photos);
+ if(usesAtlasProposal(q))return atlasPdf(q,logoBytes);
  q={...q,settings:customerDocumentSettings(q.input,q.settings)};
  const pdf=await PDFDocument.create();pdf.setTitle(`${q.folio} - ${q.settings.name}`);pdf.setAuthor(q.settings.name);
  const regular=await pdf.embedFont(StandardFonts.Helvetica),bold=await pdf.embedFont(StandardFonts.HelveticaBold);

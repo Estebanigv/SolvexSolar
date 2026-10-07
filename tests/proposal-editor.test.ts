@@ -3,6 +3,7 @@ import {createElement} from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {AtlasProposal} from '../app/atlas-proposal';
 import {PDFDocument} from 'pdf-lib';
+import {readFileSync} from 'node:fs';
 import {newQuote,initialProducts,initialSettings,calculate,quoteSchema,money,type SavedQuote} from '../lib/quote';
 import {proposalLayout,usesAtlasProposal} from '../lib/proposal-layout';
 import {proposalCanvases} from '../lib/proposal-canvas';
@@ -41,6 +42,12 @@ async function run(){
  assert.equal((html.match(/<svg /g)??[]).length,canvases.length);
  const pdf=await PDFDocument.load(await quotePdf(changed));
  assert.equal(pdf.getPageCount(),canvases.length,'HTML y PDF tienen las mismas páginas');
+ assert.ok(!canvases.flatMap(p=>p.ops).some(op=>op.kind==='image'&&op.image!=='logo'),'No incluir fotografías referenciales');
+ for(const path of ['public/logo.jpg','public/proposal/logo-transparent-v2.png']){
+  const data=readFileSync(path),buffer=data.buffer.slice(data.byteOffset,data.byteOffset+data.byteLength) as ArrayBuffer;
+  const withLogo=await PDFDocument.load(await quotePdf(changed,buffer));
+  assert.equal(withLogo.getPageCount(),canvases.length,'Compartir PDF admite logo PNG y JPG');
+ }
  assert.ok(pdf.getPages().every(p=>p.getWidth()===842&&p.getHeight()===595),'PDF horizontal');
  const long={...changed,input:{...reopened,proposalContent:{...reopened.proposalContent!,text:{...reopened.proposalContent!.text,'scope:body':('Alcance extenso con instalación, pruebas y puesta en servicio.\n').repeat(160)}}}};
  const longPages=proposalCanvases(long);
@@ -50,6 +57,23 @@ async function run(){
  const projected={...changed,input:{...changed.input,projection}};
  projection.reviewedFor=projectionContext(projected,projection);
  assert.ok(proposalLayout(projected).some(p=>p.id==='analysis'));
+ const graph=proposalLayout(projected).find(p=>p.id==='analysis')!.blocks.find(b=>b.id==='chart')!;
+ assert.equal(graph.baseline,changed.calculation.total);
+ assert.equal(graph.points!.length,projection.years+1,'Graficar todos los años, incluido el origen');
+ assert.equal(graph.points![0].value,0);
+ const lossProjection={...projection,monthlySavings:10000,annualMaintenance:100000,replacementCost:1000000,replacementYear:1};
+ const withReplacement={...projected,input:{...projected.input,projection:lossProjection}};
+ lossProjection.reviewedFor=projectionContext(withReplacement,lossProjection);
+ assert.ok(proposalLayout(withReplacement).find(p=>p.id==='analysis')!.blocks.find(b=>b.id==='chart')!.points!.some(p=>p.value<0));
+ assert.ok(proposalCanvases(withReplacement).flatMap(p=>p.ops).some(op=>op.kind==='text'&&op.text.startsWith('$-')),'La escala representa balances negativos por reposición');
+ assert.ok(proposalCanvases(projected).flatMap(p=>p.ops).some(op=>op.kind==='line'&&op.dash?.length),'Inversión identificada con una línea discontinua');
+ const extendedTerms={...projected,input:{...projected.input,proposalContent:{...projected.input.proposalContent!,text:{...projected.input.proposalContent!.text,'terms:body':'Condiciones acordadas para el proyecto. '.repeat(150),'assumptions:body':'Supuestos del estudio. '.repeat(100)}}}};
+ const extendedCanvas=proposalCanvases(extendedTerms);
+ assert.ok(extendedCanvas.flatMap(p=>p.ops).some(op=>op.kind==='line'&&op.dash?.length),'Las notas largas no eliminan el gráfico');
+ assert.ok(extendedCanvas.flatMap(p=>p.ops).some(op=>op.kind==='text'&&op.text==='Etapas de pago'),'Las condiciones largas conservan la barra de pagos');
+ for(const page of extendedCanvas)for(const op of page.ops)if(op.kind==='text')assert.ok(op.y<=577&&op.y>0,'Las condiciones largas se paginan');
+ const hiddenGraph={...projected,input:{...projected.input,proposalContent:{...projected.input.proposalContent!,hidden:['energy-flow','chart']}}};
+ assert.ok(!proposalLayout(hiddenGraph).some(p=>p.blocks.some(b=>['energy-flow','chart'].includes(b.id))),'Los gráficos se pueden retirar desde el editor');
  const lengthy={...projected,input:{...projected.input,proposalContent:{...projected.input.proposalContent!,text:{...projected.input.proposalContent!.text,...Object.fromEntries(['analysis','investment-page','equipment','cover'].flatMap(id=>[[`${id}:title`,'W'.repeat(200)],[`${id}:subtitle`,'W'.repeat(500)]])),'chart:title':'W'.repeat(200),'assumptions:title':'W'.repeat(200)}}}};
  for(const page of proposalCanvases(lengthy))for(const op of page.ops)if(op.kind==='text')assert.ok(op.y<=577&&op.y>0,`Título largo fuera de página ${page.id}: ${op.y}`);
  assert.ok(!proposalLayout({...projected,calculation:{...projected.calculation,total:6000000}}).some(p=>p.id==='analysis'),'No publicar ahorro sin revalidar después de cambiar inversión');

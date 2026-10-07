@@ -5,7 +5,7 @@ import {proposalEquipment,proposalDiscount} from './proposal-document';
 import {publishedProjection,projectionAssumptions} from './projection';
 import {newProposalContent} from './proposal-content';
 
-export type ProposalBlock={id:string;kind:'text'|'metric'|'equipment'|'chart';title:string;body:string;value?:string;binding?:'total'|'payment'|'savings'|'discount';points?:{label:string;value:number}[]};
+export type ProposalBlock={id:string;kind:'text'|'metric'|'equipment'|'chart'|'diagram';title:string;body:string;value?:string;binding?:'total'|'payment'|'savings'|'discount';visual?:'panels'|'inverter'|'battery';share?:number;baseline?:number;points?:{label:string;value:number;year?:number}[]};
 export type ProposalPage={id:string;cover?:boolean;title:string;subtitle:string;blocks:ProposalBlock[]};
 export const usesAtlasProposal=(q:SavedQuote)=>!!q.input.proposalContent;
 
@@ -25,20 +25,21 @@ export function proposalLayout(original:SavedQuote,includeHidden=false):Proposal
    ...(discount?[{id:'discount',kind:'text' as const,binding:'discount' as const,title:'Descuento para tu proyecto',body:`${discount.percent?`${discount.percent}% de descuento. `:''}Ahorras ${money(discount.amount)}. Precio anterior: ${money(discount.before)}.`}]:[]),
   ]},
   {id:'equipment',title:'Lo que forma tu sistema.',subtitle:'Equipamiento y alcance',blocks:[
-   ...proposalEquipment(q).map((item,i)=>({id:`equipment-${i}`,kind:'equipment' as const,title:item.label,value:item.value,body:item.note})),
+   {id:'energy-flow',kind:'diagram',title:'De la luz a tu hogar',value:'Luz solar | Paneles | Inversor | Consumo',body:'Los paneles transforman la energía del sol en electricidad. El inversor la convierte para su uso en el inmueble.'},
+   ...proposalEquipment(q).map((item,i)=>({id:`equipment-${i}`,kind:'equipment' as const,visual:item.kind,title:item.label,value:item.value,body:item.note})),
    {id:'scope',kind:'text',title:'Suministro e instalación',body:input.notes||'Alcance de instalación pendiente de validar.'},
    ...(input.proposalType==='preliminary'?[{id:'technical',kind:'text' as const,title:'Validación técnica',body:preliminaryNote}]:[]),
   ]},
   ...(projection?[{id:'analysis',title:'El valor de tu energía.',subtitle:'Análisis del proyecto',blocks:[
    {id:'saving',kind:'metric' as const,title:'Ahorro mensual inicial',value:money(projection.input.monthlySavings!),binding:'savings' as const,body:'Antes de costos de mantención y reposición'},
    {id:'payback',kind:'metric' as const,title:'Recuperación estimada',value:projection.payback===null?'Fuera del horizonte':`${projection.payback.toLocaleString('es-CL',{maximumFractionDigits:1})} años`,body:`Inversión ${money(c.total)}`},
-   {id:'chart',kind:'chart' as const,title:'Ahorro acumulado',body:'Después de mantención y reposiciones, antes de descontar la inversión.',points:projection.rows.filter(r=>r.year===1||r.year%5===0||r.year===projection.input.years).map(r=>({label:`Año ${r.year}`,value:Math.round(r.cumulative)}))},
+   {id:'chart',kind:'chart' as const,title:'Ahorro acumulado',body:'Después de mantención y reposiciones, antes de descontar la inversión.',baseline:c.total,points:[{label:'Año 0',year:0,value:0},...projection.rows.map(r=>({label:`Año ${r.year}`,year:r.year,value:Math.round(r.cumulative)}))]},
    {id:'assumptions',kind:'text' as const,title:'Supuestos del escenario',body:projection.input.savingsSource+'\n'+projectionAssumptions(projection.input)},
    ...(projection.co2Tonnes!==null?[{id:'environment',kind:'text' as const,title:'Impacto ambiental estimado',body:`${projection.co2Tonnes.toLocaleString('es-CL',{maximumFractionDigits:2})} toneladas de CO₂ evitadas en el primer año. ${projection.input.avoidedKwh?.toLocaleString('es-CL')} kWh sustituidos × ${projection.input.emissionFactor} kg CO₂/kWh. Fuente: ${projection.input.emissionSource}`}]:[]),
   ]}]:[]),
   {id:'investment-page',title:'Inversión y respaldo.',subtitle:'Tu propuesta, en detalle',blocks:[
    {id:'closing-total',kind:'metric',title:'Total del proyecto',value:money(c.total),binding:'total',body:input.payment},
-   ...paymentBreakdown(c.total,settings).map((p,i)=>({id:`payment-${i}`,kind:'metric' as const,title:p.label,value:money(p.amount),binding:'payment' as const,body:`${p.percent}% del total`})),
+   ...paymentBreakdown(c.total,settings).map((p,i)=>({id:`payment-${i}`,kind:'metric' as const,title:p.label,value:money(p.amount),binding:'payment' as const,share:p.percent,body:`${p.percent}% del total`})),
    {id:'warranty',kind:'text',title:'Respaldo del proyecto',body:settings.warranty||'Garantías pendientes de confirmar.'},
    {id:'terms',kind:'text',title:'Condiciones comerciales',body:settings.terms||'Condiciones pendientes de confirmar.'},
    {id:'validity',kind:'text',title:'Vigencia',body:`${settings.validDays} días desde la emisión.`},

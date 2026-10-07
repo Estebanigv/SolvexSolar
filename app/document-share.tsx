@@ -14,7 +14,7 @@ export function DocumentShare({quote,whatsapp,onClose}:{quote:SavedQuote;whatsap
   useEffect(()=>{
     let active=true,url='';const controller=new AbortController();setPrepared(null);setError('');
     void (async()=>{try{
-      const [{quotePdf},logo]=await Promise.all([import('@/lib/pdf'),fetch('/logo.jpg',{signal:controller.signal})]);
+      const [{quotePdf},logo]=await Promise.all([import('@/lib/pdf'),fetch('/proposal/logo-transparent-v2.png',{signal:controller.signal})]);
       const bytes=await quotePdf(quote,logo.ok?await logo.arrayBuffer():undefined);
       if(!active)return;
       const file=new File([bytes as BlobPart],`${quote.folio}.pdf`,{type:'application/pdf'});
