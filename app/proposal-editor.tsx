@@ -12,7 +12,7 @@ import {DiscountField} from './discount-field';
 import {FinalQuoteTotal} from './final-quote-total';
 import {ProjectionPanel} from './projection-panel';
 import {ProposalElementEditor} from './proposal-element-editor';
-import type {ElementSelection,ElementStyle} from '@/lib/proposal-elements';
+import {elementDescription,type ElementSelection,type ElementStyle} from '@/lib/proposal-elements';
 import {ProposalStyleEditor} from './proposal-style-editor';
 import {resolveProposalStyle,type ProposalStyle} from '@/lib/proposal-style';
 import './proposal-editor.css';
@@ -39,8 +39,10 @@ export function ProposalEditor({q,products,settings,rates,busy,onSave,onCancel}:
  const elementField=element?.id.split(':').at(-1),elementBase=element?.id.slice(0,element.id.lastIndexOf(':'));
  const elementPage=pages.find(p=>p.id===element?.sourcePage);
  const elementBlock=elementPage?.blocks.find(b=>b.id===elementBase);
- const elementContent=elementField==='box'?undefined:elementBlock?.[elementField as 'title'|'value'|'body']??elementPage?.[elementField as 'title'|'subtitle'];
- const elementBound=!!elementBlock?.binding&&elementField!=='title';
+ const elementContent=elementField==='box'?undefined:elementBlock?.[elementField as 'title'|'value'|'body']??(elementBase===elementPage?.id?elementPage?.[elementField as 'title'|'subtitle']:undefined);
+ const elementBound=element?.kind==='text'&&!!elementBlock?.binding&&elementField!=='title';
+ const removedElements=Object.entries(content.elements??{}).filter(([,style])=>style.hidden);
+ const elementLabel=(id:string)=>{const found=canvases.flatMap(p=>p.elements??[]).find(e=>e.id===id);return found?elementDescription(found):id;};
  const selectElement=(next:ElementSelection)=>{setSelection(next);const sourcePage=canvases.find(p=>p.id===next.pageId)?.sourcePage;if(sourcePage)setSelected(sourcePage);toolsRef.current?.scrollTo({top:0,behavior:'instant'});};
  const selectField=(id:string)=>{const canvas=canvases.find(p=>p.elements?.some(e=>e.id===id));if(canvas)selectElement({id,pageId:canvas.id});};
  const editElement=(patch:Partial<ElementStyle>|null)=>{if(!element)return;setInput(previous=>{const content=previous.proposalContent??newProposalContent(),elements={...content.elements};if(patch)elements[element.id]={...elements[element.id],...patch};else delete elements[element.id];return {...previous,proposalContent:{...content,elements}};});setDirty(true);setError('');};
@@ -61,9 +63,10 @@ export function ProposalEditor({q,products,settings,rates,busy,onSave,onCancel}:
   <div className="proposal-editor-toolbar"><div><strong>Editar propuesta</strong><p>Los cambios se guardan como una nueva versión. El PDF conserva este diseño.</p></div><Button disabled={busy} variant="outline" onClick={()=>{if(!dirty||window.confirm('¿Descartar los cambios de esta edición?'))onCancel();}}>Cancelar</Button><Button disabled={busy} onClick={()=>void save()}>{busy?'Guardando…':'Guardar propuesta'}</Button></div>
   {error&&<p className="proposal-editor-error" role="alert">{error}</p>}
   <div className="proposal-editor-workspace"><aside ref={toolsRef} className="proposal-editor-tools" aria-label="Contenido de la propuesta"><fieldset disabled={busy}>
-   <ProposalElementEditor element={element} value={element?content.elements?.[element.id]??{}:{}} label={element?`${element.kind==='box'?'Caja':'Texto'}: ${elementBlock?.title||elementPage?.title||'Elemento'}`:''} content={elementContent} readOnly={elementBound} maxLength={elementField==='title'?200:elementField==='subtitle'?500:elementField==='value'?1000:12000} onText={value=>{if(element)editText(element.id,value);}} onStyle={editElement} onReset={()=>editElement(null)} onClose={()=>setSelection(null)} onSelectField={selectField} availableFields={canvases.flatMap(p=>p.elements?.map(e=>e.id)??[])}>
+   <ProposalElementEditor element={element} value={element?content.elements?.[element.id]??{}:{}} label={element?`${({box:'Caja',text:'Texto',line:'Línea',image:'Imagen',graphic:'Gráfico'})[element.kind]}: ${elementBlock?.title||elementDescription(element)}`:''} content={elementContent} readOnly={elementBound} maxLength={elementField==='title'?200:elementField==='subtitle'?500:elementField==='value'?1000:12000} onText={value=>{if(element){if(elementContent===undefined)editElement({text:value});else editText(element.id,value);}}} onStyle={editElement} onReset={()=>editElement(null)} onRemove={()=>editElement({hidden:!element?.hidden})} onClose={()=>setSelection(null)} onSelectField={selectField} availableFields={canvases.flatMap(p=>p.elements?.map(e=>e.id)??[])}>
     {elementBound&&(elementBlock?.binding==='total'&&elementField==='value'&&working?<FinalQuoteTotal quote={input} calculation={working.calculation} onChange={update}/>:<><p>Este valor proviene del cálculo de la cotización.</p><Button type="button" variant="outline" onClick={openBinding}>Editar {elementBlock?.binding==='savings'?'ahorro y gráficos':'total y pagos'}</Button></>)}
    </ProposalElementEditor>
+   {removedElements.length>0&&<details className="proposal-edit-block"><summary>Elementos eliminados ({removedElements.length})</summary>{removedElements.map(([id])=><div className="proposal-editor-buttons" key={id}><span>{elementLabel(id)}</span><Button type="button" variant="outline" onClick={()=>{const elements={...content.elements,[id]:{...content.elements?.[id],hidden:false}};editContent({elements});}}>Restaurar</Button></div>)}</details>}
    <ProposalStyleEditor value={content.style} onChange={editStyle} disabled={busy}/>
    <label>Página<select value={page.id} onChange={e=>setSelected(e.target.value)}>{pages.map((p,i)=><option key={p.id} value={p.id}>{i+1}. {p.title||'Sin título'}{content.hidden.includes(p.id)?' (oculta)':''}</option>)}</select></label>
    <div className="proposal-editor-buttons"><Button type="button" variant="outline" onClick={()=>move(-1)} disabled={pages[0].id===page.id}>Subir página</Button><Button type="button" variant="outline" onClick={()=>move(1)} disabled={pages.at(-1)?.id===page.id}>Bajar página</Button></div>

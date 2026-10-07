@@ -29,17 +29,18 @@ export function proposalCanvases(q:SavedQuote):CanvasPage[]{
  let current:CanvasPage,y=0;
  const rect=(x:number,top:number,w:number,h:number,color=colors.green,stroke?:string,elementId?:string)=>current.ops.push({kind:'rect',x,y:top,width:w,height:h,color,stroke,elementId});
  const text=(value:string,x:number,baseline:number,size=12,isBold=false,color=colors.ink,elementId?:string,fieldWidth?:number)=>current.ops.push({kind:'text',x,y:baseline,text:printableText(value),size:size*style.textScale,bold:isBold,color,elementId,fieldWidth});
- const right=(value:string,x:number,baseline:number,size=12,isBold=false,color=colors.ink)=>text(value,x-width(value,size,isBold),baseline,size,isBold,color);
- const line=(x:number,top:number,x2:number,y2:number,color=colors.line,thickness=1,dash?:number[])=>current.ops.push({kind:'line',x,y:top,x2,y2,color,thickness,dash});
+ const right=(value:string,x:number,baseline:number,size=12,isBold=false,color=colors.ink,elementId?:string)=>text(value,x-width(value,size,isBold),baseline,size,isBold,color,elementId);
+ const line=(x:number,top:number,x2:number,y2:number,color=colors.line,thickness=1,dash?:number[],elementId?:string)=>current.ops.push({kind:'line',x,y:top,x2,y2,color,thickness,dash,elementId});
  const circle=(x:number,top:number,r:number,color=colors.pale,stroke?:string)=>current.ops.push({kind:'circle',x,y:top,r,color,stroke});
  const polygon=(points:{x:number;y:number}[],color:string,stroke?:string,thickness=1)=>current.ops.push({kind:'polygon',points,color,stroke,thickness});
  const lines=(value:string,x:number,top:number,w:number,size=12,isBold=false,color=colors.ink,elementId?:string)=>{const rows=wrap(value,size,w,isBold);rows.forEach((row,i)=>{text(row,x,top+size+i*size*1.4,size,isBold,color,elementId,w);if(i===0&&elementId)current.ops.at(-1)!.source=value;});return rows.length*size*1.4;};
- const icon=(kind:string,x:number,top:number,s=34,color=colors.teal)=>current.ops.push(...proposalIcon(kind,x,top,s,color,colors.green,colors.white));
+ const icon=(kind:string,x:number,top:number,s=34,color=colors.teal,elementId?:string)=>current.ops.push(...proposalIcon(kind,x,top,s,color,colors.green,colors.white).map(op=>({...op,elementId})));
+ const groupSince=(start:number,id:string)=>{for(const op of current.ops.slice(start))if(!op.elementId)op.elementId=id;};
  const start=(page:ProposalPage,continuation=false)=>{
   current={id:`${page.id}-${pages.length}`,title:page.title,sourcePage:page.id,ops:[]};pages.push(current);
-  rect(0,0,842,595,colors.white);
-  icon('sun',36,17,21);text(q.settings.name,65,33,12,true);right(q.folio,806,32,9,false,colors.muted);
-  line(36,49,806,49);
+  rect(0,0,842,595,colors.white,undefined,`${page.id}:background`);
+  icon('sun',36,17,21,colors.teal,`${page.id}:brand-icon`);text(q.settings.name,65,33,12,true,colors.ink,`${page.id}:brand`);right(q.folio,806,32,9,false,colors.muted,`${page.id}:folio`);
+  line(36,49,806,49,colors.line,1,undefined,`${page.id}:header-rule`);
   y=68;
   if(page.subtitle&&!continuation)y+=lines(page.subtitle,36,y,770,11,false,colors.muted,`${page.id}:subtitle`)+8;
   y+=lines(continuation?page.title+' (continuación)':page.title,36,y,770,continuation?18:29,true,colors.ink,`${page.id}:title`)+17;
@@ -53,9 +54,11 @@ export function proposalCanvases(q:SavedQuote):CanvasPage[]{
   text(block.title,54,top+24,14,true,colors.ink,`${block.id}:title`,730);
   const centers=[129,322,515,708];
   centers.forEach((cx,i)=>{
+   const connectorStart=current.ops.length;
    if(i<3){line(cx+31,top+56,centers[i+1]-33,top+56,colors.teal,1.2);polygon([{x:centers[i+1]-33,y:top+52},{x:centers[i+1]-27,y:top+56},{x:centers[i+1]-33,y:top+60}],colors.teal);}
-   circle(cx,top+56,26,colors.white);icon(['sun','panels','inverter','home'][i],cx-19,top+37,38);
-   text(labels[i],cx-width(labels[i],11,true)/2,top+92,11,true);
+   groupSince(connectorStart,`${block.id}:connector-${i}`);
+   const iconStart=current.ops.length;circle(cx,top+56,26,colors.white);icon(['sun','panels','inverter','home'][i],cx-19,top+37,38);
+   groupSince(iconStart,`${block.id}:icon-${i}`);text(labels[i],cx-width(labels[i],11,true)/2,top+92,11,true,colors.ink,`${block.id}:label-${i}`);
   });
   lines(block.body,54,top+103,730,9,false,colors.muted,`${block.id}:body`);
   return true;
@@ -68,16 +71,16 @@ export function proposalCanvases(q:SavedQuote):CanvasPage[]{
   if(y>150){pages.splice(first);return false;}
   if(flow){if(!energyFlow(flow,y)){pages.splice(first);return false;}y+=142;}
   equipment.forEach((b,i)=>{
-   const x=36+i*(col+18);rect(x,y,col,144,colors.white,colors.line,`${b.id}:box`);icon(b.visual??'panels',x+14,y+13,32);
+   const x=36+i*(col+18);rect(x,y,col,144,colors.white,colors.line,`${b.id}:box`);icon(b.visual??'panels',x+14,y+13,32,colors.teal,`${b.id}:icon`);
    lines(b.title,x+59,y+16,col-75,11,true,colors.ink,`${b.id}:title`);lines(b.value??'',x+16,y+70,col-32,15,true,colors.ink,`${b.id}:value`);text(b.body,x+16,y+130,10,false,colors.muted,`${b.id}:body`,col-32);
   });
   y+=163;
   if(notes.length>2||notes.some(b=>!canFit(b.title,13,369,1,true)||!canFit(b.body,10,369,5))){bodyPage(page,notes,true,true);return true;}
-  notes.forEach((b,i)=>{const x=36+i*395;line(x,y,x+375,y,colors.green,2);let top=y+10;top+=lines(b.title,x,top,369,13,true,colors.ink,`${b.id}:title`)+5;lines(b.body,x,top,369,10,false,colors.muted,`${b.id}:body`);});
+  notes.forEach((b,i)=>{const x=36+i*395;line(x,y,x+375,y,colors.green,2,undefined,`${b.id}:rule`);let top=y+10;top+=lines(b.title,x,top,369,13,true,colors.ink,`${b.id}:title`)+5;lines(b.body,x,top,369,10,false,colors.muted,`${b.id}:body`);});
   if(outside(first)){pages.splice(first);return false;}return true;
  }
  function chart(block:ProposalBlock,x:number,top:number,w:number,h:number){
-  const pts=block.points??[];if(!pts.length)return;
+  const pts=block.points??[];if(!pts.length)return;const chartStart=current.ops.length;
   const base=block.baseline??0,values=pts.map(p=>p.value);
   const min=Math.min(0,...values),max=Math.max(1,base,...values);
   const rough=(max-min)/4,unit=10**Math.floor(Math.log10(rough));
@@ -93,7 +96,7 @@ export function proposalCanvases(q:SavedQuote):CanvasPage[]{
   if(base>0){line(px,yValue(base),px+pw,yValue(base),colors.muted,1,[4,3]);text('Inversión inicial',px+7,yValue(base)-6,9,false,colors.muted);}
   for(let i=1;i<coords.length;i++)line(coords[i-1].x,coords[i-1].y,coords[i].x,coords[i].y,colors.teal,2.5);
   pts.forEach((p,i)=>{const year=p.year??i;if(year===0||year%5===0||i===pts.length-1){circle(coords[i].x,coords[i].y,3,colors.teal);text(String(year),coords[i].x-width(String(year),9)/2,py+ph+18,9,false,colors.muted);}});
-  right('Años',px+pw,py+ph+32,9,false,colors.muted);
+  right('Años',px+pw,py+ph+32,9,false,colors.muted);groupSince(chartStart,`${block.id}:graphic`);
  }
  function analysisPage(page:ProposalPage){
   const metrics=page.blocks.filter(b=>b.kind==='metric'),plot=page.blocks.find(b=>b.kind==='chart'),notes=page.blocks.filter(b=>b.kind==='text');
@@ -114,11 +117,11 @@ export function proposalCanvases(q:SavedQuote):CanvasPage[]{
   const first=pages.length;start(page);if(y>155){pages.splice(first);return false;}
   const top=y;rect(36,top,243,128,colors.dark,undefined,`${total.id}:box`);lines(total.title,54,top+16,205,12,true,colors.white,`${total.id}:title`);text(total.value??'',54,top+73,29,true,colors.green,`${total.id}:value`,205);lines(total.body,54,top+94,205,10,false,'#d5e3e1',`${total.id}:body`);
   if(payments.length){
-   text('Etapas de pago',306,top+15,14,true);rect(306,top+30,500,19,colors.pale);let x=306;
+   text('Etapas de pago',306,top+15,14,true,colors.ink,'payment-summary:title');rect(306,top+30,500,19,colors.pale,undefined,'payment-summary:bar');let x=306;
    const palette=[colors.teal,colors.green,'#82aaa0'];
-   payments.forEach((m,i)=>{const segment=500*(m.share??0)/100;rect(x,top+30,segment,19,palette[i]);x+=segment;});
+   payments.forEach((m,i)=>{const segment=500*(m.share??0)/100;rect(x,top+30,segment,19,palette[i],undefined,`${m.id}:segment`);x+=segment;});
    const col=500/payments.length;
-   payments.forEach((m,i)=>{const xx=306+i*col;circle(xx+4,top+66,3.5,palette[i]);lines(m.title,xx+15,top+58,col-21,11,true,colors.ink,`${m.id}:title`);text(m.value??'',xx+15,top+106,16,true,colors.ink,`${m.id}:value`,col-21);text(m.body,xx+15,top+123,9,false,colors.muted,`${m.id}:body`,col-21);});
+   payments.forEach((m,i)=>{const xx=306+i*col;circle(xx+4,top+66,3.5,palette[i]);current.ops.at(-1)!.elementId=`${m.id}:marker`;lines(m.title,xx+15,top+58,col-21,11,true,colors.ink,`${m.id}:title`);text(m.value??'',xx+15,top+106,16,true,colors.ink,`${m.id}:value`,col-21);text(m.body,xx+15,top+123,9,false,colors.muted,`${m.id}:body`,col-21);});
   }
   const col=770/3;let rowTop=top+152;
   for(let offset=0;offset<notes.length;offset+=3){
@@ -126,7 +129,7 @@ export function proposalCanvases(q:SavedQuote):CanvasPage[]{
    const height=(note:ProposalBlock)=>wrap(note.title,13,col-20,true).length*18.2+wrap(note.body,10,col-20).length*14+26;
    const h=Math.max(...row.map(height));
    if(rowTop+h>546){y=rowTop;bodyPage(page,notes.slice(offset),true,true);return true;}
-   row.forEach((note,i)=>{const x=36+i*col;line(x,rowTop,x+col-20,rowTop,colors.green,2);let yy=rowTop+10;yy+=lines(note.title,x,yy,col-20,13,true,colors.ink,`${note.id}:title`)+6;lines(note.body,x,yy,col-20,10,false,colors.muted,`${note.id}:body`);});
+   row.forEach((note,i)=>{const x=36+i*col;line(x,rowTop,x+col-20,rowTop,colors.green,2,undefined,`${note.id}:rule`);let yy=rowTop+10;yy+=lines(note.title,x,yy,col-20,13,true,colors.ink,`${note.id}:title`)+6;lines(note.body,x,yy,col-20,10,false,colors.muted,`${note.id}:body`);});
    rowTop+=h;
   }
   if(outside(first)){pages.splice(first);return false;}return true;
@@ -152,7 +155,7 @@ export function proposalCanvases(q:SavedQuote):CanvasPage[]{
    }
    const titleHeight=wrap(block.title,17,770,true).length*24;
    if(y+titleHeight+45>535)start(page,true);
-   line(36,y,806,y,colors.green,1);y+=13;
+   line(36,y,806,y,colors.green,1,undefined,`${block.id}:rule`);y+=13;
    if(block.title)y+=lines(block.title,36,y,770,17,true,colors.ink,`${block.id}:title`)+8;
    if(block.value){for(const row of wrap(block.value,17,770,true)){if(y+24>535)start(page,true);text(row,36,y+17,17,true,colors.ink,`${block.id}:value`,770);y+=24;}y+=6;}
    for(const row of wrap(block.body,12,770)){if(y+17>535)start(page,true);text(row,36,y+12,12,false,colors.muted,`${block.id}:body`,770);y+=17;}
@@ -163,18 +166,18 @@ export function proposalCanvases(q:SavedQuote):CanvasPage[]{
  function cover(page:ProposalPage){
   const client=page.blocks.find(b=>b.id==='client'),metrics=page.blocks.filter(b=>b.kind==='metric'),col=(770-14*Math.max(0,metrics.length-1))/Math.max(1,metrics.length);
   if(!canFit(page.title,36,413,3,true)||!canFit(page.subtitle,17,413,2)||client&&(!canFit(client.title,20,413,2,true)||!canFit(client.body,11,413,2))||metrics.length>3||metrics.some(m=>!canFit(m.title,11,col-40,2,true)||!canFit(m.value??'',27,col-40,1,true)||!canFit(m.body,9.5,col-40,3)))return false;
-  current={id:'cover',title:page.title,sourcePage:page.id,ops:[]};pages.push(current);rect(0,0,842,595,colors.white);rect(0,0,842,376,colors.dark);
-  if(style.coverPhoto)current.ops.push({kind:'image',image:'roof',x:330,y:0,width:512,height:376,fit:'cover'});
+  current={id:'cover',title:page.title,sourcePage:page.id,ops:[]};pages.push(current);rect(0,0,842,595,colors.white,undefined,`${page.id}:background`);rect(0,0,842,376,colors.dark,undefined,'cover:field');
+  if(style.coverPhoto)current.ops.push({kind:'image',elementId:'cover:photo',image:'roof',x:330,y:0,width:512,height:376,fit:'cover'});
   // Blend the photograph into the brand field; keep editable text above the image.
-  current.ops.push({kind:'rect',x:330,y:0,width:512,height:376,color:colors.dark,opacity:.12});
-  current.ops.push({kind:'fade',x:330,y:0,width:384,height:376,color:colors.dark,from:1,to:0,direction:'horizontal'});
-  current.ops.push({kind:'fade',x:330,y:0,width:512,height:128,color:colors.dark,from:.7,to:0,direction:'vertical'});
-  current.ops.push({kind:'image',image:'logo',x:36,y:22,width:101,height:67,fit:'contain'});
-  right(q.folio,806,43,9,false,'#bbd0ce');right(documentTitle(q),806,62,9,true,colors.green);
+  current.ops.push({kind:'rect',elementId:'cover:photo',x:330,y:0,width:512,height:376,color:colors.dark,opacity:.12});
+  current.ops.push({kind:'fade',elementId:'cover:photo',x:330,y:0,width:384,height:376,color:colors.dark,from:1,to:0,direction:'horizontal'});
+  current.ops.push({kind:'fade',elementId:'cover:photo',x:330,y:0,width:512,height:128,color:colors.dark,from:.7,to:0,direction:'vertical'});
+  current.ops.push({kind:'image',elementId:'cover:logo',image:'logo',x:36,y:22,width:101,height:67,fit:'contain'});
+  right(q.folio,806,43,9,false,'#bbd0ce','cover:folio');right(documentTitle(q),806,62,9,true,colors.green,'cover:status');
   let top=115;top+=lines(page.title,36,top,413,36,true,colors.white,`${page.id}:title`)+14;top+=lines(page.subtitle,36,top,413,17,false,'#c7dcda',`${page.id}:subtitle`)+20;
-  if(client){line(36,top,88,top,colors.green,2);top+=15;top+=lines(client.title,36,top,413,20,true,colors.white,`${client.id}:title`)+8;top+=lines(client.body,36,top,413,11,false,'#c7dcda',`${client.id}:body`);}
+  if(client){line(36,top,88,top,colors.green,2,undefined,'cover:client-rule');top+=15;top+=lines(client.title,36,top,413,20,true,colors.white,`${client.id}:title`)+8;top+=lines(client.body,36,top,413,11,false,'#c7dcda',`${client.id}:body`);}
   if(top>353){pages.pop();return false;}
-  line(36,376,806,376,colors.green,3);
+  line(36,376,806,376,colors.green,3,undefined,'cover:bottom-rule');
   metrics.forEach((m,i)=>{
    const x=36+i*(col+14),primary=m.id==='investment',value=m.value??'';
    rect(x,396,col,141,primary?'#16563f':m.id==='saving-summary'?'#e5f2cf':'#edf4e6',undefined,`${m.id}:box`);
@@ -196,9 +199,9 @@ export function proposalCanvases(q:SavedQuote):CanvasPage[]{
   bodyPage(page,page.blocks);
  }
  pages.forEach((page,i)=>{
-  page.ops.push({kind:'line',x:36,y:553,x2:806,y2:553,color:colors.line,thickness:.6});
-  page.ops.push({kind:'text',x:36,y:577,size:9,bold:false,color:colors.muted,text:printableText(`${q.settings.name} · ${q.folio}`)});
-  page.ops.push({kind:'text',x:755,y:577,size:9,bold:false,color:colors.muted,text:`${i+1} / ${pages.length}`});
+  page.ops.push({kind:'line',elementId:`${page.sourcePage}:footer-rule`,x:36,y:553,x2:806,y2:553,color:colors.line,thickness:.6});
+  page.ops.push({kind:'text',elementId:`${page.sourcePage}:footer-text`,x:36,y:577,size:9,bold:false,color:colors.muted,text:printableText(`${q.settings.name} · ${q.folio}`)});
+  page.ops.push({kind:'text',elementId:`${page.sourcePage}:page-number`,x:755,y:577,size:9,bold:false,color:colors.muted,text:`${i+1} / ${pages.length}`});
  });
  return pages.map(page=>applyElementStyles({...page,font:style.font,ops:page.ops.map(op=>{
   if(!custom||op.kind==='image')return op;

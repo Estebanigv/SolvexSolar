@@ -1,7 +1,7 @@
 import {useId} from 'react';
 import type {SavedQuote} from '@/lib/quote';
 import {proposalCanvases,canvasSize,type CanvasPage} from '@/lib/proposal-canvas';
-import type {ElementSelection} from '@/lib/proposal-elements';
+import {elementDescription,type ElementSelection} from '@/lib/proposal-elements';
 import {proposalFonts} from '@/lib/proposal-style';
 import {proposalImages} from '@/lib/proposal-document';
 import './atlas-proposal.css';
@@ -19,6 +19,6 @@ export function AtlasProposal({q,canvases,selection,onSelect}:{q:SavedQuote;canv
    const id=`${prefix}-${index}-${i}`;
    return <g key={i}><defs><clipPath id={id}><rect x={op.x} y={op.y} width={op.width} height={op.height}/></clipPath></defs><image href={proposalImages[op.image]} x={op.x} y={op.y} width={op.width} height={op.height} preserveAspectRatio={op.fit==='cover'?'xMidYMid slice':'xMidYMid meet'} clipPath={`url(#${id})`}/></g>;
   })}
- {onSelect&&page.elements?.map(element=>{const active=selection?.id===element.id&&selection.pageId===page.id;return <g key={element.id} role="button" tabIndex={0} aria-label={`${element.kind==='box'?'Editar caja':'Editar texto'}: ${(element.text??page.elements?.find(e=>e.id===element.id.replace(/:box$/,':title'))?.text??element.id.split(':')[0]).slice(0,100)}`} aria-pressed={active} className={`proposal-selectable ${active?'is-selected':''}`} onClick={()=>onSelect({id:element.id,pageId:page.id})} onKeyDown={event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();onSelect({id:element.id,pageId:page.id});}}}><rect x={element.x-2} y={element.y-2} width={element.width+4} height={Math.max(element.height+4,14)} rx={2} vectorEffect="non-scaling-stroke"/></g>;})}
+ {onSelect&&page.elements?.filter(element=>!element.hidden).slice().sort((a,b)=>b.width*b.height-a.width*a.height).map(element=>{const active=selection?.id===element.id&&selection.pageId===page.id;return <g key={element.id} data-element-id={element.id} role="button" tabIndex={0} aria-label={`${element.kind==='box'?'Editar caja':element.kind==='text'?'Editar texto':element.kind==='line'?'Editar línea':element.kind==='image'?'Editar imagen':'Editar gráfico'}: ${(element.text??page.elements?.find(e=>e.id===element.id.replace(/:box$/,':title'))?.text??elementDescription(element)).slice(0,100)}`} aria-pressed={active} className={`proposal-selectable ${active?'is-selected':''}`} onClick={()=>onSelect({id:element.id,pageId:page.id})} onKeyDown={event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();onSelect({id:element.id,pageId:page.id});}}}><rect x={element.x-2} y={element.y-2} width={element.width+4} height={Math.max(element.height+4,14)} rx={2} vectorEffect="non-scaling-stroke"/></g>;})}
  </svg></section>)}</article>;
 }
