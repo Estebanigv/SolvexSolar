@@ -4,6 +4,7 @@ import {applyElementStyles,type CanvasElement} from './proposal-elements';
 import {proposalLayout,type ProposalPage,type ProposalBlock} from './proposal-layout';
 import type {SavedQuote} from './quote';
 import {documentTitle} from './quote-issuance';
+import {proposalIcon} from './proposal-icons';
 import {resolveProposalStyle,defaultProposalStyle,readableOn,tint,type ProposalStyle} from './proposal-style';
 
 export const canvasSize={width:842,height:595};
@@ -33,26 +34,7 @@ export function proposalCanvases(q:SavedQuote):CanvasPage[]{
  const circle=(x:number,top:number,r:number,color=colors.pale,stroke?:string)=>current.ops.push({kind:'circle',x,y:top,r,color,stroke});
  const polygon=(points:{x:number;y:number}[],color:string,stroke?:string,thickness=1)=>current.ops.push({kind:'polygon',points,color,stroke,thickness});
  const lines=(value:string,x:number,top:number,w:number,size=12,isBold=false,color=colors.ink,elementId?:string)=>{const rows=wrap(value,size,w,isBold);rows.forEach((row,i)=>{text(row,x,top+size+i*size*1.4,size,isBold,color,elementId,w);if(i===0&&elementId)current.ops.at(-1)!.source=value;});return rows.length*size*1.4;};
- const icon=(kind:string,x:number,top:number,s=34,color=colors.teal)=>{
-  if(kind==='sun'){
-   circle(x+s/2,top+s/2,s*.2,colors.green);
-   for(let i=0;i<8;i++){const a=i*Math.PI/4;line(x+s/2+Math.cos(a)*s*.32,top+s/2+Math.sin(a)*s*.32,x+s/2+Math.cos(a)*s*.46,top+s/2+Math.sin(a)*s*.46,color,1.5);}return;
-  }
-  if(kind==='panels'){
-   rect(x+2,top+3,s-4,s*.65,colors.pale,color);
-   for(let i=1;i<3;i++)line(x+2+(s-4)*i/3,top+3,x+2+(s-4)*i/3,top+3+s*.65,color,.8);
-   line(x+2,top+3+s*.325,x+s-2,top+3+s*.325,color,.8);line(x+s/2,top+s*.74,x+s/2,top+s*.95,color,1.4);line(x+s*.2,top+s*.95,x+s*.8,top+s*.95,color,1.4);return;
-  }
-  if(kind==='inverter'||kind==='battery'){
-   rect(x+s*.15,top+2,s*.7,s-4,colors.pale,color);
-   if(kind==='battery'){rect(x+s*.35,top-1,s*.3,3,color);for(let i=0;i<3;i++)rect(x+s*.29,top+s*(.25+i*.21),s*.42,s*.12,colors.green);}
-   else{rect(x+s*.29,top+s*.23,s*.42,s*.18,colors.white,color);circle(x+s*.5,top+s*.69,2.6,colors.green);}
-   return;
-  }
-  line(x,top+s*.43,x+s/2,top+2,color,1.5);line(x+s/2,top+2,x+s,top+s*.43,color,1.5);
-  line(x+s*.15,top+s*.33,x+s*.15,top+s*.94,color,1.5);line(x+s*.85,top+s*.33,x+s*.85,top+s*.94,color,1.5);line(x+s*.15,top+s*.94,x+s*.85,top+s*.94,color,1.5);
-  rect(x+s*.4,top+s*.6,s*.2,s*.34,colors.green);
- };
+ const icon=(kind:string,x:number,top:number,s=34,color=colors.teal)=>current.ops.push(...proposalIcon(kind,x,top,s,color,colors.green,colors.white));
  const start=(page:ProposalPage,continuation=false)=>{
   current={id:`${page.id}-${pages.length}`,title:page.title,sourcePage:page.id,ops:[]};pages.push(current);
   rect(0,0,842,595,colors.white);
@@ -72,7 +54,7 @@ export function proposalCanvases(q:SavedQuote):CanvasPage[]{
   const centers=[129,322,515,708];
   centers.forEach((cx,i)=>{
    if(i<3){line(cx+31,top+56,centers[i+1]-33,top+56,colors.teal,1.2);polygon([{x:centers[i+1]-33,y:top+52},{x:centers[i+1]-27,y:top+56},{x:centers[i+1]-33,y:top+60}],colors.teal);}
-   circle(cx,top+56,25,colors.white);icon(['sun','panels','inverter','home'][i],cx-15,top+41,30);
+   circle(cx,top+56,26,colors.white);icon(['sun','panels','inverter','home'][i],cx-19,top+37,38);
    text(labels[i],cx-width(labels[i],11,true)/2,top+92,11,true);
   });
   lines(block.body,54,top+103,730,9,false,colors.muted,`${block.id}:body`);
@@ -86,7 +68,7 @@ export function proposalCanvases(q:SavedQuote):CanvasPage[]{
   if(y>150){pages.splice(first);return false;}
   if(flow){if(!energyFlow(flow,y)){pages.splice(first);return false;}y+=142;}
   equipment.forEach((b,i)=>{
-   const x=36+i*(col+18);rect(x,y,col,144,colors.white,colors.line,`${b.id}:box`);icon(b.visual??'panels',x+16,y+15,27);
+   const x=36+i*(col+18);rect(x,y,col,144,colors.white,colors.line,`${b.id}:box`);icon(b.visual??'panels',x+14,y+13,32);
    lines(b.title,x+59,y+16,col-75,11,true,colors.ink,`${b.id}:title`);lines(b.value??'',x+16,y+70,col-32,15,true,colors.ink,`${b.id}:value`);text(b.body,x+16,y+130,10,false,colors.muted,`${b.id}:body`,col-32);
   });
   y+=163;
