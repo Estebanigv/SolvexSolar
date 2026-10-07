@@ -19,6 +19,8 @@ async function run(){
  const q:SavedQuote={id:'test',folio:'SVX-2026-000123',date:'2026-10-06T15:00:00Z',issuedAt:'2026-10-06T15:00:00Z',input,settings,calculation:calculate(input,initialProducts,settings)};
  const frozen=JSON.stringify(q);
  const original=proposalLayout(q);
+ const pendingSavings=original[0].blocks.find(b=>b.id==='saving-summary');
+ assert.equal(pendingSavings?.value,'Por validar','Mantener el indicador sin publicar un ahorro no validado');
  assert.ok(!JSON.stringify(original).includes(input.customer.email));assert.ok(!JSON.stringify(original).includes(input.customer.phone));
  assert.ok(!original.some(p=>p.id==='visualization'),'No incluir hoja de croquis eliminada en el referente');
  assert.equal(usesAtlasProposal(q),true);

@@ -21,7 +21,7 @@ export function proposalLayout(original:SavedQuote,includeHidden=false):Proposal
    {id:'client',kind:'text',title:input.customer.name||'Nombre del cliente',body:[input.customer.commune,new Date(q.issuedAt??q.date).toLocaleDateString('es-CL',{timeZone:'America/Santiago'})].filter(Boolean).join(' · ')},
    {id:'investment',kind:'metric',title:'Inversión total',value:money(c.total),binding:'total',body:c.tax===null?'Pesos chilenos · IVA por confirmar':'Pesos chilenos · IVA incluido'},
    {id:'power',kind:'metric',title:'Potencia instalada',value:`${c.kwp.toLocaleString('es-CL',{maximumFractionDigits:3})} kWp`,body:`${c.panels} paneles solares`},
-   ...(projection?[{id:'saving-summary',kind:'metric' as const,title:'Ahorro mensual estimado',value:money(projection.input.monthlySavings!),binding:'savings' as const,body:'Primer año · Según escenario validado'}]:[]),
+   {id:'saving-summary',kind:'metric',title:'Ahorro mensual estimado',value:projection?money(projection.input.monthlySavings!):'Por validar',binding:'savings',body:projection?'Primer año · Según escenario validado':'Se confirma al validar el consumo y la generación.'},
    ...(discount?[{id:'discount',kind:'text' as const,binding:'discount' as const,title:'Descuento para tu proyecto',body:`${discount.percent?`${discount.percent}% de descuento. `:''}Ahorras ${money(discount.amount)}. Precio anterior: ${money(discount.before)}.`}]:[]),
   ]},
   {id:'equipment',title:'Lo que forma tu sistema.',subtitle:'Equipamiento y alcance',blocks:[

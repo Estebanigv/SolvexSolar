@@ -189,8 +189,8 @@ export function proposalCanvases(q:SavedQuote):CanvasPage[]{
   }
  }
  function cover(page:ProposalPage){
-  const client=page.blocks.find(b=>b.id==='client'),metrics=page.blocks.filter(b=>b.kind==='metric'),col=770/Math.max(1,metrics.length);
-  if(!canFit(page.title,36,413,3,true)||!canFit(page.subtitle,17,413,2)||client&&(!canFit(client.title,20,413,2,true)||!canFit(client.body,11,413,2))||metrics.length>3||metrics.some(m=>!canFit(m.title,11,col-35,2,true)||!canFit(m.value??'',27,col-35,1,true)||!canFit(m.body,10,col-35,2)))return false;
+  const client=page.blocks.find(b=>b.id==='client'),metrics=page.blocks.filter(b=>b.kind==='metric'),col=(770-14*Math.max(0,metrics.length-1))/Math.max(1,metrics.length);
+  if(!canFit(page.title,36,413,3,true)||!canFit(page.subtitle,17,413,2)||client&&(!canFit(client.title,20,413,2,true)||!canFit(client.body,11,413,2))||metrics.length>3||metrics.some(m=>!canFit(m.title,11,col-40,2,true)||!canFit(m.value??'',27,col-40,1,true)||!canFit(m.body,9.5,col-40,3)))return false;
   current={id:'cover',title:page.title,ops:[]};pages.push(current);rect(0,0,842,595,colors.white);rect(0,0,842,376,colors.dark);
   current.ops.push({kind:'image',image:'roof',x:330,y:0,width:512,height:376,fit:'cover'});
   // Blend the photograph into the brand field; keep editable text above the image.
@@ -203,7 +203,15 @@ export function proposalCanvases(q:SavedQuote):CanvasPage[]{
   if(client){line(36,top,88,top,colors.green,2);top+=15;top+=lines(client.title,36,top,413,20,true,colors.white)+8;top+=lines(client.body,36,top,413,11,false,'#c7dcda');}
   if(top>353){pages.pop();return false;}
   line(36,376,806,376,colors.green,3);
-  metrics.forEach((m,i)=>{const x=36+i*col;if(i)line(x-14,407,x-14,524,colors.line);lines(m.title,x,414,col-35,11,true);text(m.value??'',x,473,27,true);lines(m.body,x,492,col-35,10,false,colors.muted);});
+  metrics.forEach((m,i)=>{
+   const x=36+i*(col+14),primary=m.id==='investment',value=m.value??'';
+   rect(x,396,col,141,primary?'#16563f':m.id==='saving-summary'?'#e5f2cf':'#edf4e6');
+   const ink=primary?'#ffffff':'#244b35',valueColor=primary?'#d4ef83':'#176343';
+   lines(m.title,x+20,413,col-40,11,true,ink);
+   const size=Math.min(value==='Por validar'?26:32,(col-40)/Math.max(1,width(value,1,true)));
+   text(value,x+20,476,size,true,valueColor);
+   lines(m.body,x+20,494,col-40,9.5,false,primary?'#e0eedc':'#435d40');
+  });
   const extras=page.blocks.filter(b=>b.id!=='client'&&b.kind!=='metric');
   if(extras.length)bodyPage({...page,cover:false,title:'Resumen de la propuesta',subtitle:page.subtitle},extras,true);
   return true;
