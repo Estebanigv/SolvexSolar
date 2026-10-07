@@ -2,3 +2,4 @@
 @media(max-width:1050px){.proposal-editor-workspace{grid-template-columns:1fr}.proposal-editor-preview{order:-1;max-height:50vh;overflow:auto;border:1px solid #ccd9dc}.proposal-editor-toolbar>button{flex:1}.proposal-editor-tools{padding:15px}}
 
 .proposal-editor-tools .projection-editor{padding:8px}.proposal-editor-tools .projection-metrics,.proposal-editor-tools .savings-breakdown dl{grid-template-columns:1fr}.proposal-editor-tools .projection-metrics strong{font-size:22px}
+.proposal-style-colors{display:grid;grid-template-columns:1fr 1fr;gap:12px}.proposal-editor-tools .proposal-style-colors input[type=color]{height:38px;padding:3px;border:1px solid #b8cbc4;border-radius:6px;cursor:pointer}.proposal-style-tools input[type=range]{accent-color:#16563f}.proposal-style-tools>p{margin:10px 0}

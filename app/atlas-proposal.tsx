@@ -1,6 +1,7 @@
 import {useId} from 'react';
 import type {SavedQuote} from '@/lib/quote';
 import {proposalCanvases,canvasSize} from '@/lib/proposal-canvas';
+import {proposalFonts} from '@/lib/proposal-style';
 import {proposalImages} from '@/lib/proposal-document';
 import './atlas-proposal.css';
 
@@ -9,7 +10,7 @@ export function AtlasProposal({q}:{q:SavedQuote}){
  return <article className="atlas-proposal" aria-label="Cotización horizontal de Solvex Solar">{proposalCanvases(q).map((page,index)=><section className="atlas-sheet" key={page.id} aria-label={`Página ${index+1}: ${page.title}`}><svg viewBox={`0 0 ${canvasSize.width} ${canvasSize.height}`} xmlns="http://www.w3.org/2000/svg" role="img" aria-label={`Página ${index+1}: ${page.title}`}>
   {page.ops.map((op,i)=>{
    if(op.kind==='fade'){const id=`${prefix}-${index}-${i}-fade`;return <g key={i}><defs><linearGradient id={id} x1="0%" y1="0%" x2={op.direction==='horizontal'?'100%':'0%'} y2={op.direction==='vertical'?'100%':'0%'}><stop offset="0%" stopColor={op.color} stopOpacity={op.from}/><stop offset="100%" stopColor={op.color} stopOpacity={op.to}/></linearGradient></defs><rect x={op.x} y={op.y} width={op.width} height={op.height} fill={`url(#${id})`}/></g>;}
-   if(op.kind==='text')return <text key={i} x={op.x} y={op.y} fill={op.color} fontSize={op.size} fontWeight={op.bold?700:400} fontFamily="Arial, Helvetica, sans-serif">{op.text}</text>;
+   if(op.kind==='text')return <text key={i} x={op.x} y={op.y} fill={op.color} fontSize={op.size} fontWeight={op.bold?700:400} fontFamily={proposalFonts[page.font??'sans']}>{op.text}</text>;
    if(op.kind==='rect')return <rect key={i} x={op.x} y={op.y} width={op.width} height={op.height} fill={op.color} stroke={op.stroke} strokeWidth={op.stroke?1:0} opacity={op.opacity??1}/>;
    if(op.kind==='line')return <line key={i} x1={op.x} y1={op.y} x2={op.x2} y2={op.y2} stroke={op.color} strokeWidth={op.thickness} strokeDasharray={op.dash?.join(' ')}/>;
    if(op.kind==='circle')return <circle key={i} cx={op.x} cy={op.y} r={op.r} fill={op.color} stroke={op.stroke} strokeWidth={op.stroke?1:0}/>;

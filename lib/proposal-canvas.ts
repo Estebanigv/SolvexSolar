@@ -2,6 +2,7 @@ import {Font,FontNames,Encodings} from '@pdf-lib/standard-fonts';
 import {proposalLayout,type ProposalPage,type ProposalBlock} from './proposal-layout';
 import type {SavedQuote} from './quote';
 import {documentTitle} from './quote-issuance';
+import {resolveProposalStyle,defaultProposalStyle,readableOn,tint,type ProposalStyle} from './proposal-style';
 
 export const canvasSize={width:842,height:595};
 export type DrawOp=
@@ -12,12 +13,13 @@ export type DrawOp=
  |{kind:'circle';x:number;y:number;r:number;color:string;stroke?:string}
  |{kind:'polygon';points:{x:number;y:number}[];color:string;stroke?:string;thickness?:number}
  |{kind:'image';x:number;y:number;width:number;height:number;image:'logo'|'roof'|'home';fit:'cover'|'contain'};
-export type CanvasPage={id:string;title:string;ops:DrawOp[]};
+export type CanvasPage={id:string;title:string;ops:DrawOp[];font?:ProposalStyle['font']};
 const colors={ink:'#103b45',green:'#bdd548',muted:'#49646c',white:'#ffffff',pale:'#eef4f2',dark:'#092f38',teal:'#17695c',line:'#ccdbd8'};
 const regular=Font.load(FontNames.Helvetica),bold=Font.load(FontNames.HelveticaBold);
 export const printableText=(text:string)=>Array.from(text.normalize('NFC').replace(/\t/g,'  ').replace(/\u202f/g,' ').replace(/₂/g,'2').replace(/−/g,'-')).map(c=>c==='\n'||Encodings.WinAnsi.canEncodeUnicodeCodePoint(c.codePointAt(0)!)?c:'?').join('');
-function width(text:string,size:number,isBold=false){const font=isBold?bold:regular;return Array.from(printableText(text)).reduce((sum,c)=>sum+(font.getWidthOfGlyph(Encodings.WinAnsi.encodeUnicodeCodePoint(c.codePointAt(0)!).name)||0),0)*size/1000;}
-export function wrapProposal(text:string,size:number,maxWidth:number,isBold=false){
+function measure(text:string,size:number,isBold=false,family:ProposalStyle['font']='sans'){const font=family==='sans'?(isBold?bold:regular):Font.load(family==='serif'?(isBold?FontNames.TimesRomanBold:FontNames.TimesRoman):(isBold?FontNames.CourierBold:FontNames.Courier));return Array.from(printableText(text)).reduce((sum,c)=>sum+(font.getWidthOfGlyph(Encodings.WinAnsi.encodeUnicodeCodePoint(c.codePointAt(0)!).name)||0),0)*size/1000;}
+export function wrapProposal(text:string,size:number,maxWidth:number,isBold=false,family:ProposalStyle['font']='sans'){
+ const width=(text:string,size:number,b=false)=>measure(text,size,b,family);
  const result:string[]=[];
  for(const paragraph of printableText(text).split('\n')){
   let line='';
@@ -34,15 +36,19 @@ export function wrapProposal(text:string,size:number,maxWidth:number,isBold=fals
 // The same vector composition is used in the editable HTML and the PDF.
 // Grid: 36 pt margins, 18 pt gutters, 770 pt content width, 535 pt lower limit.
 export function proposalCanvases(q:SavedQuote):CanvasPage[]{
+ const style=resolveProposalStyle(q.input.proposalContent?.style),custom=JSON.stringify(style)!==JSON.stringify(defaultProposalStyle);
+ const palette={...colors,ink:style.text,green:style.accent,dark:style.cover,teal:style.primary,pale:style.panel,muted:style.text};
+ const width=(value:string,size:number,b=false)=>measure(value,size*style.textScale,b,style.font);
+ const wrap=(value:string,size:number,w:number,b=false)=>wrapProposal(value,size*style.textScale,w,b,style.font);
  const pages:CanvasPage[]=[];
  let current:CanvasPage,y=0;
  const rect=(x:number,top:number,w:number,h:number,color=colors.green,stroke?:string)=>current.ops.push({kind:'rect',x,y:top,width:w,height:h,color,stroke});
- const text=(value:string,x:number,baseline:number,size=12,isBold=false,color=colors.ink)=>current.ops.push({kind:'text',x,y:baseline,text:printableText(value),size,bold:isBold,color});
+ const text=(value:string,x:number,baseline:number,size=12,isBold=false,color=colors.ink)=>current.ops.push({kind:'text',x,y:baseline,text:printableText(value),size:size*style.textScale,bold:isBold,color});
  const right=(value:string,x:number,baseline:number,size=12,isBold=false,color=colors.ink)=>text(value,x-width(value,size,isBold),baseline,size,isBold,color);
  const line=(x:number,top:number,x2:number,y2:number,color=colors.line,thickness=1,dash?:number[])=>current.ops.push({kind:'line',x,y:top,x2,y2,color,thickness,dash});
  const circle=(x:number,top:number,r:number,color=colors.pale,stroke?:string)=>current.ops.push({kind:'circle',x,y:top,r,color,stroke});
  const polygon=(points:{x:number;y:number}[],color:string,stroke?:string,thickness=1)=>current.ops.push({kind:'polygon',points,color,stroke,thickness});
- const lines=(value:string,x:number,top:number,w:number,size=12,isBold=false,color=colors.ink)=>{const rows=wrapProposal(value,size,w,isBold);rows.forEach((row,i)=>text(row,x,top+size+i*size*1.4,size,isBold,color));return rows.length*size*1.4;};
+ const lines=(value:string,x:number,top:number,w:number,size=12,isBold=false,color=colors.ink)=>{const rows=wrap(value,size,w,isBold);rows.forEach((row,i)=>text(row,x,top+size+i*size*1.4,size,isBold,color));return rows.length*size*1.4;};
  const icon=(kind:string,x:number,top:number,s=34,color=colors.teal)=>{
   if(kind==='sun'){
    circle(x+s/2,top+s/2,s*.2,colors.green);
@@ -73,7 +79,7 @@ export function proposalCanvases(q:SavedQuote):CanvasPage[]{
   y+=lines(continuation?page.title+' (continuación)':page.title,36,y,770,continuation?18:29,true)+17;
  };
  const outside=(first:number)=>pages.slice(first).some(p=>p.ops.some(op=>op.kind==='text'&&op.y>535));
- const canFit=(s:string,size:number,w:number,n:number,b=false)=>wrapProposal(s,size,w,b).length<=n;
+ const canFit=(s:string,size:number,w:number,n:number,b=false)=>wrap(s,size,w,b).length<=n;
  function energyFlow(block:ProposalBlock,top:number){
   const labels=(block.value??'').split('|').map(s=>s.trim());
   if(labels.length!==4||labels.some(label=>!canFit(label,11,145,1,true))||!canFit(block.title,14,730,1,true)||!canFit(block.body,10,730,2))return false;
@@ -151,7 +157,7 @@ export function proposalCanvases(q:SavedQuote):CanvasPage[]{
   const col=770/3;let rowTop=top+152;
   for(let offset=0;offset<notes.length;offset+=3){
    const row=notes.slice(offset,offset+3);
-   const height=(note:ProposalBlock)=>wrapProposal(note.title,13,col-20,true).length*18.2+wrapProposal(note.body,10,col-20).length*14+26;
+   const height=(note:ProposalBlock)=>wrap(note.title,13,col-20,true).length*18.2+wrap(note.body,10,col-20).length*14+26;
    const h=Math.max(...row.map(height));
    if(rowTop+h>546){y=rowTop;bodyPage(page,notes.slice(offset),true,true);return true;}
    row.forEach((note,i)=>{const x=36+i*col;line(x,rowTop,x+col-20,rowTop,colors.green,2);let yy=rowTop+10;yy+=lines(note.title,x,yy,col-20,13,true)+6;lines(note.body,x,yy,col-20,10,false,colors.muted);});
@@ -170,7 +176,7 @@ export function proposalCanvases(q:SavedQuote):CanvasPage[]{
    }
    if(block.kind==='metric'||block.kind==='equipment'){
     const pair=[block];if(['metric','equipment'].includes(blocks[i+1]?.kind))pair.push(blocks[i+1]);
-    const height=(b:ProposalBlock)=>wrapProposal(b.title,13,337,true).length*18.2+wrapProposal(b.value??'',21,337,true).length*29.4+wrapProposal(b.body,11,337).length*15.4+54;
+    const height=(b:ProposalBlock)=>wrap(b.title,13,337,true).length*18.2+wrap(b.value??'',21,337,true).length*29.4+wrap(b.body,11,337).length*15.4+54;
     const h=Math.max(...pair.map(height));
     if(h<345){
      if(y+h>535)start(page,true);
@@ -178,12 +184,12 @@ export function proposalCanvases(q:SavedQuote):CanvasPage[]{
      y+=h+18;i+=pair.length-1;continue;
     }
    }
-   const titleHeight=wrapProposal(block.title,17,770,true).length*24;
+   const titleHeight=wrap(block.title,17,770,true).length*24;
    if(y+titleHeight+45>535)start(page,true);
    line(36,y,806,y,colors.green,1);y+=13;
    if(block.title)y+=lines(block.title,36,y,770,17,true)+8;
-   if(block.value){for(const row of wrapProposal(block.value,17,770,true)){if(y+24>535)start(page,true);text(row,36,y+17,17,true);y+=24;}y+=6;}
-   for(const row of wrapProposal(block.body,12,770)){if(y+17>535)start(page,true);text(row,36,y+12,12,false,colors.muted);y+=17;}
+   if(block.value){for(const row of wrap(block.value,17,770,true)){if(y+24>535)start(page,true);text(row,36,y+17,17,true);y+=24;}y+=6;}
+   for(const row of wrap(block.body,12,770)){if(y+17>535)start(page,true);text(row,36,y+12,12,false,colors.muted);y+=17;}
    if(block.points){if(y+245>535)start(page,true);chart(block,36,y+10,770,235);y+=255;}
    y+=20;
   }
@@ -192,7 +198,7 @@ export function proposalCanvases(q:SavedQuote):CanvasPage[]{
   const client=page.blocks.find(b=>b.id==='client'),metrics=page.blocks.filter(b=>b.kind==='metric'),col=(770-14*Math.max(0,metrics.length-1))/Math.max(1,metrics.length);
   if(!canFit(page.title,36,413,3,true)||!canFit(page.subtitle,17,413,2)||client&&(!canFit(client.title,20,413,2,true)||!canFit(client.body,11,413,2))||metrics.length>3||metrics.some(m=>!canFit(m.title,11,col-40,2,true)||!canFit(m.value??'',27,col-40,1,true)||!canFit(m.body,9.5,col-40,3)))return false;
   current={id:'cover',title:page.title,ops:[]};pages.push(current);rect(0,0,842,595,colors.white);rect(0,0,842,376,colors.dark);
-  current.ops.push({kind:'image',image:'roof',x:330,y:0,width:512,height:376,fit:'cover'});
+  if(style.coverPhoto)current.ops.push({kind:'image',image:'roof',x:330,y:0,width:512,height:376,fit:'cover'});
   // Blend the photograph into the brand field; keep editable text above the image.
   current.ops.push({kind:'rect',x:330,y:0,width:512,height:376,color:colors.dark,opacity:.12});
   current.ops.push({kind:'fade',x:330,y:0,width:384,height:376,color:colors.dark,from:1,to:0,direction:'horizontal'});
@@ -228,5 +234,23 @@ export function proposalCanvases(q:SavedQuote):CanvasPage[]{
   page.ops.push({kind:'text',x:36,y:577,size:9,bold:false,color:colors.muted,text:printableText(`${q.settings.name} · ${q.folio}`)});
   page.ops.push({kind:'text',x:755,y:577,size:9,bold:false,color:colors.muted,text:`${i+1} / ${pages.length}`});
  });
- return pages;
+ return pages.map(page=>({...page,font:style.font,ops:page.ops.map(op=>{
+  if(!custom||op.kind==='image')return op;
+  const map=(value:string)=>{
+   const key=Object.entries(colors).find(([,hex])=>hex===value)?.[0] as keyof typeof colors|undefined;
+   if(key)return palette[key];
+   if(['#16563f','#176343','#244b35'].includes(value))return style.primary;
+   if(['#e5f2cf','#edf4e6','#e4eec6'].includes(value))return tint(style.accent);
+   if(['#d4ef83','#82aaa0'].includes(value))return style.accent;
+   return value;
+  };
+  let color=map(op.color);
+  if(op.kind==='rect'&&op.x===0&&op.y===0&&op.width===842&&op.height===595)color=style.background;
+  if(op.kind==='text'){
+   if(['#ffffff','#c7dcda','#bbd0ce','#ccdddc','#d5e3e1'].includes(op.color))color=readableOn(style.cover);
+   if(['#e0eedc','#d4ef83'].includes(op.color)||(page.id==='cover'&&op.y>=396&&op.color==='#ffffff'))color=readableOn(style.primary);
+   if(op.color==='#435d40')color=readableOn(tint(style.accent));
+  }
+  return {...op,color,...('stroke' in op&&op.stroke?{stroke:map(op.stroke)}:{})};
+ })}));
 }

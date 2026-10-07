@@ -11,6 +11,8 @@ import {AtlasProposal} from './atlas-proposal';
 import {DiscountField} from './discount-field';
 import {FinalQuoteTotal} from './final-quote-total';
 import {ProjectionPanel} from './projection-panel';
+import {ProposalStyleEditor} from './proposal-style-editor';
+import {resolveProposalStyle,type ProposalStyle} from '@/lib/proposal-style';
 import './proposal-editor.css';
 
 export function ProposalEditor({q,products,settings,rates,busy,onSave,onCancel}:{q:SavedQuote;products:Product[];settings:Settings;rates:InstallationRates;busy:boolean;onSave:(input:QuoteInput)=>Promise<boolean>;onCancel:()=>void}){
@@ -23,6 +25,7 @@ export function ProposalEditor({q,products,settings,rates,busy,onSave,onCancel}:
  try{working={...q,id:'draft',folio:'BORRADOR-SVX',issuedAt:undefined,issuedBy:undefined,input,settings,calculation:calculate(input,products,settings,rates)};}catch{/* Keep controls available while a partial value is being corrected. */}
  const update=(patch:Partial<QuoteInput>)=>{setInput(previous=>({...previous,...patch,technicalReviewed:patch.technicalReviewed??false}));setDirty(true);setError('');};
  const editContent=(patch:Partial<ProposalContent>)=>update({proposalContent:{...content,...patch}});
+ const editStyle=(style:ProposalStyle)=>{setInput(previous=>({...previous,proposalContent:{...(previous.proposalContent??newProposalContent()),style}}));setDirty(true);setError('');};
  const editText=(key:string,value:string)=>editContent({text:{...content.text,[key]:value}});
  const toggle=(id:string)=>editContent({hidden:content.hidden.includes(id)?content.hidden.filter(item=>item!==id):[...content.hidden,id]});
  const pages=working?proposalLayout(working,true):proposalLayout({...q,input:{...q.input,proposalContent:content}},true);
@@ -31,7 +34,7 @@ export function ProposalEditor({q,products,settings,rates,busy,onSave,onCancel}:
  const add=(pageId?:string)=>{if(content.sections.length>=20){setError('Puedes agregar hasta 20 bloques o páginas.');return;}const id=crypto.randomUUID();editContent({sections:[...content.sections,{id,pageId,title:'Información adicional',body:'Escribe aquí el contenido de tu propuesta.'}]});if(!pageId)setSelected(`custom-${id}`);};
  useEffect(()=>{if(!dirty)return;const warn=(event:BeforeUnloadEvent)=>{event.preventDefault();event.returnValue='';};window.addEventListener('beforeunload',warn);return()=>window.removeEventListener('beforeunload',warn);},[dirty]);
  async function save(){
-  const parsed=quoteSchema.safeParse(input);
+  const parsed=quoteSchema.safeParse({...input,proposalContent:{...content,style:resolveProposalStyle(content.style)}});
   if(!parsed.success){setError(parsed.error.issues[0]?.message??'Revisa los datos antes de guardar.');return;}
   if(!working){setError('Revisa los montos y los porcentajes: los pagos deben sumar 100%.');return;}
   if(!proposalCanvases(working).length){setError('Deja al menos una página visible antes de guardar.');return;}
@@ -41,6 +44,7 @@ export function ProposalEditor({q,products,settings,rates,busy,onSave,onCancel}:
   <div className="proposal-editor-toolbar"><div><strong>Editar propuesta</strong><p>Los cambios se guardan como una nueva versión. El PDF conserva este diseño.</p></div><Button disabled={busy} variant="outline" onClick={()=>{if(!dirty||window.confirm('¿Descartar los cambios de esta edición?'))onCancel();}}>Cancelar</Button><Button disabled={busy} onClick={()=>void save()}>{busy?'Guardando…':'Guardar propuesta'}</Button></div>
   {error&&<p className="proposal-editor-error" role="alert">{error}</p>}
   <div className="proposal-editor-workspace"><aside className="proposal-editor-tools" aria-label="Contenido de la propuesta"><fieldset disabled={busy}>
+   <ProposalStyleEditor value={content.style} onChange={editStyle} disabled={busy}/>
    <label>Página<select value={page.id} onChange={e=>setSelected(e.target.value)}>{pages.map((p,i)=><option key={p.id} value={p.id}>{i+1}. {p.title||'Sin título'}{content.hidden.includes(p.id)?' (oculta)':''}</option>)}</select></label>
    <div className="proposal-editor-buttons"><Button type="button" variant="outline" onClick={()=>move(-1)} disabled={pages[0].id===page.id}>Subir página</Button><Button type="button" variant="outline" onClick={()=>move(1)} disabled={pages.at(-1)?.id===page.id}>Bajar página</Button></div>
    <label className="proposal-visibility"><input type="checkbox" checked={!content.hidden.includes(page.id)} onChange={()=>toggle(page.id)}/>Mostrar esta página</label>

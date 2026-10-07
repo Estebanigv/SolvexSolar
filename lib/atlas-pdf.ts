@@ -1,10 +1,12 @@
 import {PDFDocument,StandardFonts,rgb,pushGraphicsState,popGraphicsState,rectangle,clip,endPath,setGraphicsState} from 'pdf-lib';
 import {proposalCanvases,canvasSize} from './proposal-canvas';
+import {resolveProposalStyle} from './proposal-style';
 import type {SavedQuote} from './quote';
 
 export async function atlasPdf(q:SavedQuote,logoBytes?:ArrayBuffer,photos:{roof?:ArrayBuffer}={}){
  const pdf=await PDFDocument.create();pdf.setTitle(`${q.folio} - ${q.settings.name}`);pdf.setAuthor(q.settings.name);
- const regular=await pdf.embedFont(StandardFonts.Helvetica),bold=await pdf.embedFont(StandardFonts.HelveticaBold);
+ const family=resolveProposalStyle(q.input.proposalContent?.style).font;
+ const regular=await pdf.embedFont(family==='serif'?StandardFonts.TimesRoman:family==='mono'?StandardFonts.Courier:StandardFonts.Helvetica),bold=await pdf.embedFont(family==='serif'?StandardFonts.TimesRomanBold:family==='mono'?StandardFonts.CourierBold:StandardFonts.HelveticaBold);
  const isPng=logoBytes&&new Uint8Array(logoBytes)[0]===137;
  const images={logo:logoBytes?await (isPng?pdf.embedPng(logoBytes):pdf.embedJpg(logoBytes)):null,roof:photos.roof?await pdf.embedJpg(photos.roof):null,home:null};
  const color=(hex:string)=>rgb(parseInt(hex.slice(1,3),16)/255,parseInt(hex.slice(3,5),16)/255,parseInt(hex.slice(5,7),16)/255);
