@@ -7,6 +7,7 @@ export const canvasSize={width:842,height:595};
 export type DrawOp=
  |{kind:'text';x:number;y:number;text:string;size:number;bold:boolean;color:string}
  |{kind:'rect';x:number;y:number;width:number;height:number;color:string;opacity?:number;stroke?:string}
+ |{kind:'fade';x:number;y:number;width:number;height:number;color:string;from:number;to:number;direction:'horizontal'|'vertical'}
  |{kind:'line';x:number;y:number;x2:number;y2:number;color:string;thickness:number;dash?:number[]}
  |{kind:'circle';x:number;y:number;r:number;color:string;stroke?:string}
  |{kind:'polygon';points:{x:number;y:number}[];color:string;stroke?:string;thickness?:number}
@@ -191,19 +192,16 @@ export function proposalCanvases(q:SavedQuote):CanvasPage[]{
   const client=page.blocks.find(b=>b.id==='client'),metrics=page.blocks.filter(b=>b.kind==='metric'),col=770/Math.max(1,metrics.length);
   if(!canFit(page.title,36,413,3,true)||!canFit(page.subtitle,17,413,2)||client&&(!canFit(client.title,20,413,2,true)||!canFit(client.body,11,413,2))||metrics.length>3||metrics.some(m=>!canFit(m.title,11,col-35,2,true)||!canFit(m.value??'',27,col-35,1,true)||!canFit(m.body,10,col-35,2)))return false;
   current={id:'cover',title:page.title,ops:[]};pages.push(current);rect(0,0,842,595,colors.white);rect(0,0,842,376,colors.dark);
+  current.ops.push({kind:'image',image:'roof',x:330,y:0,width:512,height:376,fit:'cover'});
+  // Blend the photograph into the brand field; keep editable text above the image.
+  current.ops.push({kind:'rect',x:330,y:0,width:512,height:376,color:colors.dark,opacity:.12});
+  current.ops.push({kind:'fade',x:330,y:0,width:384,height:376,color:colors.dark,from:1,to:0,direction:'horizontal'});
+  current.ops.push({kind:'fade',x:330,y:0,width:512,height:128,color:colors.dark,from:.7,to:0,direction:'vertical'});
   current.ops.push({kind:'image',image:'logo',x:36,y:22,width:101,height:67,fit:'contain'});
   right(q.folio,806,43,9,false,'#bbd0ce');right(documentTitle(q),806,62,9,true,colors.green);
   let top=115;top+=lines(page.title,36,top,413,36,true,colors.white)+14;top+=lines(page.subtitle,36,top,413,17,false,'#c7dcda')+20;
   if(client){line(36,top,88,top,colors.green,2);top+=15;top+=lines(client.title,36,top,413,20,true,colors.white)+8;top+=lines(client.body,36,top,413,11,false,'#c7dcda');}
   if(top>353){pages.pop();return false;}
-  // An original photovoltaic cell illustration, not a site photograph or installation plan.
-  circle(735,131,27,colors.green);
-  for(let i=0;i<12;i++){const a=i*Math.PI/6;line(735+Math.cos(a)*36,131+Math.sin(a)*36,735+Math.cos(a)*44,131+Math.sin(a)*44,'#51786f',1);}
-  polygon([{x:490,y:327},{x:698,y:277},{x:810,y:321},{x:603,y:364}],'#104650');
-  const a={x:486,y:181},b={x:687,y:131},c={x:790,y:304},d={x:583,y:355};
-  polygon([a,b,c,d],'#153f49','#6c9a93',1.5);
-  const at=(u:number,v:number)=>({x:a.x*(1-u)*(1-v)+b.x*u*(1-v)+c.x*u*v+d.x*(1-u)*v,y:a.y*(1-u)*(1-v)+b.y*u*(1-v)+c.y*u*v+d.y*(1-u)*v});
-  for(let r=0;r<6;r++)for(let k=0;k<4;k++){const u=k/4+.012,v=r/6+.012,uu=(k+1)/4-.012,vv=(r+1)/6-.012;polygon([at(u,v),at(uu,v),at(uu,vv),at(u,vv)],r+k===4?'#326957':'#1b535d','#427e7e',.6);}
   line(36,376,806,376,colors.green,3);
   metrics.forEach((m,i)=>{const x=36+i*col;if(i)line(x-14,407,x-14,524,colors.line);lines(m.title,x,414,col-35,11,true);text(m.value??'',x,473,27,true);lines(m.body,x,492,col-35,10,false,colors.muted);});
   const extras=page.blocks.filter(b=>b.id!=='client'&&b.kind!=='metric');

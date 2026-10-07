@@ -15,7 +15,7 @@ El guardado crea una versión nueva con su vínculo a la anterior y conserva las
 
 ## Diseño y datos
 
-- A4 horizontal con ilustración vectorial de paneles, logo transparente, líneas verdes y una grilla común de márgenes y columnas. Sin fotografía referencial.
+- A4 horizontal con fotografía de paneles integrada en la portada, logo transparente, líneas verdes y una grilla común de márgenes y columnas.
 - Portada con nombre, comuna y fecha del cliente, tipo de sistema, inversión y ahorro validado.
 - Sin la página de croquis eliminada en el referente.
 - Contenido editable como texto, nunca HTML ejecutable. Los importes financieros se editan en sus controles y actualizan pagos e impuestos conjuntamente.
@@ -31,4 +31,4 @@ Pruebas automatizadas de persistencia, compatibilidad con cotizaciones emitidas,
 - Equipos alineados en cajas de la misma altura, con iconos y esquema funcional del recorrido de la energía. El esquema puede ocultarse y sus etiquetas se editan separadas por `|`.
 - Curva de ahorro acumulado con todos los años de la proyección y una línea discontinua para la inversión inicial. Solo se muestra con el escenario validado.
 - Barra de pagos proporcional a los porcentajes de cada etapa. Los textos comerciales largos continúan en páginas adicionales sin eliminar los gráficos.
-- HTML y PDF comparten líneas, polígonos y círculos vectoriales. La nueva salida no descarga ni incorpora las fotografías antiguas.
+- HTML y PDF comparten líneas, polígonos y círculos vectoriales. La portada recupera la fotografía del techo con paneles, integrada con un degradado nativo y sin marco; las páginas interiores conservan los gráficos. La foto se incluye también al descargar o compartir el PDF.

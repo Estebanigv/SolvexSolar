@@ -42,10 +42,12 @@ async function run(){
  assert.equal((html.match(/<svg /g)??[]).length,canvases.length);
  const pdf=await PDFDocument.load(await quotePdf(changed));
  assert.equal(pdf.getPageCount(),canvases.length,'HTML y PDF tienen las mismas páginas');
- assert.ok(!canvases.flatMap(p=>p.ops).some(op=>op.kind==='image'&&op.image!=='logo'),'No incluir fotografías referenciales');
+ assert.ok(canvases[0].ops.some(op=>op.kind==='image'&&op.image==='roof'),'Recuperar la fotografía de portada');
+ assert.ok(!canvases.slice(1).flatMap(p=>p.ops).some(op=>op.kind==='image'&&op.image!=='logo'),'Conservar gráficos en las páginas interiores');
  for(const path of ['public/logo.jpg','public/proposal/logo-transparent-v2.png']){
   const data=readFileSync(path),buffer=data.buffer.slice(data.byteOffset,data.byteOffset+data.byteLength) as ArrayBuffer;
-  const withLogo=await PDFDocument.load(await quotePdf(changed,buffer));
+  const roof=readFileSync('public/proposal/solar-roof.jpg');
+  const withLogo=await PDFDocument.load(await quotePdf(changed,buffer,{roof:roof.buffer.slice(roof.byteOffset,roof.byteOffset+roof.byteLength) as ArrayBuffer}));
   assert.equal(withLogo.getPageCount(),canvases.length,'Compartir PDF admite logo PNG y JPG');
  }
  assert.ok(pdf.getPages().every(p=>p.getWidth()===842&&p.getHeight()===595),'PDF horizontal');
