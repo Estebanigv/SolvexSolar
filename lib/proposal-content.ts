@@ -1,10 +1,12 @@
 import {z} from 'zod';
 import {proposalStyleSchema} from './proposal-style';
+import {elementStylesSchema} from './proposal-elements';
 
 const id=z.string().regex(/^[a-zA-Z0-9:_-]+$/).max(100);
 export const proposalContentSchema=z.object({
  version:z.literal(1),
  style:proposalStyleSchema.optional(),
+ elements:elementStylesSchema.optional(),
  text:z.record(z.string().max(12000)).refine(v=>Object.keys(v).length<=250,'Demasiados campos editados.'),
  hidden:z.array(id).max(200),
  order:z.array(id).max(40),

@@ -6,7 +6,11 @@ import type {SavedQuote} from './quote';
 export async function atlasPdf(q:SavedQuote,logoBytes?:ArrayBuffer,photos:{roof?:ArrayBuffer}={}){
  const pdf=await PDFDocument.create();pdf.setTitle(`${q.folio} - ${q.settings.name}`);pdf.setAuthor(q.settings.name);
  const family=resolveProposalStyle(q.input.proposalContent?.style).font;
- const regular=await pdf.embedFont(family==='serif'?StandardFonts.TimesRoman:family==='mono'?StandardFonts.Courier:StandardFonts.Helvetica),bold=await pdf.embedFont(family==='serif'?StandardFonts.TimesRomanBold:family==='mono'?StandardFonts.CourierBold:StandardFonts.HelveticaBold);
+ const fonts={
+  sans:{regular:await pdf.embedFont(StandardFonts.Helvetica),bold:await pdf.embedFont(StandardFonts.HelveticaBold)},
+  serif:{regular:await pdf.embedFont(StandardFonts.TimesRoman),bold:await pdf.embedFont(StandardFonts.TimesRomanBold)},
+  mono:{regular:await pdf.embedFont(StandardFonts.Courier),bold:await pdf.embedFont(StandardFonts.CourierBold)},
+ };
  const isPng=logoBytes&&new Uint8Array(logoBytes)[0]===137;
  const images={logo:logoBytes?await (isPng?pdf.embedPng(logoBytes):pdf.embedJpg(logoBytes)):null,roof:photos.roof?await pdf.embedJpg(photos.roof):null,home:null};
  const color=(hex:string)=>rgb(parseInt(hex.slice(1,3),16)/255,parseInt(hex.slice(3,5),16)/255,parseInt(hex.slice(5,7),16)/255);
@@ -24,7 +28,7 @@ export async function atlasPdf(q:SavedQuote,logoBytes?:ArrayBuffer,photos:{roof?
     page.drawRectangle({x:op.x,y:bottom,width:op.width,height:op.height,color:color(op.color)});
     page.pushOperators(popGraphicsState());continue;
    }
-   if(op.kind==='text'){page.drawText(op.text,{x:op.x,y:canvasSize.height-op.y,size:op.size,font:op.bold?bold:regular,color:color(op.color)});continue;}
+   if(op.kind==='text'){page.drawText(op.text,{x:op.x,y:canvasSize.height-op.y,size:op.size,font:fonts[op.font??family][op.bold?'bold':'regular'],color:color(op.color)});continue;}
    if(op.kind==='rect'){page.drawRectangle({x:op.x,y:canvasSize.height-op.y-op.height,width:op.width,height:op.height,color:color(op.color),borderColor:op.stroke?color(op.stroke):undefined,borderWidth:op.stroke?1:0,opacity:op.opacity??1});continue;}
    if(op.kind==='line'){page.drawLine({start:{x:op.x,y:canvasSize.height-op.y},end:{x:op.x2,y:canvasSize.height-op.y2},color:color(op.color),thickness:op.thickness,dashArray:op.dash});continue;}
    if(op.kind==='circle'){page.drawCircle({x:op.x,y:canvasSize.height-op.y,size:op.r,color:color(op.color),borderColor:op.stroke?color(op.stroke):undefined,borderWidth:op.stroke?1:0});continue;}

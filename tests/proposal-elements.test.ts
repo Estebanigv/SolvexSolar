@@ -1,0 +1,46 @@
+import assert from 'node:assert/strict';
+import {createElement} from 'react';
+import {renderToStaticMarkup} from 'react-dom/server';
+import {PDFDocument,PDFName,PDFDict} from 'pdf-lib';
+import {AtlasProposal} from '../app/atlas-proposal';
+import {calculate,newQuote,initialProducts,initialSettings,quoteSchema,type SavedQuote} from '../lib/quote';
+import {proposalCanvases} from '../lib/proposal-canvas';
+import {elementStylesSchema,type ElementStyle} from '../lib/proposal-elements';
+import {quotePdf} from '../lib/pdf';
+import {persistentQuote} from '../lib/quote-persistence';
+
+async function run(){
+ const input={...newQuote(),finalTotalOverride:16000000};
+ const q:SavedQuote={id:'elements',folio:'PRUEBA',date:'2026-10-07T12:00:00Z',input,settings:initialSettings,calculation:calculate(input,initialProducts,initialSettings)};
+ const base=proposalCanvases(q),snapshot=JSON.stringify(q);
+ const theme=(elements:Record<string,ElementStyle>)=>({...q,input:{...input,proposalContent:{...input.proposalContent!,elements}}});
+ const changes={'investment:value':{color:'#ffffff',size:25,font:'serif' as const},'investment:box':{background:'#234e69',widthScale:1.03,heightScale:1.04},'cover:title':{color:'#f2d88a',size:30},'power:value':{color:'#7b2847'}};
+ const edited=theme(changes),pages=proposalCanvases(edited),cover=pages[0];
+ assert.ok(cover.elements?.some(e=>e.id==='investment:box'&&e.kind==='box'));
+ assert.ok(cover.elements?.some(e=>e.id==='investment:value'&&e.kind==='text'));
+ assert.deepEqual(pages.flatMap(p=>p.issues),[], 'Una edición que cabe no debe bloquearse');
+ assert.deepEqual(cover.ops.filter(op=>op.elementId==='power:body'),base[0].ops.filter(op=>op.elementId==='power:body'),'Cambiar un monto no cambia la descripción vecina');
+ assert.deepEqual(pages[1].ops,base[1].ops,'La otra página no cambia');
+ assert.equal(cover.elements?.find(e=>e.id==='investment:value')?.font,'serif');
+ assert.equal(cover.elements?.find(e=>e.id==='investment:value')?.size,25);
+ const restored=proposalCanvases(theme({}));assert.deepEqual(restored,base);
+ const saved=quoteSchema.parse(JSON.parse(JSON.stringify(persistentQuote(edited.input))));assert.deepEqual(saved.proposalContent?.elements,changes);
+ assert.equal(calculate(saved,initialProducts,initialSettings).total,q.calculation.total,'Los estilos no cambian los números');
+ const reordered=proposalCanvases({...edited,input:{...edited.input,proposalContent:{...edited.input.proposalContent!,order:['equipment','cover']}}});
+ assert.equal(reordered.find(p=>p.id==='cover')?.elements?.find(e=>e.id==='investment:value')?.color,'#ffffff');
+ const tooBig=proposalCanvases(theme({'investment:value':{size:64},'investment:box':{heightScale:1.5}}));assert.ok(tooBig[0].issues!.length>0,'Avisar antes de guardar si el texto no cabe o invade otra caja');
+ const textOnPages=proposalCanvases({...edited,input:{...edited.input,proposalContent:{...edited.input.proposalContent!,text:{'scope:body':'Párrafo extenso para comprobar la continuidad del estilo. '.repeat(250)},elements:{'scope:body':{color:'#78264b'}}}}});
+ const fragments=textOnPages.flatMap(p=>p.ops.filter(op=>op.elementId==='scope:body'));assert.ok(fragments.length>30);assert.ok(fragments.every(op=>'color' in op&&op.color==='#78264b'));
+ assert.ok(!elementStylesSchema.safeParse({'investment:value':{font:'<script>',size:100}}).success);
+ assert.ok(!elementStylesSchema.safeParse({'bad/key':{color:'#000000'}}).success);
+ assert.ok(!elementStylesSchema.safeParse({'investment:box':{background:'url(secret)',widthScale:-2}}).success);
+ const plain=renderToStaticMarkup(createElement(AtlasProposal,{q:edited}));assert.ok(!plain.includes('proposal-selectable'));
+ const interactive=renderToStaticMarkup(createElement(AtlasProposal,{q:edited,onSelect:()=>{},selection:{id:'investment:value',pageId:'cover'}}));assert.ok(interactive.includes('aria-label="Editar texto: $16.000.000"'));assert.ok(interactive.includes('aria-pressed="true"'));assert.ok(interactive.includes('tabindex="0"'));assert.ok(interactive.includes('Editar caja: Inversión total'));
+ assert.ok(plain.includes('Times New Roman')&&plain.includes('#234e69'));
+ const pdf=await PDFDocument.load(await quotePdf(edited));assert.equal(pdf.getPageCount(),pages.length);
+ const fonts=pdf.getPage(0).node.Resources()?.lookup(PDFName.of('Font'),PDFDict);
+ const names=fonts?.entries().map(([,ref])=>pdf.context.lookup(ref,PDFDict).get(PDFName.of('BaseFont'))?.toString()).join(' ');assert.ok(names?.includes('Times')&&names?.includes('Helvetica'),'PDF conserva fuentes mezcladas en una misma página');
+ assert.equal(JSON.stringify(q),snapshot);
+ console.log('Elementos: selección accesible, aislamiento, dimensiones, desbordes, persistencia, reordenación, continuidad y PDF con fuentes mixtas: OK');
+}
+void run();
