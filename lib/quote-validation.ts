@@ -11,7 +11,7 @@ export function quoteValidationIssues(q:SavedQuote):QuoteIssue[]{
  const add=(id:string,message:string,step:QuoteIssue['step'],field:string,tab:QuoteIssue['tab']='quote',productId?:string)=>{if(!issues.some(i=>i.id===id))issues.push({id,message,step,field,tab,productId})};
  const customer=(key:keyof typeof input.customer,message:string,field:string)=>add('customer-'+key,message,'customer',field);
  if(!input.customer.name.trim())customer('name','Completa el nombre y apellido del cliente.','Nombre y apellido');
- if(!input.customer.email.trim()&&!input.customer.phone.trim())customer('email','Completa un correo o teléfono de contacto.','Correo electrónico');
+ if(!input.customer.email.trim()&&!input.customer.phone.trim())customer('email',input.proposalType==='preliminary'?'Completa un correo o teléfono de contacto.':'Completa el correo electrónico del cliente.','Correo electrónico');
  if(input.customer.email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.customer.email))customer('email','Corrige el correo electrónico del cliente.','Correo electrónico');
  if(c.tax===null||s.taxMode==='pending')add('tax','Confirma si los precios incluyen IVA.','review','Precios del catálogo e IVA','settings');
  const final=input.proposalType!=='preliminary'&&!c.official;

@@ -33,10 +33,13 @@ export function useQuoteValidation(issues:QuoteIssue[],focus:ValidationFocus|nul
  const focused=useRef<number|null>(null);
  useEffect(()=>{
   const cleanup:(()=>void)[]=[];
+  const marked=new Set<HTMLElement>();
   const grouped=new Map<string,QuoteIssue[]>();
   for(const issue of JSON.parse(serialized) as QuoteIssue[])grouped.set(issue.field,[...(grouped.get(issue.field)??[]),issue]);
+  const highlight=()=>{
   for(const [field,rows] of grouped){
-   const el=findValidationField(field);if(!el)continue;
+   const el=findValidationField(field);if(!el||marked.has(el))continue;
+   marked.add(el);
    const box=el.closest<HTMLElement>('label')??el;
    const invalid=el.getAttribute('aria-invalid'),described=el.getAttribute('aria-describedby');
    box.classList.add('quote-invalid');box.dataset.validationMessage=rows.map(r=>r.message).join(' ');
@@ -45,7 +48,12 @@ export function useQuoteValidation(issues:QuoteIssue[],focus:ValidationFocus|nul
    if(messages.length)el.setAttribute('aria-describedby',[described,...messages].filter(Boolean).join(' '));
    cleanup.push(()=>{box.classList.remove('quote-invalid');delete box.dataset.validationMessage;if(invalid===null)el.removeAttribute('aria-invalid');else el.setAttribute('aria-invalid',invalid);if(described===null)el.removeAttribute('aria-describedby');else el.setAttribute('aria-describedby',described)});
   }
-  return()=>cleanup.forEach(fn=>fn());
+  };
+  highlight();
+  // Radix can mount a tab or dialog after this parent effect has run.
+  const observer=new MutationObserver(highlight);
+  observer.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['data-state']});
+  return()=>{observer.disconnect();cleanup.forEach(fn=>fn())};
  },[serialized,location]);
  useEffect(()=>{
   if(!focus||focused.current===focus.token)return;
