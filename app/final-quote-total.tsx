@@ -24,7 +24,7 @@ function TotalEditor({quote,calculation:c,onChange}:{quote:QuoteInput;calculatio
   onChange({finalTotalOverride:Math.max(1,Math.round(value/roundTo)*roundTo)});
   setAmount(String(Math.max(1,Math.round(value/roundTo)*roundTo)));
  };
- return <section className="final-quote-total" aria-labelledby={`${id}-title`}>
+ return <section data-validation-field="final-total" className="final-quote-total" aria-labelledby={`${id}-title`}>
   <div className="final-total-heading"><div><h3 id={`${id}-title`}>Total final de la cotización</h3><p>Define el importe que recibirá el cliente.</p></div><strong aria-live="polite">{money(c.total)}</strong></div>
   <p>Según equipos, instalación y descuento: <b>{money(c.calculatedTotal??c.total)}</b>.</p>
   <div className="final-total-controls">

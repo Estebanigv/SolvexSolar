@@ -10,10 +10,10 @@ import {money,productUnit,isInstallation,productSchema,systems,systemNames,type 
 
 const categoryLabel=(s:string)=>s.toLocaleLowerCase('es').replace(/^./,c=>c.toUpperCase());
 const normalize=(s:string)=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('es');
-type Props={products:Product[];dirty:boolean;busy:boolean;loaded:boolean;canEdit:boolean;demo:boolean;onApply:(product:Product)=>void;onRemove:(id:string)=>void;onSave:()=>void};
-export function EquipmentCatalog({products,dirty,busy,loaded,canEdit,demo,onApply,onRemove,onSave}:Props){
- const [system,setSystem]=useState<Product['system']>('ON GRID'),[search,setSearch]=useState(''),[category,setCategory]=useState('');
- const [draft,setDraft]=useState<Product|null>(null),[isNew,setIsNew]=useState(false),[customCategory,setCustomCategory]=useState(false),[error,setError]=useState('');
+type Props={initialProduct?:Product;products:Product[];dirty:boolean;busy:boolean;loaded:boolean;canEdit:boolean;demo:boolean;onApply:(product:Product)=>void;onRemove:(id:string)=>void;onSave:()=>void};
+export function EquipmentCatalog({initialProduct,products,dirty,busy,loaded,canEdit,demo,onApply,onRemove,onSave}:Props){
+ const [system,setSystem]=useState<Product['system']>(initialProduct?.system??'ON GRID'),[search,setSearch]=useState(''),[category,setCategory]=useState('');
+ const [draft,setDraft]=useState<Product|null>(initialProduct?{...initialProduct}:null),[isNew,setIsNew]=useState(false),[customCategory,setCustomCategory]=useState(false),[error,setError]=useState('');
  const [removing,setRemoving]=useState<Product|null>(null);
  const systemProducts=useMemo(()=>products.filter(p=>p.system===system),[products,system]);
  const categories=useMemo(()=>Array.from(new Set(systemProducts.map(p=>p.category))).sort((a,b)=>a.localeCompare(b,'es')),[systemProducts]);

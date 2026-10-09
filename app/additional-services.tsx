@@ -19,7 +19,7 @@ export function AdditionalServices({services,quote,onChange,onQuantityChange,pri
   setNotice(removed.length?`${kind} seleccionado. Se retiró ${removed.map(p=>p.name).join(', ')} del total.`:'');
  }
  const edit=(id:string,patch:Partial<CustomService>)=>onChange({customServices:custom.map(s=>s.id===id?{...s,...patch}:s)});
- return <div className="additional-services additional-services-internal">
+ return <div data-validation-field="certifications" className="additional-services additional-services-internal">
   <div className="additional-services-help"><div><strong>Detalle interno de costos</strong><p>Estos servicios forman parte del precio final. El PDF del cliente presenta los paneles, inversor y baterías, sin este desglose.</p></div></div>
   {services.some(p=>certificationType(p))&&<p className="certification-rule">TE1 y TE4 son alternativas: al incluir uno, se desmarca el otro y se actualiza el total.</p>}
   {conflict&&<p className="energy-error" role="alert">{certificationConflictMessage} Selecciona el que corresponde para continuar.</p>}

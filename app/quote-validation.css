@@ -1,0 +1,19 @@
+.quote-validation-list{padding:16px;margin:14px 0;border:1px solid #c93636;border-radius:8px;background:#fff6f5;color:#922323}
+.quote-validation-list h3{display:flex;gap:8px;align-items:center;font-size:16px!important;color:#922323!important;margin:0 0 6px}
+.quote-validation-list>p{font-size:13px!important;line-height:1.5;color:#922323!important;margin-bottom:10px}
+.quote-validation-list ul{list-style:none;padding:0;margin:0;display:grid;gap:6px}
+.quote-validation-list li button{display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:left;width:100%;padding:10px 12px;border:1px solid #e7b0ac;border-radius:5px;background:#fff;color:#922323;cursor:pointer}
+.quote-validation-list li button strong{font-size:13px;line-height:1.5;color:inherit}
+.quote-validation-list li button small{display:block;color:#6c3434;font-size:12px;margin-top:3px}
+.quote-validation-list li button svg{flex-shrink:0}
+.quote-validation-list li button:hover{background:#ffebe8}
+.quote-validation-list li button:focus-visible{outline:3px solid #b72b2b;outline-offset:2px}
+.quote-validation-list li button:disabled{opacity:.65;cursor:wait}
+.quote-invalid{scroll-margin:100px;color:#a12424!important}
+.quote-invalid:is(input,select,textarea,button),.quote-invalid :is(input,select,textarea,button[role=combobox],button[role=checkbox]){border:2px solid #c52f2f!important;background-color:#fff8f7!important}
+label.quote-invalid::after{content:attr(data-validation-message);display:block;color:#a12424;font-size:12px;line-height:1.5;font-weight:500;margin-top:5px}
+.quote-invalid.check-label,.quote-invalid.bill-review{flex-wrap:wrap}
+.quote-invalid.check-label::after,.quote-invalid.bill-review::after{flex-basis:100%}
+.quote-invalid:focus,.quote-invalid :focus{outline:3px solid #f1b9b4!important;outline-offset:3px}
+.quote-issue-panel .quote-validation-list{margin-bottom:0}
+@media print{.quote-validation-list{display:none}}
