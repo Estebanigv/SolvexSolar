@@ -23,11 +23,11 @@ export function InstallationPanel({quote,panels,rates,onChange}:{quote:QuoteInpu
   </div>
   {!rate&&<p role="alert">No hay tarifa automática para {panels} paneles. Solicita un total aprobado y utiliza el ajuste manual.</p>}
   <div className="installation-manual">
-   <label className="installation-toggle"><input type="checkbox" checked={manual} onChange={e=>e.target.checked?onChange({installationOverride:rate?.price??0,installationNote:''}):restoreAutomatic()}/>Usar ajuste manual de instalación (opcional)</label>
+   <label className="installation-toggle"><input type="checkbox" checked={manual} onChange={e=>e.target.checked?onChange({installationOverride:Math.round(rate?.price??0),installationNote:''}):restoreAutomatic()}/>Usar ajuste manual de instalación (opcional)</label>
    <p>El cálculo automático permanece visible como referencia. Activa el ajuste solo si necesitas un total distinto para este proyecto.</p>
    {manual&&<>
     <div className="field-grid">
-     <label>Total manual (CLP, IVA incluido)<Input type="number" min={0} step={1} aria-label="Valor manual de instalación" value={quote.installationOverride??0} onChange={e=>onChange({installationOverride:Math.max(0,Math.round(Number(e.target.value)||0))})}/><small>Reemplaza el total automático. Un valor de $0 significa instalación sin cobro.</small></label>
+     <label>Total manual (CLP, IVA incluido)<Input type="number" min={0} step={1} aria-label="Valor manual de instalación" value={Math.round(quote.installationOverride??0)} onChange={e=>onChange({installationOverride:Math.max(0,Math.round(Number(e.target.value)||0))})}/><small>Reemplaza el total automático. Un valor de $0 significa instalación sin cobro.</small></label>
      <label>Motivo y aprobación<Input value={quote.installationNote} onChange={e=>onChange({installationNote:e.target.value})} placeholder="Indica quién aprobó el ajuste y por qué"/></label>
     </div>
     <Button type="button" variant="outline" onClick={restoreAutomatic}>Volver al cálculo automático</Button>

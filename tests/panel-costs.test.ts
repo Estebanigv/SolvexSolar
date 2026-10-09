@@ -68,5 +68,6 @@ assert.equal(automaticCalculation.lines.find(l=>l.id==='installation')?.total,65
 assert.equal(manualCalculation.subtotal-automaticCalculation.subtotal,50000,'Charge only the selected installation total, never both');
 assert.ok(!renderInstallation(automaticInput,9).includes('Valor manual de instalación'));
 assert.ok(renderInstallation({...manualInput,installationOverride:0},8).includes('$0'),'A free approved installation is still a manual override');
+assert.ok(renderInstallation({...manualInput,installationOverride:631907.136},8).includes('value="631907"'),'Manual input displays whole Chilean pesos even for older fractional overrides');
 assert.ok(renderInstallation(manualInput,7).includes('No hay tarifa automática para 7 paneles'),'Missing rates remain explicit even in manual mode');
 console.log('Instalación: referencia automática visible, cambio de paneles, ajuste opcional y regreso a tarifa sin doble cobro: OK');
