@@ -1,4 +1,7 @@
 import assert from 'node:assert/strict';
+import {createElement} from 'react';
+import {renderToStaticMarkup} from 'react-dom/server';
+import {InstallationPanel} from '../app/installation-panel';
 import {calculate,newQuote,initialSettings,panelQuantities,systems,type Product} from '../lib/quote';
 import {proposalEquipment} from '../lib/proposal-document';
 import {workflowReadiness} from '../lib/workflow';
@@ -46,3 +49,24 @@ assert.equal(noPrice.complete,false);assert.equal(noPrice.lines.find(l=>l.id==='
 const zero=calculate({...input,quantities:{...input.quantities,panel:0}},products,settings);
 assert.equal(zero.complete,false);assert.ok(!zero.lines.some(l=>l.id==='roof'||l.id==='structure'));
 console.log('Cantidades por panel, total de instalación, impuestos, excepciones y resumen de cliente: OK');
+
+// Switching to an override must not hide the live automatic reference.
+const rates=[{panels:8,price:600000,source:'Servicio Instalación'},{panels:9,price:650000,source:'Servicio Instalación'}];
+const renderInstallation=(quote:typeof input,panels:number)=>renderToStaticMarkup(createElement(InstallationPanel,{quote,panels,rates,onChange:()=>{}}));
+const manualInput={...input,installationOverride:700000,installationNote:'Ajuste aprobado'};
+const manualHtml=renderInstallation(manualInput,8);
+assert.ok(manualHtml.includes('$600.000')&&manualHtml.includes('$700.000'),'Automatic reference and manual total remain visible together');
+assert.ok(manualHtml.includes('Volver al cálculo automático'));
+const ninePanels={...manualInput,quantities:{...manualInput.quantities,panel:9}};
+const updatedHtml=renderInstallation(ninePanels,9);
+assert.ok(updatedHtml.includes('$650.000')&&updatedHtml.includes('$700.000'),'Changing panel count updates the reference while retaining the chosen override');
+const manualCalculation=calculate(ninePanels,products,settings,rates);
+const automaticInput={...ninePanels,installationOverride:null,installationNote:''};
+const automaticCalculation=calculate(automaticInput,products,settings,rates);
+assert.equal(manualCalculation.lines.find(l=>l.id==='installation')?.total,700000);
+assert.equal(automaticCalculation.lines.find(l=>l.id==='installation')?.total,650000);
+assert.equal(manualCalculation.subtotal-automaticCalculation.subtotal,50000,'Charge only the selected installation total, never both');
+assert.ok(!renderInstallation(automaticInput,9).includes('Valor manual de instalación'));
+assert.ok(renderInstallation({...manualInput,installationOverride:0},8).includes('$0'),'A free approved installation is still a manual override');
+assert.ok(renderInstallation(manualInput,7).includes('No hay tarifa automática para 7 paneles'),'Missing rates remain explicit even in manual mode');
+console.log('Instalación: referencia automática visible, cambio de paneles, ajuste opcional y regreso a tarifa sin doble cobro: OK');
