@@ -5,7 +5,7 @@ const input={...newQuote(),customer:{...newQuote().customer,name:'Cliente prueba
 const settings={...initialSettings,taxMode:'included' as const};
 const draft:SavedQuote={id:'draft',folio:'BORRADOR-SVX',date:'2026-10-02T12:00:00Z',input,settings,calculation:calculate(input,initialProducts,settings)};
 assert.deepEqual(issuanceProblems(draft),[],'Una propuesta preliminar completa puede emitirse, manteniendo sus condiciones técnicas');
-assert.equal(documentTitle(draft),'PRECOTIZACIÓN EN REVISIÓN');
+assert.equal(documentTitle(draft),'PRECOTIZACIÓN');
 const issued={...draft,id:'persisted',folio:'SVX-2026-000001',issuedAt:'2026-10-03T00:15:00Z'};
 assert.equal(isIssued(issued),true);
 assert.equal(documentTitle(issued),'COTIZACIÓN');

@@ -41,7 +41,7 @@ for(const system of systems)for(const count of [1,8,11,16,33]){
  assert.ok(!JSON.stringify(summary).includes('Cable privado'));
  const net=calculate(input,products,{...settings,taxMode:'net'},rates);
  assert.equal(net.lines.find(l=>l.id==='installation')?.total,Math.round(718272.576/1.19));
- assert.equal(net.total,net.subtotal+Math.round(net.subtotal*.19));
+ assert.equal(net.calculatedTotal,net.subtotal+Math.round(net.subtotal*.19));
 }
 const products=template('ON GRID'),input={...newQuote(),quantities:{panel:8,roof:1,structure:1,inverter:1}};
 const noPrice=calculate(input,products.map(p=>p.id==='install-rate'?{...p,price:null}:p),settings,[]);

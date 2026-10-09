@@ -1,10 +1,11 @@
+import {documentFolio} from './quote-issuance';
 import {PDFDocument,StandardFonts,rgb,pushGraphicsState,popGraphicsState,rectangle,clip,endPath,setGraphicsState} from 'pdf-lib';
 import {proposalCanvases,canvasSize} from './proposal-canvas';
 import {resolveProposalStyle} from './proposal-style';
 import type {SavedQuote} from './quote';
 
 export async function atlasPdf(q:SavedQuote,logoBytes?:ArrayBuffer,photos:{roof?:ArrayBuffer}={}){
- const pdf=await PDFDocument.create();pdf.setTitle(`${q.folio} - ${q.settings.name}`);pdf.setAuthor(q.settings.name);
+ const pdf=await PDFDocument.create();pdf.setTitle([documentFolio(q),q.settings.name].filter(Boolean).join(' - '));pdf.setAuthor(q.settings.name);
  const family=resolveProposalStyle(q.input.proposalContent?.style).font;
  const fonts={
   sans:{regular:await pdf.embedFont(StandardFonts.Helvetica),bold:await pdf.embedFont(StandardFonts.HelveticaBold)},

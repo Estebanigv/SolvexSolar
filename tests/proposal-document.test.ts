@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {proposalDiscount,proposalLines,proposalEquipment,proposalReadingSections,proposalSentences} from '../lib/proposal-document';
 import {customerTerms} from '../lib/commercial';
 import {newQuote,initialSettings,initialProducts,calculate,quoteSchema,type SavedQuote} from '../lib/quote';
-const input={...newQuote(),notes:'Incluye paneles de 5.5 kWp. Excluye obras civiles. Sujeto a visita técnica. Condición especial acordada con el cliente.'};
+const input={...newQuote(),roundFinalTotal:undefined,notes:'Incluye paneles de 5.5 kWp. Excluye obras civiles. Sujeto a visita técnica. Condición especial acordada con el cliente.'};
 const settings={...initialSettings,warranty:'1 año de garantía de instalación: reparación sin costo.\nGarantía del fabricante: 15 años para paneles fotovoltaicos. Servicio postventa: soporte según contrato. La garantía de baterías se confirmará por modelo. Condición particular de cobertura.',terms:'Precios con IVA incluidos. Vigencia de la oferta: 10 días. Formas de pago: transferencia. Anticipo 20%, entrega 80%. Incluye los equipos y cantidades detallados en esta propuesta. Baterías y otros equipos solo cuando figuran en el detalle. Traslados especiales se cobran aparte. El alcance se acuerda tras la visita técnica. Descuento especial de 2.5%.'};
 const quote:SavedQuote={id:'layout-check',folio:'CHECK',date:'2026-09-29T12:00:00Z',input,settings,calculation:calculate(input,initialProducts,settings)};
 const before=JSON.stringify(quote),sections=proposalReadingSections(quote);

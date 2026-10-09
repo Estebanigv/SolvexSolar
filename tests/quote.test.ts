@@ -34,7 +34,7 @@ console.log('Eliminar equipo: borradores, totales, revisión e historial conserv
 
 for(const taxMode of ['included','net','pending'] as const){
  const settings={...initialSettings,taxMode,paymentSchedule:[{label:'Anticipo',percent:33},{label:'Entrega',percent:67}]};
- const input={...newQuote(),discountPercent:10,showDiscount:true,extra:123.45,extraLabel:'Prueba de fracciones'};
+ const input={...newQuote(),roundFinalTotal:undefined,discountPercent:10,showDiscount:true,extra:123.45,extraLabel:'Prueba de fracciones'};
  const baseline=calculate(input,initialProducts,settings);
  for(const amount of [1,5155000,baseline.total+999,baseline.total-321,1e10]){
   const manual={...input,finalTotalOverride:amount};

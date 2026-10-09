@@ -11,7 +11,7 @@ for(const percent of [0,1,30]){
  const c=calculate({...q,discountPercent:percent},initialProducts,settings);
  assert.equal(c.discount,Math.round(base.subtotal*percent/100));
  assert.equal(c.net+c.tax!,c.total);
- assert.equal(c.total,base.subtotal-c.discount,'No agregar IVA nuevamente');
+ assert.equal(c.calculatedTotal,base.subtotal-c.discount,'No agregar IVA nuevamente');
 }
 for(const percent of [-1,1.5,31,Infinity])assert.equal(quoteSchema.safeParse({...q,discountPercent:percent}).success,false);
 assert.equal(paymentBreakdown(100003,settings).reduce((s,r)=>s+r.amount,0),100003,'Redondeos concilian con total');

@@ -1,6 +1,6 @@
 import {AtlasProposal} from './atlas-proposal';
 import {usesAtlasProposal} from '@/lib/proposal-layout';
-import {documentTitle,isIssued} from '@/lib/quote-issuance';
+import {documentFolio,documentTitle,isIssued} from '@/lib/quote-issuance';
 import type {SavedQuote} from '@/lib/quote';
 import {ProposalProjection} from './proposal-projection';
 import {money,systemNames} from '@/lib/quote';
@@ -10,20 +10,20 @@ import {proposalDiscount,proposalEquipment,proposalImages,proposalWarranties,pro
 import {UserRound,Phone,Mail,MapPin,CalendarDays,Sun,Zap,BatteryCharging,ShieldCheck} from 'lucide-react';
 
 export function Proposal({q}:{q:SavedQuote}){return usesAtlasProposal(q)?<AtlasProposal q={q}/>:<LegacyProposal q={q}/>;}
-function LegacyProposal({q}:{q:SavedQuote}){
- q={...q,settings:customerDocumentSettings(q.input,q.settings)};
+function LegacyProposal({q:original}:{q:SavedQuote}){
+ const q={...original,settings:customerDocumentSettings(original.input,original.settings)};
  const {input,settings,calculation:c}=q;
  const discount=proposalDiscount(q);
  const adviser=assignedAdviser(input,settings),consumption=consumptionSummary(input.energy);
  const payments=paymentBreakdown(c.total,settings),netbilling=netbillingScope(input,settings);
  const equipment=proposalEquipment(q),warranties=proposalWarranties(settings.warranty),reading=proposalReadingSections(q);
  const facts=[{label:'Cliente',value:input.customer.name||'Por completar',icon:UserRound},{label:'Teléfono',value:input.customer.phone||'Por completar',icon:Phone},{label:'Correo',value:input.customer.email||'Por completar',icon:Mail},{label:'Región',value:input.customer.region||'Por completar',icon:MapPin},{label:'Comuna',value:input.customer.commune||'Por completar',icon:MapPin},{label:'Emisión',value:new Date(q.issuedAt??q.date).toLocaleDateString('es-CL',{timeZone:'America/Santiago'}),icon:CalendarDays}];
- const footer=(section:string)=><div className="proposal-sheet-footer"><strong>{settings.name}</strong><span>{section}</span><span>{q.folio}</span></div>;
+ const footer=(section:string)=><div className="proposal-sheet-footer"><strong>{settings.name}</strong><span>{section}</span><span>{documentFolio(q)}</span></div>;
  return <article className="proposal proposal-brochure">
   <section className="proposal-sheet">
    <div className="proposal-cover-visual">
     <img className="proposal-cover-photo" src={proposalImages.roof} alt="Vivienda con paneles solares, imagen referencial"/>
-    <header className="proposal-masthead"><div className="proposal-brand"><img src={proposalImages.logo} alt={settings.name}/></div><div className="proposal-ref"><p>{documentTitle(q)}</p><strong>{q.folio}</strong></div></header>
+    <header className="proposal-masthead"><div className="proposal-brand"><img src={proposalImages.logo} alt={settings.name}/></div><div className="proposal-ref"><p>{documentTitle(q)}</p><strong>{documentFolio(q)}</strong></div></header>
     <div className="proposal-cover-copy"><p>{systemNames[input.system]}</p><h2>Tu proyecto solar,<br/>en detalle.</h2><p>Preparado para {input.customer.name||'ti'}</p></div>
     <small className="proposal-image-caption">Imagen referencial</small>
    </div>
@@ -38,7 +38,7 @@ function LegacyProposal({q}:{q:SavedQuote}){
    </div>{footer('Resumen del proyecto')}
   </section>
   <section className="proposal-sheet">
-   <header className="proposal-section-title"><p>{q.folio}</p><h2>La tecnología de tu proyecto</h2><p>Equipos seleccionados, potencia y forma de pago.</p></header>
+   <header className="proposal-section-title"><p>{documentFolio(q)}</p><h2>La tecnología de tu proyecto</h2><p>Equipos seleccionados, potencia y forma de pago.</p></header>
    <div className="proposal-sheet-content">
     <section className="proposal-project-includes"><h3>Tu proyecto incluye</h3><div className="proposal-project-equipment">{equipment.map((item,index)=><div className="proposal-project-equipment-row" key={item.kind+'-'+index}><span className="proposal-project-equipment-icon">{item.kind==='panels'?<Sun size={26}/>:item.kind==='battery'?<BatteryCharging size={26}/>:<Zap size={26}/>}</span><div><h4>{item.label}</h4><p className="proposal-project-model">{item.value}</p><p className="proposal-project-note">{item.note}</p></div></div>)}</div></section>
     <p className="proposal-validity">Vigencia de {settings.validDays} días desde la emisión.</p>
@@ -56,7 +56,7 @@ function LegacyProposal({q}:{q:SavedQuote}){
    </div>{footer('Garantías y alcance')}
   </section>
   <section className="proposal-sheet">
-   <header className="proposal-section-title"><p>{q.folio}</p><h2>Condiciones claras</h2><p>Revisa los pagos, los servicios y las validaciones de tu propuesta.</p></header>
+   <header className="proposal-section-title"><p>{documentFolio(q)}</p><h2>Condiciones claras</h2><p>Revisa los pagos, los servicios y las validaciones de tu propuesta.</p></header>
    <div className="proposal-sheet-content">
     <div className="proposal-commercial-list">{reading.commercial.map(group=><section className="proposal-reading-block" key={group.title}><h4>{group.title}</h4><ul>{group.items.map((item,i)=><li key={i}>{item}</li>)}</ul></section>)}</div>
     {netbilling&&<section className="proposal-reading-block proposal-netbilling"><h4>Certificación y Netbilling</h4><p>{netbilling}</p></section>}

@@ -34,7 +34,7 @@ assert.equal(calculation.total-base.total,100000);
 assert.equal(calculation.lines.find(l=>l.id===`custom:${service.id}`)?.total,100000);
 assert.equal(calculate({...custom,discountPercent:10},initialProducts,settings).discount,Math.round(calculation.subtotal*.1));
 const net=calculate(custom,initialProducts,{...settings,taxMode:'net'}),netBase=calculate(quote,initialProducts,{...settings,taxMode:'net'});
-assert.equal(net.total-netBase.total,119000);
+assert.equal(net.calculatedTotal!-netBase.calculatedTotal!,119000);
 assert.deepEqual(quoteSchema.parse(JSON.parse(JSON.stringify(custom))).customServices,[service]);
 assert.equal(calculate({...custom,customServices:[{...service,quantity:0}]},initialProducts,settings).total,base.total);
 assert.equal(calculate({...custom,customServices:[]},initialProducts,settings).total,base.total);

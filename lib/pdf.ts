@@ -1,6 +1,6 @@
 import {atlasPdf} from './atlas-pdf';
 import {usesAtlasProposal} from './proposal-layout';
-import {documentTitle,isIssued} from './quote-issuance';
+import {documentFolio,documentTitle,isIssued} from './quote-issuance';
 import {PDFDocument,StandardFonts,rgb,pushGraphicsState,popGraphicsState,rectangle,clip,endPath,type PDFImage} from 'pdf-lib';
 import {customerDocumentSettings,assignedAdviser,paymentBreakdown,netbillingScope,preliminaryNote} from './commercial';
 import {consumptionSummary} from './energy';
@@ -13,7 +13,7 @@ type ProposalPhotos={roof?:ArrayBuffer;home?:ArrayBuffer};
 export async function quotePdf(q:SavedQuote,logoBytes?:ArrayBuffer,photos:ProposalPhotos={}){
  if(usesAtlasProposal(q))return atlasPdf(q,logoBytes,photos);
  q={...q,settings:customerDocumentSettings(q.input,q.settings)};
- const pdf=await PDFDocument.create();pdf.setTitle(`${q.folio} - ${q.settings.name}`);pdf.setAuthor(q.settings.name);
+ const pdf=await PDFDocument.create();pdf.setTitle([documentFolio(q),q.settings.name].filter(Boolean).join(' - '));pdf.setAuthor(q.settings.name);
  const regular=await pdf.embedFont(StandardFonts.Helvetica),bold=await pdf.embedFont(StandardFonts.HelveticaBold);
  const ink=rgb(.05,.20,.25),brand=rgb(.03,.17,.22),teal=rgb(.06,.25,.28),green=rgb(.69,.80,.24),muted=rgb(.34,.44,.48),rule=rgb(.84,.89,.90),pale=rgb(.94,.96,.93),white=rgb(1,1,1),light=rgb(.79,.86,.86),lime=rgb(.79,.86,.38);
  const logo=logoBytes?(new Uint8Array(logoBytes)[0]===137?await pdf.embedPng(logoBytes):await pdf.embedJpg(logoBytes)):null,roof=photos.roof?await pdf.embedJpg(photos.roof):null,home=photos.home?await pdf.embedJpg(photos.home):null;
@@ -27,7 +27,7 @@ export async function quotePdf(q:SavedQuote,logoBytes?:ArrayBuffer,photos:Propos
  const fitted=(s:string,size:number,width:number,isBold=true)=>Math.min(size,width/(isBold?bold:regular).widthOfTextAtSize(clean(s),1));
  function wrap(s:string,size=10,width=CW,isBold=false){const font=isBold?bold:regular,result:string[]=[];for(const paragraph of clean(s).split('\n')){let current='';for(const word of paragraph.split(/\s+/)){const candidate=current?current+' '+word:word;if(font.widthOfTextAtSize(candidate,size)<=width){current=candidate;continue}if(current){result.push(current);current=''}for(const char of word){if(font.widthOfTextAtSize(current+char,size)>width&&current){result.push(current);current=''}current+=char}}result.push(current)}return result}
  function imageCover(img:PDFImage,x:number,top:number,width:number,height:number){const scale=Math.max(width/img.width,height/img.height);page.pushOperators(pushGraphicsState(),rectangle(x,top-height,width,height),clip(),endPath());page.drawImage(img,{x:x+(width-img.width*scale)/2,y:top-height+(height-img.height*scale)/2,width:img.width*scale,height:img.height*scale});page.pushOperators(popGraphicsState())}
- const newPage=(nextSection=section)=>{if(count)page=pdf.addPage([W,H]);count++;section=nextSection;sections.push(section);if(count>1){draw(q.settings.name,M,H-30,11,true);right(q.folio,R,H-30,9,false,muted);line(H-42);y=H-64}};
+ const newPage=(nextSection=section)=>{if(count)page=pdf.addPage([W,H]);count++;section=nextSection;sections.push(section);if(count>1){draw(q.settings.name,M,H-30,11,true);right(documentFolio(q),R,H-30,9,false,muted);line(H-42);y=H-64}};
  const space=(height:number)=>{if(y-height<57)newPage()};
  function text(s:string,size=9.5,isBold=false,color=muted){const rows=wrap(s,size,CW,isBold);space(Math.min(rows.length,3)*(size+4.5));for(const row of rows){space(size+4.5);draw(row,M,y-size,size,isBold,color);y-=size+4.5}}
  function block(s:string,x:number,top:number,width:number,size=10,isBold=false,color=muted){const rows=wrap(s,size,width,isBold);rows.forEach((row,i)=>draw(row,x,top-size-i*(size+4.5),size,isBold,color));return rows.length*(size+4.5)}
@@ -43,7 +43,7 @@ export async function quotePdf(q:SavedQuote,logoBytes?:ArrayBuffer,photos:Propos
   page.drawRectangle({x:0,y:H-(i+1)*5,width:W,height:5,color:brand,opacity:Math.min(.78,opacity)});
  }
  if(logo)page.drawImage(logo,{x:M,y:H-102,width:117,height:78});
- right(documentTitle(q),R,H-43,8,true,lime);right(q.folio,R,H-60,10,false,white);
+ right(documentTitle(q),R,H-43,8,true,lime);right(documentFolio(q),R,H-60,10,false,white);
  draw(systemNames[q.input.system],M,H-188,11,true,lime);
  draw('Tu proyecto solar,',M,H-235,37,true,white);draw('en detalle.',M,H-279,37,true,white);
  const customer='Preparado para '+(q.input.customer.name||'ti');
@@ -161,6 +161,6 @@ export async function quotePdf(q:SavedQuote,logoBytes?:ArrayBuffer,photos:Propos
  let contactTop=y-51;
  for(const item of contactLines)contactTop-=block(item.text,M,contactTop,CW,10,item.bold,item.bold?lime:white)+6;
  y-=contactHeight+18;text('Las fotografías son referenciales y no representan la instalación cotizada. No se incluyen estimaciones de ahorro, generación o retorno sin parámetros técnicos validados.',8);
- const pages=pdf.getPages();pages.forEach((p,i)=>{page=p;line(42);draw(q.settings.name+' · '+sections[i],M,27,8,false,muted);right(`${q.folio} · ${i+1} / ${pages.length}`,R,27,8,false,muted)});
+ const pages=pdf.getPages();pages.forEach((p,i)=>{page=p;line(42);draw(q.settings.name+' · '+sections[i],M,27,8,false,muted);right(`${documentFolio(q)} · ${i+1} / ${pages.length}`,R,27,8,false,muted)});
  return new Uint8Array(await pdf.save());
 }

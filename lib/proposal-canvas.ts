@@ -3,7 +3,7 @@ export {wrapProposal,printableText} from './proposal-typography';
 import {applyElementStyles,type CanvasElement} from './proposal-elements';
 import {proposalLayout,type ProposalPage,type ProposalBlock} from './proposal-layout';
 import type {SavedQuote} from './quote';
-import {documentTitle} from './quote-issuance';
+import {documentFolio,documentTitle} from './quote-issuance';
 import {proposalIcon} from './proposal-icons';
 import {resolveProposalStyle,defaultProposalStyle,readableOn,tint,type ProposalStyle} from './proposal-style';
 
@@ -39,7 +39,7 @@ export function proposalCanvases(q:SavedQuote):CanvasPage[]{
  const start=(page:ProposalPage,continuation=false)=>{
   current={id:`${page.id}-${pages.length}`,title:page.title,sourcePage:page.id,ops:[]};pages.push(current);
   rect(0,0,842,595,colors.white,undefined,`${page.id}:background`);
-  icon('sun',36,17,21,colors.teal,`${page.id}:brand-icon`);text(q.settings.name,65,33,12,true,colors.ink,`${page.id}:brand`);right(q.folio,806,32,9,false,colors.muted,`${page.id}:folio`);
+  icon('sun',36,17,21,colors.teal,`${page.id}:brand-icon`);text(q.settings.name,65,33,12,true,colors.ink,`${page.id}:brand`);right(documentFolio(q),806,32,9,false,colors.muted,`${page.id}:folio`);
   line(36,49,806,49,colors.line,1,undefined,`${page.id}:header-rule`);
   y=68;
   if(page.subtitle&&!continuation)y+=lines(page.subtitle,36,y,770,11,false,colors.muted,`${page.id}:subtitle`)+8;
@@ -173,7 +173,7 @@ export function proposalCanvases(q:SavedQuote):CanvasPage[]{
   current.ops.push({kind:'fade',elementId:'cover:photo',x:330,y:0,width:384,height:376,color:colors.dark,from:1,to:0,direction:'horizontal'});
   current.ops.push({kind:'fade',elementId:'cover:photo',x:330,y:0,width:512,height:128,color:colors.dark,from:.7,to:0,direction:'vertical'});
   current.ops.push({kind:'image',elementId:'cover:logo',image:'logo',x:36,y:22,width:101,height:67,fit:'contain'});
-  right(q.folio,806,43,9,false,'#bbd0ce','cover:folio');right(documentTitle(q),806,62,9,true,colors.green,'cover:status');
+  right(documentFolio(q),806,43,9,false,'#bbd0ce','cover:folio');right(documentTitle(q),806,62,9,true,colors.green,'cover:status');
   let top=115;top+=lines(page.title,36,top,413,36,true,colors.white,`${page.id}:title`)+14;top+=lines(page.subtitle,36,top,413,17,false,'#c7dcda',`${page.id}:subtitle`)+20;
   if(client){line(36,top,88,top,colors.green,2,undefined,'cover:client-rule');top+=15;top+=lines(client.title,36,top,413,20,true,colors.white,`${client.id}:title`)+8;top+=lines(client.body,36,top,413,11,false,'#c7dcda',`${client.id}:body`);}
   if(top>353){pages.pop();return false;}
@@ -200,7 +200,7 @@ export function proposalCanvases(q:SavedQuote):CanvasPage[]{
  }
  pages.forEach((page,i)=>{
   page.ops.push({kind:'line',elementId:`${page.sourcePage}:footer-rule`,x:36,y:553,x2:806,y2:553,color:colors.line,thickness:.6});
-  page.ops.push({kind:'text',elementId:`${page.sourcePage}:footer-text`,x:36,y:577,size:9,bold:false,color:colors.muted,text:printableText(`${q.settings.name} · ${q.folio}`)});
+  page.ops.push({kind:'text',elementId:`${page.sourcePage}:footer-text`,x:36,y:577,size:9,bold:false,color:colors.muted,text:printableText([q.settings.name,documentFolio(q)].filter(Boolean).join(' · '))});
   page.ops.push({kind:'text',elementId:`${page.sourcePage}:page-number`,x:755,y:577,size:9,bold:false,color:colors.muted,text:`${i+1} / ${pages.length}`});
  });
  return pages.map(page=>applyElementStyles({...page,font:style.font,ops:page.ops.map(op=>{
