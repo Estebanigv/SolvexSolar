@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {calculate,initialProducts,initialSettings,newQuote,quoteSchema,type Product,type SavedQuote} from '../lib/quote';
-import {certificationType,serviceQuantities} from '../lib/additional-services';
+import {requiredMaterial,isLinearDrop,serviceQuantity,equipmentCategories,requiredServiceQuantities,certificationType,serviceQuantities} from '../lib/additional-services';
 import {issuanceProblems} from '../lib/quote-issuance';
 import {workflowReadiness} from '../lib/workflow';
 const settings={...initialSettings,taxMode:'included' as const};
@@ -50,3 +50,29 @@ const old:SavedQuote={id:'old',folio:'OLD',date:'2026-10-02',input:both,settings
 assert.ok(issuanceProblems(old).some(s=>s.includes('TE1 o TE4')));
 assert.throws(()=>calculate({...custom,quantities:{...custom.quantities,[te4.id]:1},customServices:[{...service,name:'TE1 especial'}]},initialProducts,settings),/TE1 o TE4/);
 console.log('Servicios: exclusión TE1/TE4, guardado, emisión, otros, impuestos, descuento y validación: OK');
+
+// Waldo: mandatory materials and whole-metre drop are enforced in calculations,
+// including old drafts that omitted them, for every system in the catalogue.
+for(const system of [...new Set(initialProducts.map(p=>p.system))]){
+ const products=initialProducts.filter(p=>p.system===system);
+ const required=products.filter(requiredMaterial),drop=products.find(isLinearDrop)!;
+ assert.equal(required.length,2,`${system}: adhesive kit and electrical board`);
+ assert.ok(drop);
+ assert.equal(equipmentCategories([...products].reverse())[0],'PANEL FOTOVOLTAICO');
+ const input={...newQuote(),system,quantities:{[drop.id]:15.2}};
+ const before=JSON.stringify(input),normal=requiredServiceQuantities(input,initialProducts);
+ for(const p of required){
+  assert.equal(normal[p.id],1);
+  assert.equal(serviceQuantities(input,products,p,0)[p.id],1);
+ }
+ assert.equal(normal[drop.id],16);
+ assert.deepEqual(requiredServiceQuantities({...input,quantities:normal},initialProducts),normal);
+ const c=calculate(input,initialProducts,settings);
+ for(const p of required){const line=c.lines.find(l=>l.id===p.id)!;assert.equal(line.qty,1);assert.equal(line.total,p.price);}
+ assert.equal(c.lines.find(l=>l.id===drop.id)?.qty,16);
+ assert.equal(JSON.stringify(input),before,'Historical inputs remain unchanged');
+ assert.equal(serviceQuantity(drop,1),15);assert.equal(serviceQuantity(drop,15),15);assert.equal(serviceQuantity(drop,16),16);assert.equal(serviceQuantity(drop,0),0);
+}
+assert.equal(requiredMaterial({category:'TABLERO TRIFÁSICO'}),true);
+assert.equal(requiredMaterial({category:'KIT DE ADHESIVO'}),true);
+console.log('Waldo: panel primero, kit/tablero obligatorios en todos los sistemas, bajada entera desde 15 y snapshots intactos: OK');

@@ -4,7 +4,7 @@ import {projectionSchema} from './projection';
 import {z} from 'zod';
 import {adviserSchema,roiReferenceSchema,paymentScheduleSchema,greenCreditNote} from './commercial';
 import {energyInputSchema,consumptionSummary} from './energy';
-import {customServiceSchema,hasCertificationConflict,certificationConflictMessage} from './additional-services';
+import {requiredServiceQuantities,customServiceSchema,hasCertificationConflict,certificationConflictMessage} from './additional-services';
 export const systems=['ON GRID','ON GRID TRIFASICO','OFF GRID','HIBRIDO','HIBRIDO TRIFASICO'] as const;
 export const systemNames:Record<string,string>={'ON GRID':'On Grid monofásico','ON GRID TRIFASICO':'On Grid trifásico','OFF GRID':'Off Grid','HIBRIDO':'Híbrido monofásico','HIBRIDO TRIFASICO':'Híbrido trifásico'};
 export const productSchema=z.object({id:z.string().min(1).max(60),system:z.enum(systems),category:z.string().min(1).max(100),name:z.string().min(1).max(180),price:z.number().finite().min(0).max(1e10).nullable(),unit:z.string().min(1).max(50),source:z.string().max(200),watts:z.number().finite().min(0).max(2000).nullable()});
@@ -28,7 +28,7 @@ export const isInstallation=(p:Pick<Product,'category'>)=>p.category==='SERVICIO
 // A selected roof/structure is a choice, not an independent quantity. Apply this
 // on the server as well as in the editor so stale drafts cannot undercharge it.
 export function panelQuantities(input:Pick<QuoteInput,'system'|'quantities'>,products:Product[]){
- const quantities={...input.quantities};
+ const quantities=requiredServiceQuantities(input,products);
  const panels=products.filter(p=>p.system===input.system&&p.category==='PANEL FOTOVOLTAICO').reduce((sum,p)=>sum+(quantities[p.id]||0),0);
  for(const p of products)if(p.system===input.system&&followsPanelCount(p)&&quantities[p.id]>0)quantities[p.id]=panels;
  return quantities;

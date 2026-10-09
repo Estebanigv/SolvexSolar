@@ -12,8 +12,8 @@ import type {AddressQuery} from '@/lib/geocoding';
 const number = (value: number) => value.toLocaleString('es-CL', {maximumFractionDigits: 1});
 const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 
-export function EnergyPanel({value, peakPower, onChange, address, mode = 'consumption'}: {
-  address?:AddressQuery; mode?: 'consumption' | 'solar'; value?: EnergyInput; peakPower: number; onChange: (value: EnergyInput) => void;
+export function EnergyPanel({value, peakPower, onChange, address, onEditLocation, mode = 'consumption'}: {
+  address?:AddressQuery; onEditLocation?:()=>void; mode?: 'consumption' | 'solar'; value?: EnergyInput; peakPower: number; onChange: (value: EnergyInput) => void;
 }) {
   const energy = value ?? newEnergyInput();
   const latestEnergy=useRef(energy);latestEnergy.current=energy;
@@ -75,7 +75,7 @@ export function EnergyPanel({value, peakPower, onChange, address, mode = 'consum
     {mode === 'solar' && <details open className="solar-study"><summary><Sun size={18}/><span>Estimar generación solar por ubicación<small>Consulta pública de PVGIS · Comisión Europea</small></span></summary>
       <div className="solar-study-body">
         <p>Usa las coordenadas del proyecto y ajusta los supuestos según el techo. La potencia seleccionada es <strong>{peakPower.toLocaleString('es-CL', {maximumFractionDigits: 3})} kWp</strong>.</p>
-        {address&&<ProjectLocation address={address} latitude={energy.latitude} longitude={energy.longitude} onChange={edit}/>}
+        {onEditLocation?<p className="energy-explanation">Ubicación definida en Cliente y boleta. <Button type="button" variant="link" onClick={onEditLocation}>{energy.latitude===null||energy.longitude===null?'Completar ubicación':'Editar ubicación'}</Button></p>:address&&<ProjectLocation address={address} latitude={energy.latitude} longitude={energy.longitude} onChange={edit}/>}
         <div className="field-grid energy-fields">
           <label>Inclinación del panel (°)<Input type="number" min={0} max={90} value={energy.tilt} onChange={e => edit({tilt: Number(e.target.value)})}/></label>
           <label>Orientación del panel<select value={energy.azimuth} onChange={e => edit({azimuth: Number(e.target.value)})}><option value={180}>Norte</option><option value={-135}>Noreste</option><option value={-90}>Este</option><option value={-45}>Sureste</option><option value={0}>Sur</option><option value={45}>Suroeste</option><option value={90}>Oeste</option><option value={135}>Noroeste</option></select></label>

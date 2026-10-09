@@ -1,6 +1,7 @@
 "use client";
 import {useEffect,useRef,useState} from 'react';
 import {readRecovery,writeRecovery} from '@/lib/local-recovery';
+import {ClientCreateDialog} from './client-create-dialog';
 import {Button} from '@/components/ui/button';
 import {toast} from 'sonner';
 import {LogOut,FileText,ExternalLink} from 'lucide-react';
@@ -16,11 +17,12 @@ export function SignOutButton({compact=false,preview=false}:{compact?:boolean;pr
 }
 type Client={id:string;details:QuoteInput['customer']};
 export function ClientPicker({customer,clientId,onSelect,onSave,refresh=0,onManage}:{refresh?:number;onManage?:()=>void;customer:QuoteInput['customer'];clientId:string|null;onSelect:(client:Client|null)=>void;onSave:(id:string)=>void}){
+  const [creating,setCreating]=useState(false);
   const [clients,setClients]=useState<Client[]>([]),[error,setError]=useState(''),[busy,setBusy]=useState(false);
   async function load(){try{const body=await api<{clients:Client[]}>('/api/clients');setClients(body.clients);setError('')}catch(e){setError((e as Error).message)}}
   useEffect(()=>{void load()},[refresh]);
   async function save(){setBusy(true);try{const body=await api<{id:string}>('/api/clients',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({details:customer,id:clientId})});onSave(body.id);await load();toast.success('Cliente guardado.')}catch(e){toast.error((e as Error).message)}finally{setBusy(false)}}
-  return <section className="client-picker"><label htmlFor="existing-client"><strong>Cliente nuevo o registrado</strong></label><select id="existing-client" value={clientId??''} onChange={e=>onSelect(clients.find(c=>c.id===e.target.value)??null)}><option value="">Nuevo cliente</option>{clientId&&!clients.some(c=>c.id===clientId)&&<option value={clientId}>Cliente de esta cotización</option>}{clients.map(client=><option key={client.id} value={client.id}>{client.details.name}{client.details.email?` · ${client.details.email}`:''}</option>)}</select><p>Guardar una cotización también guarda los datos del cliente. Puedes guardarlos ahora, aunque aún no tengas la propuesta.</p><Button variant="outline" onClick={save} disabled={busy||!customer.name.trim()}>{clientId?'Actualizar cliente':'Guardar cliente'}</Button>{onManage&&<Button variant="ghost" onClick={onManage}>Ver y administrar clientes</Button>}{error&&<p role="alert">{error} <button onClick={load}>Reintentar</button></p>}</section>;
+  return <section className="client-picker"><div className="client-picker-heading"><label htmlFor="existing-client"><strong>Cliente nuevo o registrado</strong></label><Button type="button" onClick={()=>setCreating(true)} disabled={busy}>Nuevo cliente</Button></div><select id="existing-client" value={clientId??''} onChange={e=>onSelect(clients.find(c=>c.id===e.target.value)??null)}><option value="">Ingreso manual · cliente por guardar</option>{clientId&&!clients.some(c=>c.id===clientId)&&<option value={clientId}>Cliente de esta cotización</option>}{clients.map(client=><option key={client.id} value={client.id}>{client.details.name}{client.details.email?` · ${client.details.email}`:''}</option>)}</select><p>Guardar una cotización también guarda los datos del cliente. Puedes guardarlos ahora, aunque aún no tengas la propuesta.</p><Button variant="outline" onClick={save} disabled={busy||!customer.name.trim()||!/^$|^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.email)}>{busy?'Guardando…':clientId?'Actualizar cliente':'Guardar datos del cliente'}</Button>{onManage&&<Button variant="ghost" onClick={onManage}>Ver y administrar clientes</Button>}{error&&<p role="alert">{error} <button onClick={load}>Reintentar</button></p>}{creating&&<ClientCreateDialog onClose={()=>setCreating(false)} onCreated={client=>{setClients(list=>[client,...list.filter(item=>item.id!==client.id)]);onSelect(client);setCreating(false);toast.success('Cliente creado y seleccionado.');}}/>}</section>;
 }
 export {Members} from './members';
 export function useQuoteBillBackup(ownerId?:string){
