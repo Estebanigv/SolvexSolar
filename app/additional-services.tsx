@@ -4,7 +4,7 @@ import {Input} from '@/components/ui/input';
 import {Button} from '@/components/ui/button';
 import {Plus,Trash2} from 'lucide-react';
 import {money,type Product,type QuoteInput} from '@/lib/quote';
-import {requiredMaterial,isLinearDrop,serviceQuantity,certificationType,hasCertificationConflict,certificationConflictMessage,type CustomService} from '@/lib/additional-services';
+import {requiredMaterial,isLinearService,serviceQuantity,certificationType,hasCertificationConflict,certificationConflictMessage,type CustomService} from '@/lib/additional-services';
 import './additional-services.css';
 
 export function AdditionalServices({services,quote,onChange,onQuantityChange,priceLabel='Precio unitario (CLP)'}:{services:Product[];quote:QuoteInput;onChange:(patch:Partial<QuoteInput>)=>void;onQuantityChange:(product:Product,qty:number)=>void;priceLabel?:string}){
@@ -25,7 +25,7 @@ export function AdditionalServices({services,quote,onChange,onQuantityChange,pri
   {conflict&&<p className="energy-error" role="alert">{certificationConflictMessage} Selecciona el que corresponde para continuar.</p>}
   <p className="service-selection-notice" role="status">{notice}</p>
   <div className="additional-services-head" aria-hidden="true"><span>Servicio o material</span><span>Cantidad</span></div>
-  {services.map(p=>{const required=requiredMaterial(p),linear=isLinearDrop(p),qty=serviceQuantity(p,quote.quantities[p.id]??0);return <div className="additional-service" key={p.id}>
+  {services.map(p=>{const required=requiredMaterial(p),linear=isLinearService(p),qty=serviceQuantity(p,quote.quantities[p.id]??0);return <div className="additional-service" key={p.id}>
    <div className="additional-service-name"><label className="service-include"><input type="checkbox" checked={qty>0} disabled={required} aria-label={'Incluir '+p.name} onChange={e=>{if(!e.target.checked)previous.current[p.id]=qty;quantity(p,e.target.checked?(previous.current[p.id]||(linear?15:1)):0)}}/><strong>{p.name}</strong></label><p>{p.price===null?'Sin precio':money(p.price)} / {p.unit} · {required?'Obligatorio · incluido en el total':qty>0?'Incluido en el total':'Sin cobro'}</p>{linear&&<small>Desde 15 metros, en incrementos de 1 metro.</small>}</div>
    <label className="additional-service-quantity"><span>Cantidad</span><Input type="number" min={required?1:linear&&qty>0?15:0} step={linear?1:p.unit==='metro'?0.1:1} aria-label={'Cantidad '+p.name} value={qty} onChange={e=>quantity(p,Math.max(0,+e.target.value||0))}/></label>
   </div>})}

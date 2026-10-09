@@ -41,7 +41,7 @@ import {calculate,initialProducts,initialSettings,newQuote,money,systems,systemN
 import {Proposal} from './proposal';
 import {ProposalEditor} from './proposal-editor';
 import {AdditionalServices} from './additional-services';
-import {serviceQuantities,isLinearDrop,equipmentCategories} from '@/lib/additional-services';
+import {serviceQuantities,isLinearService,equipmentCategories} from '@/lib/additional-services';
 import {InstallationPanel} from './installation-panel';
 import {ProjectionPanel} from './projection-panel';
 import {proposalImages} from '@/lib/proposal-document';
@@ -107,7 +107,7 @@ function QuoteWorkspace(){
  const stateRef=useRef({quote,products,settings,installation});stateRef.current={quote,products,settings,installation};
  useEffect(()=>{const context=(document as unknown as {modelContext?:{registerTool:(tool:unknown,options:unknown)=>unknown}}).modelContext;if(!context?.registerTool)return;const control=new AbortController();try{Promise.resolve(context.registerTool({name:'read_quote_summary',title:'Consultar cotización actual',description:'Lee el cálculo y validaciones de la propuesta que está en pantalla. No guarda ni envía.',inputSchema:{type:'object',properties:{},additionalProperties:false},annotations:{readOnlyHint:true},execute:(input:unknown)=>{if(!input||typeof input!=='object'||Object.keys(input).length)throw Error('No se aceptan parámetros.');const s=stateRef.current;return calculate(s.quote,s.products,s.settings,s.installation)}},{signal:control.signal})).catch(()=>{});}catch{}return()=>control.abort()},[]);
  useEffect(()=>{const handler=(e:BeforeUnloadEvent)=>{if(configDirty){e.preventDefault();e.returnValue=''}};window.addEventListener('beforeunload',handler);return()=>window.removeEventListener('beforeunload',handler)},[configDirty]);
- function changeSystem(system:QuoteInput['system']){const rows=products.filter(p=>p.system===system);const quantities:Record<string,number>={};for(const cat of ['PANEL FOTOVOLTAICO','TIPO DE ESTRUCTURA','MATERIAL DE TECHO']){const p=rows.find(p=>p.category===cat);if(p)quantities[p.id]=8;}const inverter=rows.find(p=>p.category.includes('INVERSOR'));if(inverter)quantities[inverter.id]=1;for(const p of rows)if(isLinearDrop(p))quantities[p.id]=15;update({system,quantities,installationOverride:null,installationNote:''})}
+ function changeSystem(system:QuoteInput['system']){const rows=products.filter(p=>p.system===system);const quantities:Record<string,number>={};for(const cat of ['PANEL FOTOVOLTAICO','TIPO DE ESTRUCTURA','MATERIAL DE TECHO']){const p=rows.find(p=>p.category===cat);if(p)quantities[p.id]=8;}const inverter=rows.find(p=>p.category.includes('INVERSOR'));if(inverter)quantities[inverter.id]=1;for(const p of rows)if(isLinearService(p))quantities[p.id]=15;update({system,quantities,installationOverride:null,installationNote:''})}
  function choose(cat:string,id:string){const quantities={...quote.quantities};for(const p of products.filter(p=>p.system===quote.system&&p.category===cat))delete quantities[p.id];if(id!=='none'){const p=products.find(p=>p.id===id)!;quantities[id]=cat==='PANEL FOTOVOLTAICO'?(calculation?.panels||8):followsPanelCount(p)?(calculation?.panels||8):1;}update({quantities})}
  const setQty=(p:Product,n:number)=>update({quantities:panelQuantities({...quote,quantities:serviceQuantities(quote,products,p,productUnit(p)==='panel'||p.unit==='unidad'?Math.floor(n):n)},products)});
  function removeProduct(id:string){

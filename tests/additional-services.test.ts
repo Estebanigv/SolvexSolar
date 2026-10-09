@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {calculate,initialProducts,initialSettings,newQuote,quoteSchema,type Product,type SavedQuote} from '../lib/quote';
-import {requiredMaterial,isLinearDrop,serviceQuantity,equipmentCategories,requiredServiceQuantities,certificationType,serviceQuantities} from '../lib/additional-services';
+import {requiredMaterial,isLinearDrop,isLinearService,serviceQuantity,equipmentCategories,requiredServiceQuantities,certificationType,serviceQuantities} from '../lib/additional-services';
 import {issuanceProblems} from '../lib/quote-issuance';
 import {workflowReadiness} from '../lib/workflow';
 const settings={...initialSettings,taxMode:'included' as const};
@@ -76,3 +76,27 @@ for(const system of [...new Set(initialProducts.map(p=>p.system))]){
 assert.equal(requiredMaterial({category:'TABLERO TRIFÁSICO'}),true);
 assert.equal(requiredMaterial({category:'KIT DE ADHESIVO'}),true);
 console.log('Waldo: panel primero, kit/tablero obligatorios en todos los sistemas, bajada entera desde 15 y snapshots intactos: OK');
+
+// Acometidas follow the same rule in the editor and server-side recalculation,
+// including fractional quantities recovered from an earlier editable draft.
+for(const system of [...new Set(initialProducts.map(p=>p.system))]){
+ const connection=initialProducts.find(p=>p.system===system&&p.category.startsWith('ACOMETIDA'))!;
+ assert.ok(connection,`${system}: connection exists`);
+ assert.equal(isLinearService(connection),true);
+ for(const [entered,expected] of [[0,0],[0.1,15],[1,15],[14,15],[15,15],[15.1,16],[16,16],[25,25]]){
+  const input={...newQuote(),system,quantities:{[connection.id]:entered}};
+  const snapshot=JSON.stringify(input);
+  assert.equal(serviceQuantities(input,initialProducts,connection,entered)[connection.id],expected);
+  const normalized=requiredServiceQuantities(input,initialProducts);
+  assert.equal(normalized[connection.id],expected);
+  const result=calculate(input,initialProducts,settings);
+  const line=result.lines.find(l=>l.id===connection.id);
+  if(expected===0)assert.equal(line,undefined);
+  else {assert.equal(line?.qty,expected);assert.equal(line?.total,Math.round(expected*connection.price!));}
+  assert.equal(JSON.stringify(input),snapshot,'Do not mutate a saved input snapshot');
+ }
+}
+assert.equal(isLinearService({category:'Acometida trifásica'}),true);
+assert.equal(isLinearService({category:'MATERIAL DE TECHO'}),false);
+assert.equal(serviceQuantity({category:'OTRO CABLEADO',unit:'metro'},0.5),0.5);
+console.log('Acometidas: mínimo 15 m, incrementos enteros, total coherente y exclusión opcional en todos los sistemas: OK');
