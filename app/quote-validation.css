@@ -17,3 +17,6 @@ label.quote-invalid::after{content:attr(data-validation-message);display:block;c
 .quote-invalid:focus,.quote-invalid :focus{outline:3px solid #f1b9b4!important;outline-offset:3px}
 .quote-issue-panel .quote-validation-list{margin-bottom:0}
 @media print{.quote-validation-list{display:none}}
+@media (min-width:1021px){
+ .app-root .summary:has(.quote-validation-list){top:84px;max-height:calc(100dvh - 104px);overflow-y:auto;scrollbar-gutter:stable}
+}
