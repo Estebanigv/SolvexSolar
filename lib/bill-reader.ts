@@ -1,3 +1,4 @@
+import {combineBillCodes} from './bill-code-extraction';
 import {billTextScore, extractBill, type BillExtraction} from './bill-extraction';
 import type {Worker} from 'tesseract.js';
 import type {PDFDocumentLoadingTask} from 'pdfjs-dist';
@@ -56,7 +57,7 @@ export async function readBills(files:BillDocument[],signal:AbortSignal,progress
             const lines=new Map<number,{x:number;text:string}[]>();
             for(const piece of content.items)if('str' in piece){const y=Math.round(piece.transform[5]/3)*3;const row=lines.get(y)??[];row.push({x:piece.transform[4],text:piece.str});lines.set(y,row)}
             let text=[...lines.entries()].sort((a,b)=>b[0]-a[0]).map(([,items])=>items.sort((a,b)=>a.x-b.x).map(x=>x.text).join(' ')).join('\n');
-            if(billTextScore(text)<4){const base=page.getViewport({scale:1});const viewport=page.getViewport({scale:Math.min(2.5,2400/Math.max(base.width,base.height))});const canvas=document.createElement('canvas');canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);try{await abortable(page.render({canvas,viewport}).promise,signal);text=await recognize(canvas,canvas.width,canvas.height,item.rotation,`${label}, página ${pageNumber}`)}finally{canvas.width=0;canvas.height=0}}
+            {const needsOcr=billTextScore(text)<4;const base=page.getViewport({scale:1});const viewport=page.getViewport({scale:Math.min(2.5,2400/Math.max(base.width,base.height))});const canvas=document.createElement('canvas');canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);try{await abortable(page.render({canvas,viewport}).promise,signal);progress(`${label}, página ${pageNumber} · Buscando códigos…`);codes.push(...await scanBillCodes(canvas,canvas.width,canvas.height,signal));if(needsOcr)text=await recognize(canvas,canvas.width,canvas.height,item.rotation,`${label}, página ${pageNumber}`)}finally{canvas.width=0;canvas.height=0}}
             texts.push(text);page.cleanup();
           }
           await pdfTask.destroy();pdfTask=undefined;
@@ -74,7 +75,7 @@ export async function readBills(files:BillDocument[],signal:AbortSignal,progress
       }catch(error){if(signal.aborted)throw error;warnings.push(`No se pudo leer el documento ${i+1}. Prueba una foto nítida, sin reflejos, o un PDF sin contraseña.`);await pdfTask?.destroy();pdfTask=undefined}
     }
     signal.throwIfAborted();
-    const result=extractBill(texts);result.codes=codes.filter((code,i)=>codes.findIndex(c=>c.text===code.text)===i);result.warnings.unshift(...warnings);
+    const result=combineBillCodes(extractBill(texts),codes.filter((code,i)=>codes.findIndex(c=>c.text===code.text)===i));result.warnings.unshift(...warnings);
     if(!texts.some(t=>billTextScore(t)>2))result.warnings.unshift(codes.length?'Código leído. Adjunta también la boleta completa para obtener cliente, región, comuna y consumo.':'No se encontró texto suficiente. Repite la foto con la boleta completa, de frente y bien iluminada.');
     return result;
   }finally{signal.removeEventListener('abort',stop);stop()}

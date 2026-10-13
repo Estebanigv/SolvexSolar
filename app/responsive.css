@@ -171,3 +171,16 @@
   [data-slot=sidebar][data-mobile=true] .nav-footer {padding-block:10px!important}
   .app-toolbar {position:static}
 }
+
+/* Laptop work area: retain readable form width at 1366px and browser zoom. */
+@media screen and (min-width:1024px) and (max-width:1439px){
+ .quote-layout{grid-template-columns:minmax(0,1fr)}
+ .summary{position:static;max-height:none}
+ .workspace{padding-inline:24px}
+ .stage-workspace .card{padding:24px}
+}
+.savings-inputs select{width:100%;min-height:44px;border:1px solid #adbec7;border-radius:6px;padding:10px;background:white;color:#163e49}
+.savings-table-scroll{overflow-x:auto;max-width:100%;margin:14px 0}
+.savings-table-scroll table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.savings-table-scroll th,.savings-table-scroll td{padding:10px 12px;border-bottom:1px solid #d5e2e2;text-align:right;white-space:nowrap}
+.savings-table-scroll th:first-child,.savings-table-scroll td:first-child{text-align:left}

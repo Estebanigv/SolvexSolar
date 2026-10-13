@@ -47,7 +47,7 @@ export function EnergyPanel({value, peakPower, onChange, address, onEditLocation
       if (!control.signal.aborted && currentKey.current === queryKey){
         setResult({key: queryKey, data: body as SolarEstimate});
         const currentEnergy=latestEnergy.current;
-        latestOnChange.current({...currentEnergy,solarGeneration:{annualKwh:body.annualKwh,context:solarGenerationContext(currentEnergy,peakPower),retrievedAt:body.retrievedAt,source:body.source.name}});
+        latestOnChange.current({...currentEnergy,solarGeneration:{monthly:body.monthly,annualKwh:body.annualKwh,context:solarGenerationContext(currentEnergy,peakPower),retrievedAt:body.retrievedAt,source:body.source.name}});
       }
     } catch (e) {
       if (!control.signal.aborted && currentKey.current === queryKey) setError((e as Error).message);

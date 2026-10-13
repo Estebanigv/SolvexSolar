@@ -8,7 +8,7 @@ export const energyInputSchema = z.object({
   latitude: z.number().finite().min(-56.6).max(-17).nullable(),
   longitude: z.number().finite().min(-110).max(-66).nullable(),
   googlePlaceId: z.string().min(1).max(500).optional(),
-  solarGeneration: z.object({annualKwh:z.number().finite().min(0).max(1e10),context:z.string().max(1500),retrievedAt:z.string().datetime(),source:z.string().max(200)}).optional(),
+  solarGeneration: z.object({monthly:z.array(z.object({month:z.number().int().min(1).max(12),kwh:z.number().finite().min(0).max(1e10)})).length(12).refine(rows=>new Set(rows.map(row=>row.month)).size===12).optional(),annualKwh:z.number().finite().min(0).max(1e10),context:z.string().max(1500),retrievedAt:z.string().datetime(),source:z.string().max(200)}).optional(),
   tilt: z.number().finite().min(0).max(90),
   azimuth: z.number().finite().min(-180).max(180),
   loss: z.number().finite().min(0).max(50),

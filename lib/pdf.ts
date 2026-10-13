@@ -105,7 +105,7 @@ export async function quotePdf(q:SavedQuote,logoBytes?:ArrayBuffer,photos:Propos
    box(M,y-51,CW,8,pale);if(comparison.barPercent>0)box(M,y-51,CW*comparison.barPercent/100,8,green);
    draw('Boleta mensualizada',M,y-80,9,false,muted);right('Beneficio mensual estimado',R,y-80,9,false,muted);
    draw(money(comparison.monthlyBill),M,y-102,19,true);right(money(comparison.monthlySavings),R,y-102,19,true);
-   y-=114;text('Boleta de '+comparison.billingDays+' días ajustada a un mes promedio (365 / 12 días). El beneficio puede incluir excedentes; no representa una boleta futura ni un ahorro garantizado.',8);y-=17;
+   y-=114;text('Boleta de '+comparison.billingDays+' días ajustada a '+(comparison.referenceDays===365/12?'un mes promedio (365 / 12 días)':'un mes de referencia de '+comparison.referenceDays+' días')+'. El beneficio puede incluir excedentes; no representa una boleta futura ni un ahorro garantizado.',8);y-=17;
   }
   const metrics=[['Ahorro mensual inicial',money(forecast.input.monthlySavings!)],['Recuperación estimada',forecast.payback!==null?forecast.payback.toLocaleString('es-CL',{maximumFractionDigits:1})+' años':'Fuera del horizonte'],['Balance neto a '+forecast.input.years+' años',money(forecast.net)]];
   const col=(CW-20)/3;space(80);metrics.forEach(([label,value],i)=>{const x=M+i*(col+10);box(x,y,col,70,pale);draw(label,x+10,y-18,8,false,muted);draw(value,x+10,y-45,fitted(value,19,col-20),true,ink)});y-=86;

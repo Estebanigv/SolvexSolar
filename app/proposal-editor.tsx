@@ -3,7 +3,7 @@ import {useEffect,useState,useRef,useMemo} from 'react';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Textarea} from '@/components/ui/textarea';
-import {calculate,quoteSchema,type SavedQuote,type QuoteInput,type Product,type Settings,type InstallationRates} from '@/lib/quote';
+import {calculate,quoteSchema,mergeQuotePatch,type SavedQuote,type QuoteInput,type Product,type Settings,type InstallationRates} from '@/lib/quote';
 import {newProposalContent,type ProposalContent} from '@/lib/proposal-content';
 import {proposalLayout} from '@/lib/proposal-layout';
 import {proposalCanvases} from '@/lib/proposal-canvas';
@@ -26,7 +26,7 @@ export function ProposalEditor({q,products,settings,rates,busy,onSave,onCancel}:
  const toolsRef=useRef<HTMLElement>(null);
  const content=input.proposalContent!;
  const working=useMemo<SavedQuote|null>(()=>{try{return {...q,id:'draft',folio:'BORRADOR-SVX',issuedAt:undefined,issuedBy:undefined,input,settings,calculation:calculate(input,products,settings,rates)};}catch{return null;}},[q,input,settings,products,rates]);
- const update=(patch:Partial<QuoteInput>)=>{setInput(previous=>({...previous,...patch,technicalReviewed:patch.technicalReviewed??false}));setDirty(true);setError('');};
+ const update=(patch:Partial<QuoteInput>)=>{setInput(previous=>mergeQuotePatch(previous,patch));setDirty(true);setError('');};
  const editContent=(patch:Partial<ProposalContent>)=>update({proposalContent:{...content,...patch}});
  const editStyle=(style:ProposalStyle)=>{setInput(previous=>({...previous,proposalContent:{...(previous.proposalContent??newProposalContent()),style}}));setDirty(true);setError('');};
  const editText=(key:string,value:string)=>editContent({text:{...content.text,[key]:value}});

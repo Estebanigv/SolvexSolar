@@ -100,5 +100,6 @@ export function mergeQuotePatch(quote:QuoteInput,patch:Partial<QuoteInput>):Quot
   if(patch.customer&&(['address','commune','region'] as const).some(key=>patch.customer![key]!==quote.customer[key])&&next.energy){
     next.energy={...next.energy,latitude:null,longitude:null,googlePlaceId:undefined,solarGeneration:undefined};
   }
+  if(!('finalTotalOverride' in patch)&&(['system','quantities','installationOverride','customServices','extra','discount','discountPercent'] as const).some(key=>key in patch&&JSON.stringify(patch[key])!==JSON.stringify(quote[key])))next.finalTotalOverride=null;
   return next;
 }

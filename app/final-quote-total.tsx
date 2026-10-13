@@ -21,7 +21,7 @@ function TotalEditor({quote,calculation:c,onChange}:{quote:QuoteInput;calculatio
  const apply=()=>{
   setAttempted(true);
   if(!valid)return;
-  onChange({roundFinalTotal:true,finalTotalOverride:roundCommercialTotal(value)});
+  onChange({roundFinalTotal:true,finalTotalOverride:roundCommercialTotal(value)===roundCommercialTotal(c.calculatedTotal??c.total)?null:roundCommercialTotal(value)});
   setAmount(String(roundCommercialTotal(value)));
  };
  return <section data-validation-field="final-total" className="final-quote-total" aria-labelledby={`${id}-title`}>
@@ -29,13 +29,13 @@ function TotalEditor({quote,calculation:c,onChange}:{quote:QuoteInput;calculatio
   <p>Según equipos, instalación y descuento: <b>{money(c.calculatedTotal??c.total)}</b>.</p>
   <div className="final-total-controls">
    <label htmlFor={`${id}-amount`}>Total a enviar (CLP{c.tax!==null?', IVA incluido':''})<Input id={`${id}-amount`} type="number" inputMode="decimal" min={1} max={1e10} step="10000" value={amount} onChange={e=>setAmount(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();apply();}}} aria-describedby={`${id}-help`} aria-invalid={attempted&&!valid||undefined}/></label>
-   <Button type="button" onClick={()=>apply()}>Aplicar total</Button>
-   <Button type="button" variant="outline" onClick={()=>apply()}>Redondear a $10.000</Button>
+   <Button type="button" onClick={()=>apply()}>Aplicar total manual</Button>
+   <Button type="button" variant="outline" onClick={()=>{onChange({roundFinalTotal:true,finalTotalOverride:null});setAmount(String(roundCommercialTotal(c.calculatedTotal??c.total)));setAttempted(false);}}>Usar cálculo automático</Button>
   </div>
   <p id={`${id}-help`}>El total se redondea al múltiplo de $10.000 más cercano; los últimos cuatro dígitos quedan en cero. Por ejemplo, $6.003.000 queda en $6.000.000. El mismo total se usa en la propuesta, el PDF y los pagos.</p>
   {attempted&&!valid&&<p role="alert" className="field-error">Ingresa un monto entre $1 y $10.000.000.000.</p>}
   {pending&&valid&&<p role="status">Tienes un valor pendiente de aplicar. El total vigente sigue siendo {money(c.total)}.</p>}
   {quote.finalTotalOverride!=null&&<div className="final-total-adjustment"><span>Ajuste de cierre: <b>{(c.totalAdjustment??0)>0?'+ ':''}{money(c.totalAdjustment??0)}</b>{c.tax!==null?' · IVA incluido':''}</span><Button type="button" variant="outline" onClick={()=>onChange({roundFinalTotal:true,finalTotalOverride:null})}>Restaurar cálculo</Button></div>}
-  {quote.finalTotalOverride!=null&&<p>El total final queda fijo hasta que lo edites o restaures el cálculo. Revísalo si cambias los equipos o la instalación.</p>}
+  {quote.finalTotalOverride!=null&&<p>El ajuste manual se conserva para este presupuesto. Al cambiar equipos, instalación o descuento, se vuelve al cálculo automático para evitar arrastrar un total anterior.</p>}
  </section>;
 }

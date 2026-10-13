@@ -1,8 +1,15 @@
-import {persistentEnergy,solarGenerationContext} from './energy';
+import {savingsGeneration,calendarDays} from './savings-generation';
+import {persistentEnergy} from './energy';
 import {z} from 'zod';
 import type {SavedQuote} from './quote';
 
 export const projectionSchema=z.object({
+ generationMethod:z.enum(['pvgis','hsp']).optional(),
+ peakSunHours:z.number().finite().positive().max(12).optional(),
+ referenceDays:z.number().int().min(1).max(31).optional(),
+ referenceLossPercent:z.number().finite().min(0).max(50).optional(),
+ consumptionMethod:z.enum(['bill','amount']).optional(),
+ rateSource:z.string().max(200).optional(),
  savingsMode:z.enum(['automatic','manual']).optional(),
  selfConsumptionPercent:z.number().finite().min(0).max(100).optional(),
  energyRate:z.number().finite().min(0).max(1e6).nullable().optional(),
@@ -20,22 +27,35 @@ export type ProjectionInput=z.infer<typeof projectionSchema>;
 export const newProjection=():ProjectionInput=>({savingsMode:'automatic',selfConsumptionPercent:70,energyRate:null,exportRate:0,monthlySavings:null,savingsSource:'',years:25,tariffGrowth:0,degradation:0.5,annualMaintenance:0,replacementYear:null,replacementCost:0,avoidedKwh:null,emissionFactor:null,emissionSource:'',reviewedFor:''});
 
 export function automaticSavings(q:SavedQuote,p:ProjectionInput){
- const energy=q.input.energy,generation=energy?.solarGeneration,issues:string[]=[];
- const validGeneration=!!energy&&!!generation&&generation.context===solarGenerationContext(energy,q.calculation.kwp);
- if(!validGeneration)issues.push('Completa la ubicación y consulta la generación solar del sistema actual.');
+ const energy=q.input.energy,generation=savingsGeneration(q,p),issues:string[]=[];
+ if(!generation)issues.push(p.generationMethod==='hsp'?'Completa potencia, horas solares y días del mes de referencia.':'Completa la ubicación y consulta la generación solar del sistema actual, o selecciona la referencia por paneles.');
+ const offGrid=q.input.system==='OFF GRID',fromAmount=p.consumptionMethod==='amount';
  const kwh=energy?.consumptionKwh,days=energy?.billingDays;
- if(!(kwh&&kwh>0&&days&&days>0))issues.push('Completa el consumo en kWh y los días del período.');
- const offGrid=q.input.system==='OFF GRID';
- const rate=p.energyRate??(!offGrid&&kwh&&q.input.customer.bill>0?Math.max(0,q.input.customer.bill-(p.nonEnergyCharges??0))/kwh:null);
+ const energyBill=Math.max(0,q.input.customer.bill-(p.nonEnergyCharges??0));
+ const rate=p.energyRate??(!offGrid&&kwh&&q.input.customer.bill>0?energyBill/kwh:null);
  if(!(rate!==null&&Number.isFinite(rate)&&rate>0))issues.push(offGrid?'Ingresa el costo por kWh de la energía o combustible que se reemplaza.':'Completa el monto de la boleta o ingresa una tarifa por kWh.');
- if(issues.length)return {issues,result:null};
- const monthlyGeneration=generation!.annualKwh/12,monthlyConsumption=kwh!/days!*365/12;
- const selfConsumed=Math.min(monthlyConsumption,monthlyGeneration*(p.selfConsumptionPercent??70)/100);
- const surplus=offGrid?0:Math.max(0,monthlyGeneration-selfConsumed),exportRate=offGrid?0:p.exportRate??0;
+ const period=days??(fromAmount?p.referenceDays:undefined);
+ const consumption=fromAmount&&p.energyRate&&energyBill>0&&!offGrid?energyBill/p.energyRate:kwh;
+ if(fromAmount&&(offGrid||!p.energyRate||energyBill<=0))issues.push('La estimación desde el monto requiere boleta sin cargos no evitables y una tarifa explícita; no aplica a Off Grid.');
+ if(!(consumption&&consumption>0&&period&&period>0))issues.push('Completa los kWh y días del período, o estima el consumo desde el monto y una tarifa revisada.');
+ if(issues.length||!generation)return {issues,result:null};
+ const averageGeneration=generation.annualKwh/12;
+ // Keep old annual-only snapshots unchanged. New PVGIS snapshots retain seasonality.
+ const monthly=generation.monthly?.map(row=>{
+  const demand=consumption!/period!*calendarDays[row.month-1];
+  const selfConsumed=Math.min(demand,row.kwh*(p.selfConsumptionPercent??70)/100);
+  const surplus=Math.max(0,row.kwh-selfConsumed),exportRate=offGrid?0:p.exportRate??0;
+  return {month:row.month,generation:row.kwh,consumption:demand,selfConsumed,surplus,savings:selfConsumed*rate!+surplus*exportRate};
+ })??null;
+ const monthlyGeneration=monthly?monthly.reduce((sum,row)=>sum+row.generation,0)/12:averageGeneration;
+ const monthlyConsumption=consumption!/period!*(p.generationMethod==='hsp'?(p.referenceDays??30):365/12);
+ const selfConsumed=monthly?monthly.reduce((sum,row)=>sum+row.selfConsumed,0)/12:Math.min(monthlyConsumption,monthlyGeneration*(p.selfConsumptionPercent??70)/100);
+ const unused=Math.max(0,monthlyGeneration-selfConsumed),surplus=offGrid?0:unused,exportRate=offGrid?0:p.exportRate??0;
  const selfSavings=selfConsumed*rate!,exportCredit=surplus*exportRate;
- return {issues,result:{monthlyGeneration,monthlyConsumption,selfConsumed,surplus,rate:rate!,exportRate,selfSavings,exportCredit,
+ return {issues,result:{monthlyGeneration,monthlyConsumption,selfConsumed,surplus,unused,rate:rate!,exportRate,selfSavings,exportCredit,monthly,
+  potentialValue:monthlyGeneration*rate!,estimatedConsumption:fromAmount,
   monthlySavings:Math.round(selfSavings+exportCredit),billRate:p.energyRate==null&&!offGrid,
-  source:`${generation!.source}; generación ${generation!.annualKwh.toFixed(1)} kWh/año. Autoconsumo supuesto ${p.selfConsumptionPercent??70}%: ${selfConsumed.toFixed(1)} kWh/mes × ${rate!.toFixed(2)} CLP/kWh${p.energyRate==null?' (promedio boleta)':''}. Excedentes ${surplus.toFixed(1)} kWh/mes × ${exportRate.toFixed(2)} CLP/kWh. Promedio anual; validar perfil horario${offGrid?' y pérdidas/autonomía Off Grid':''}.`}};
+  source:!p.generationMethod&&!p.consumptionMethod&&!generation.monthly?`${generation.source}; generación ${generation.annualKwh.toFixed(1)} kWh/año. Autoconsumo supuesto ${p.selfConsumptionPercent??70}%: ${selfConsumed.toFixed(1)} kWh/mes × ${rate!.toFixed(2)} CLP/kWh${p.energyRate==null?' (promedio boleta)':''}. Excedentes ${surplus.toFixed(1)} kWh/mes × ${exportRate.toFixed(2)} CLP/kWh. Promedio anual; validar perfil horario${offGrid?' y pérdidas/autonomía Off Grid':''}.`:`${generation.source}. Autoconsumo supuesto ${p.selfConsumptionPercent??70}%: ${selfConsumed.toFixed(1)} kWh/mes × ${rate!.toFixed(2)} CLP/kWh${p.energyRate==null?' (boleta)':''}. Excedentes ${surplus.toFixed(1)} × ${exportRate.toFixed(2)} CLP/kWh. ${fromAmount?'Consumo estimado desde monto; validar kWh. ':''}${p.rateSource?p.rateSource+'. ':''}${monthly?'Balance mensual; ':''}Validar perfil horario${offGrid?' y autonomía Off Grid':''}.`.slice(0,500)}};
 }
 
 // Legacy projections remain manual. New proposals default to the automatic model.
@@ -49,11 +69,12 @@ export function resolvedProjection(q:SavedQuote):ProjectionInput{
 // Compare like-for-like monthly periods. This is an economic reference, not a
 // simulated electricity bill: export credits and fixed charges differ by tariff.
 export function savingsBillComparison(q:SavedQuote,p=resolvedProjection(q)){
- const bill=q.input.customer.bill,days=q.input.energy?.billingDays,savings=p.monthlySavings;
+ const bill=q.input.customer.bill,days=q.input.energy?.billingDays??(p.consumptionMethod==='amount'?p.referenceDays:undefined),savings=p.monthlySavings;
  if(q.input.system==='OFF GRID'||!days||days<=0||!Number.isFinite(days)||!Number.isFinite(bill)||bill<=0||savings==null||!Number.isFinite(savings)||savings<0)return null;
- const monthlyBill=bill/days*365/12;
+ const referenceDays=p.generationMethod==='hsp'?(p.referenceDays??30):365/12;
+ const monthlyBill=bill/days*referenceDays;
  return {monthlyBill,monthlySavings:savings,percent:savings/monthlyBill*100,
-  barPercent:Math.min(100,savings/monthlyBill*100),billingDays:days};
+  barPercent:Math.min(100,savings/monthlyBill*100),billingDays:days,referenceDays};
 }
 
 // Bind approval to both the assumptions and the exact technical/economic snapshot.
