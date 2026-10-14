@@ -29,7 +29,7 @@ async function run(){
  await assert.rejects(()=>createCneTokenProvider((async()=>new Response('secret upstream body',{status:401})) as typeof fetch)('test@example.com','test#password'),/rechazó las credenciales/);
  await assert.rejects(()=>createCneTokenProvider((async()=>Response.json({token:'header.'+Buffer.from(JSON.stringify({exp:1})).toString('base64url')+'.signature'})) as typeof fetch)('test@example.com','test#password'),/vencida/);
 
- for(const [status,code] of [[401,'credentials'],[403,'credentials'],[429,'rate-limit'],[500,'unavailable'],[502,'unavailable']] as const){
+ for(const [status,code] of [[400,'configuration'],[422,'configuration'],[401,'credentials'],[403,'credentials'],[429,'rate-limit'],[500,'unavailable'],[502,'unavailable']] as const){
   await assert.rejects(()=>createCneTokenProvider((async()=>new Response('secret upstream body',{status})) as typeof fetch)('test@example.com','secret'),e=>e instanceof CneAuthError&&e.code===code&&!e.message.includes('secret'));
  }
  await assert.rejects(()=>createCneTokenProvider((async()=>{throw Error('private network details')}) as typeof fetch)('test@example.com','secret'),e=>e instanceof CneAuthError&&e.code==='unavailable'&&!e.message.includes('private'));
