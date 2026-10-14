@@ -22,9 +22,9 @@ export default function ManualReader(){
   let task:PDFDocumentLoadingTask|undefined;
   async function load(){
    try{
-    const pdfjs=await import('pdfjs-dist');
+    const pdfjs=await import('pdfjs-dist/legacy/build/pdf.mjs');
     if(cancelled)return;
-    pdfjs.GlobalWorkerOptions.workerSrc=new URL('pdfjs-dist/build/pdf.worker.min.mjs',import.meta.url).toString();
+    pdfjs.GlobalWorkerOptions.workerSrc=new URL('pdfjs-dist/legacy/build/pdf.worker.min.mjs',import.meta.url).toString();
     task=pdfjs.getDocument({url:manualUrl,useSystemFonts:true});
     const document=await task.promise;
     if(!cancelled)setPdf(document);

@@ -53,7 +53,8 @@ export type ProposalTextBlock={title:string;items:string[]};
 // Preserve the saved wording. Only separate sentences and group recognizable clauses.
 // Unknown wording stays visible in a neutral section rather than being discarded.
 export function proposalSentences(value:string){
- return value.split(/\n+|(?<=[.!?])\s+(?=[A-ZÁÉÍÓÚÑ])/u).map(s=>s.trim()).filter(Boolean);
+ // Lookbehind fails at parse time on Safari <16.4, even before a quote opens.
+ return value.replace(/([.!?])\s+(?=[A-ZÁÉÍÓÚÑ])/gu,'$1\n').split(/\n+/).map(s=>s.trim()).filter(Boolean);
 }
 function groupedText(value:string,groups:{title:string;match:RegExp}[],fallback:string):ProposalTextBlock[]{
  const result=groups.map(g=>({title:g.title,items:[] as string[]}));

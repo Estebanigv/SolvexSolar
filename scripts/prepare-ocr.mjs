@@ -16,3 +16,5 @@ for (const file of await readdir(core)) {
 await copyFile(path.join(spanish,'4.0.0_best_int/spa.traineddata.gz'),path.join(output,'spa.traineddata.gz'));
 await copyFile(path.join(core,'LICENSE'),path.join(output,'LICENSE-tesseract-core.txt'));
 console.log('OCR local: motor e idioma español preparados.');
+
+await copyFile(require.resolve('zxing-wasm/reader/zxing_reader.wasm'),path.join(output,'zxing_reader.wasm'));

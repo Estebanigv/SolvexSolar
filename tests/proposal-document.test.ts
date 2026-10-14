@@ -56,3 +56,6 @@ for(const taxMode of ['net','included','pending'] as const){
  assert.equal(proposalDiscount({...discounted,calculation:calculate({...discountedInput,discountPercent:0},initialProducts,config)}),null,'No destacar un descuento de cero');
 }
 console.log('Descuento al cliente: visibilidad, persistencia y montos con IVA y redondeo: OK');
+
+assert.deepEqual(proposalSentences('Primera frase. Segunda frase! Tercera? Sí.\nOtra línea.'),['Primera frase.','Segunda frase!','Tercera?','Sí.','Otra línea.']);
+assert.deepEqual(proposalSentences('Costo 1.500 pesos. Incluye IVA; y texto continuo.'),['Costo 1.500 pesos.','Incluye IVA; y texto continuo.']);

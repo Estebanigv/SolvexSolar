@@ -16,9 +16,9 @@ export default function BillPdfPreview({file}: {file: File}) {
     let task: PDFDocumentLoadingTask | undefined;
     async function load() {
       try {
-        const pdfjs = await import('pdfjs-dist');
+        const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
         if (cancelled) return;
-        pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
+        pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/legacy/build/pdf.worker.min.mjs', import.meta.url).toString();
         const data = await file.arrayBuffer();
         if (cancelled) return;
         task = pdfjs.getDocument({data, useSystemFonts:true});
@@ -36,7 +36,6 @@ export default function BillPdfPreview({file}: {file: File}) {
     if (!document) return;
     let cancelled = false;
     let render: RenderTask | undefined;
-    setLoading(true); setError('');
     async function draw() {
       try {
         const page = await document!.getPage(pageNumber);
@@ -62,6 +61,6 @@ export default function BillPdfPreview({file}: {file: File}) {
     {loading && <p className="pdf-loading" role="status"><LoaderCircle className="animate-spin" size={18}/>Preparando vista previa…</p>}
     {error && <p className="field-error" role="alert">{error}</p>}
     <div className="pdf-paper" hidden={!!error}><canvas ref={canvas} role="img" aria-label={`Boleta de electricidad, página ${pageNumber}`}/></div>
-    {document && <div className="pdf-pagination"><Button variant="outline" aria-label="Página anterior de la boleta" disabled={loading || pageNumber<=1} onClick={()=>setPageNumber(p=>p-1)}><ArrowLeft/></Button><span aria-live="polite">Página {pageNumber} de {document.numPages}</span><Button variant="outline" aria-label="Página siguiente de la boleta" disabled={loading || pageNumber>=document.numPages} onClick={()=>setPageNumber(p=>p+1)}><ArrowRight/></Button></div>}
+    {document && <div className="pdf-pagination"><Button variant="outline" aria-label="Página anterior de la boleta" disabled={loading || pageNumber<=1} onClick={()=>{setLoading(true);setError('');setPageNumber(p=>p-1)}}><ArrowLeft/></Button><span aria-live="polite">Página {pageNumber} de {document.numPages}</span><Button variant="outline" aria-label="Página siguiente de la boleta" disabled={loading || pageNumber>=document.numPages} onClick={()=>{setLoading(true);setError('');setPageNumber(p=>p+1)}}><ArrowRight/></Button></div>}
   </div>;
 }

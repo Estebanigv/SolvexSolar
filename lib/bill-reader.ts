@@ -3,6 +3,7 @@ import {billTextScore, extractBill, type BillExtraction} from './bill-extraction
 import type {Worker} from 'tesseract.js';
 import type {PDFDocumentLoadingTask} from 'pdfjs-dist';
 import {scanBillCodes,type BillCode} from './bill-barcode';
+import {openBillImage} from './bill-image';
 export type BillDocument = {id:string;file:File;url:string;mime:string;rotation:number;codeOnly?:boolean};
 
 function abortable<T>(promise:Promise<T>,signal:AbortSignal):Promise<T>{
@@ -43,12 +44,12 @@ export async function readBills(files:BillDocument[],signal:AbortSignal,progress
   try {
     for(let i=0;i<files.length;i++){
       signal.throwIfAborted();const item=files[i];const label=`Documento ${i+1} de ${files.length}`;progress(`${label} · Abriendo…`);
-      const cacheKey=`${item.id}:${item.rotation}`;const previous=cache.get(cacheKey);
+      const cacheKey=`${item.id}:${item.rotation}:${!!item.codeOnly}`;const previous=cache.get(cacheKey);
       if(previous){texts.push(...previous.texts);codes.push(...previous.codes);warnings.push(...previous.warnings);continue}
       const textStart=texts.length,codeStart=codes.length,warningStart=warnings.length;
       try {
         if(item.mime==='application/pdf'){
-          const pdfjs=await import('pdfjs-dist');pdfjs.GlobalWorkerOptions.workerSrc=new URL('pdfjs-dist/build/pdf.worker.min.mjs',import.meta.url).toString();
+          const pdfjs=await import('pdfjs-dist/legacy/build/pdf.mjs');pdfjs.GlobalWorkerOptions.workerSrc=new URL('pdfjs-dist/legacy/build/pdf.worker.min.mjs',import.meta.url).toString();
           pdfTask=pdfjs.getDocument({data:await item.file.arrayBuffer(),useSystemFonts:true});
           const pdf=await abortable(pdfTask.promise,signal);
           if(pdf.numPages>6)warnings.push(`Documento ${i+1}: solo se revisaron las primeras 6 páginas.`);
@@ -57,21 +58,21 @@ export async function readBills(files:BillDocument[],signal:AbortSignal,progress
             const lines=new Map<number,{x:number;text:string}[]>();
             for(const piece of content.items)if('str' in piece){const y=Math.round(piece.transform[5]/3)*3;const row=lines.get(y)??[];row.push({x:piece.transform[4],text:piece.str});lines.set(y,row)}
             let text=[...lines.entries()].sort((a,b)=>b[0]-a[0]).map(([,items])=>items.sort((a,b)=>a.x-b.x).map(x=>x.text).join(' ')).join('\n');
-            {const needsOcr=billTextScore(text)<4;const base=page.getViewport({scale:1});const viewport=page.getViewport({scale:Math.min(2.5,2400/Math.max(base.width,base.height))});const canvas=document.createElement('canvas');canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);try{await abortable(page.render({canvas,viewport}).promise,signal);progress(`${label}, página ${pageNumber} · Buscando códigos…`);codes.push(...await scanBillCodes(canvas,canvas.width,canvas.height,signal));if(needsOcr)text=await recognize(canvas,canvas.width,canvas.height,item.rotation,`${label}, página ${pageNumber}`)}finally{canvas.width=0;canvas.height=0}}
+            {const needsOcr=billTextScore(text)<4;const base=page.getViewport({scale:1});const viewport=page.getViewport({scale:Math.min(2.5,2400/Math.max(base.width,base.height))});const canvas=document.createElement('canvas');canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);try{await abortable(page.render({canvas,viewport}).promise,signal);progress(`${label}, página ${pageNumber} · Buscando códigos…`);const scan=await scanBillCodes(canvas,canvas.width,canvas.height,signal);codes.push(...scan.codes);if(scan.warning)warnings.push(`${label}: ${scan.warning}`);if(needsOcr)text=await recognize(canvas,canvas.width,canvas.height,item.rotation,`${label}, página ${pageNumber}`)}finally{canvas.width=0;canvas.height=0}}
             texts.push(text);page.cleanup();
           }
           await pdfTask.destroy();pdfTask=undefined;
         }else{
-          const bitmap=await createImageBitmap(item.file);
+          const bitmap=await openBillImage(item.file,signal);
           try{
             if(bitmap.width*bitmap.height>50000000)throw Error('Imagen demasiado grande.');
             progress(`${label} · Buscando códigos de barras o QR…`);
-            const found=await scanBillCodes(bitmap,bitmap.width,bitmap.height,signal);codes.push(...found);
-            if(!item.codeOnly)texts.push(await recognize(bitmap,bitmap.width,bitmap.height,item.rotation,label));
-            else if(!found.length)warnings.push(`Documento ${i+1}: no se pudo leer el código. Acércate, evita reflejos e incluye el código completo.`);
+            const found=await scanBillCodes(bitmap.source,bitmap.width,bitmap.height,signal);codes.push(...found.codes);if(found.warning)warnings.push(`${label}: ${found.warning}`);
+            if(!item.codeOnly)texts.push(await recognize(bitmap.source,bitmap.width,bitmap.height,item.rotation,label));
+            if(!found.codes.length&&!found.warning&&item.codeOnly)warnings.push(`Documento ${i+1}: no se pudo leer el código. Toma otra foto de cerca, con el timbre completo, enfocado y sin pliegues. Ampliar una foto borrosa no recupera sus datos.`);
           }finally{bitmap.close()}
         }
-        cache.set(cacheKey,{texts:texts.slice(textStart),codes:codes.slice(codeStart),warnings:warnings.slice(warningStart)});
+        if(warnings.length===warningStart)cache.set(cacheKey,{texts:texts.slice(textStart),codes:codes.slice(codeStart),warnings:[]});
       }catch(error){if(signal.aborted)throw error;warnings.push(`No se pudo leer el documento ${i+1}. Prueba una foto nítida, sin reflejos, o un PDF sin contraseña.`);await pdfTask?.destroy();pdfTask=undefined}
     }
     signal.throwIfAborted();
