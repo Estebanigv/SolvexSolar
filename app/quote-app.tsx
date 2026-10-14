@@ -120,6 +120,7 @@ function QuoteWorkspace(){
  const quoteInProgress=useMemo(()=>{const base=reconcileQuoteProducts(newQuote(),products);return hasQuoteInProgress(quote,{...base,quantities:panelQuantities(base,products)},{clientId,sourceQuoteId,fileCount:draftFiles.length})},[quote,products,clientId,sourceQuoteId,draftFiles.length]);
  const progressInput=quoteInProgress?quote:draft.candidate?.input;
  const progressStep=quoteInProgress?step:draft.candidate?.step;
+ useEffect(()=>{if(tab==='quote')return;const frame=requestAnimationFrame(()=>document.querySelector('.quote-progress-notice')?.scrollIntoView({block:'start'}));return()=>cancelAnimationFrame(frame)},[tab]);
  const complete={customer:ready.customer&&confirmed.includes('customer'),system:ready.system&&confirmed.includes('system'),installation:ready.installation&&confirmed.includes('installation'),review:ready.review&&['customer','system','installation'].every(id=>confirmed.includes(id))};
  function continueStep(){if(ready[step as keyof typeof ready])setConfirmed(previous=>Array.from(new Set([...previous,step])));moveStep(stages[Math.min(stageIndex+1,stages.length-1)].id)}
  const editCustomer=(k:keyof QuoteInput['customer'],v:string|number)=>update({customer:{...quote.customer,[k]:v}});
