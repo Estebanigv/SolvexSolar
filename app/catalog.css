@@ -23,3 +23,16 @@
 .equipment-delete-summary strong{font-size:18px}.equipment-delete-summary span{font-size:14px;color:#456572}
 .equipment-delete-dialog .equipment-remove-confirm{background:#a43b37;color:#fff}
 .equipment-delete-dialog .equipment-remove-confirm:hover{background:#8d302b}
+
+.technical-library{margin-top:24px;padding-top:20px;border-top:1px solid #cbdedb}
+.technical-library>p,.product-technical-documents p,.product-technical-documents>small{font-size:13px;line-height:1.55;color:#47616a}
+.technical-document-link{display:flex;gap:10px;align-items:flex-start;margin-top:10px;padding:12px;border:1px solid #cfdfd9;border-radius:8px;background:#f5f9f6;color:#164f44;text-decoration:none}
+.technical-document-link:hover{border-color:#518c75;background:#edf5ef}
+.technical-document-link:focus-visible{outline:3px solid #8ba83c;outline-offset:3px}
+.technical-document-link>svg{flex-shrink:0;margin-top:3px}
+.technical-document-link>span{display:grid;gap:5px;min-width:0;flex:1;overflow-wrap:anywhere}
+.technical-document-link strong{font-size:14px}.technical-document-link small{font-size:12px;line-height:1.5}
+.technical-document-link .technical-document-warning{color:#88580b}
+.product-technical-documents{width:100%;grid-column:1/-1;margin-top:12px}
+.product-technical-documents summary{cursor:pointer;font-size:13px;font-weight:600;color:#1b5d49;padding:8px 0}
+.technical-document-empty{font-size:12px;color:#667b80;grid-column:1/-1;margin-top:10px}
