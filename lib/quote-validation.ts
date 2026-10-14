@@ -59,3 +59,17 @@ export function quoteValidationIssues(q:SavedQuote):QuoteIssue[]{
  if(blockers.length&&!issues.length)add('review','Revisa los datos de esta versión y vuelve a preparar la propuesta.','review','Tipo de propuesta');
  return issues;
 }
+
+// One action per destination; after a correction it points to the next pending field.
+export function groupQuoteIssues(issues:QuoteIssue[]){
+ const groups=new Map<string,{key:string;location:string;issues:QuoteIssue[];labels:string[]}>();
+ for(const issue of issues){
+  const key=issue.tab+':'+issue.step;
+  const group=groups.get(key)??{key,location:issueLocation(issue).replace(/^\d · /,''),issues:[],labels:[]};
+  group.issues.push(issue);
+  const label=issue.id==='customer-email'&&issue.message.includes('o teléfono')?'Correo o teléfono':issue.field;
+  if(!group.labels.includes(label))group.labels.push(label);
+  groups.set(key,group);
+ }
+ return [...groups.values()];
+}

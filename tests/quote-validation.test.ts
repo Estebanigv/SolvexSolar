@@ -37,3 +37,21 @@ assert.equal(quoteValidationIssues(noRate).find(i=>i.id==='installation-rate')?.
 const historical={...snapshot(complete),id:'saved-version'};
 const original=JSON.stringify(historical);quoteValidationIssues(historical);assert.equal(JSON.stringify(historical),original,'Guidance never mutates a saved quote');
 console.log('Validaciones: detalle por campo, destinos, dependencias, corrección, tarifas, catálogo y requisitos de cotización final: OK');
+
+// Several missing fields in one section must produce one compact action.
+const {groupQuoteIssues}=require('../lib/quote-validation');
+const {QuoteValidationList}=require('../app/quote-validation');
+const {createElement}=require('react');
+const {renderToStaticMarkup}=require('react-dom/server');
+const customerIssues=missing.filter(i=>['customer-name','customer-email'].includes(i.id));
+const grouped=groupQuoteIssues(customerIssues);
+assert.equal(grouped.length,1);
+assert.equal(grouped[0].issues[0].id,'customer-name');
+assert.equal(groupQuoteIssues(customerIssues.slice(1))[0].issues[0].id,'customer-email');
+const compact=renderToStaticMarkup(createElement(QuoteValidationList,{issues:customerIssues,onSelect:()=>{},prefix:'workspace-validation'}));
+assert.equal((compact.match(/<button/g)||[]).length,1,'One action per section, not per missing field');
+assert.match(compact,/Pendientes en Cliente y boleta/);
+assert.match(compact,/workspace-validation-customer-name/);
+assert.match(compact,/workspace-validation-customer-email/);
+assert.equal(groupQuoteIssues([...customerIssues,missing.find(i=>i.id==='technical')!]).length,2,'Different sections keep their own destination');
+console.log('Avisos compactos: un botón por sección, detalle accesible y siguiente campo pendiente: OK');

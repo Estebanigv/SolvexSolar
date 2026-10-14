@@ -1,16 +1,19 @@
 'use client';
 import {useEffect,useRef} from 'react';
 import {AlertCircle,ArrowRight} from 'lucide-react';
-import {issueLocation,type QuoteIssue} from '@/lib/quote-validation';
+import {groupQuoteIssues,type QuoteIssue} from '@/lib/quote-validation';
 import './quote-validation.css';
 
-export function QuoteValidationList({issues,onSelect,busy=false,prefix='validation'}:{issues:QuoteIssue[];onSelect:(issue:QuoteIssue)=>void;busy?:boolean;prefix?:string}){
- if(!issues.length)return null;
- return <section className="quote-validation-list" aria-label="Datos pendientes de la cotización">
-  <h3><AlertCircle size={20}/>Falta completar {issues.length} {issues.length===1?'dato':'datos'}</h3>
-  <p>Selecciona un pendiente para ir al campo marcado en rojo.</p>
-  <ul>{issues.map(issue=><li key={issue.id}><button type="button" disabled={busy} id={`${prefix}-${issue.id}`} onClick={()=>onSelect(issue)}><span><strong>{issue.message}</strong><small>{issueLocation(issue)}</small></span><ArrowRight size={17}/></button></li>)}</ul>
- </section>;
+type PendingProps={issues:QuoteIssue[];onSelect:(issue:QuoteIssue)=>void;busy?:boolean;prefix?:string};
+export function QuotePendingGroups({issues,onSelect,busy=false,prefix='validation'}:PendingProps){
+ return <div className="quote-pending-groups">{groupQuoteIssues(issues).map(group=><div className="quote-pending-group" key={group.key}>
+  <div><strong>Pendientes en {group.location}</strong><p>{group.labels.join(' · ')}</p>{group.issues.map(issue=><span className="sr-only" id={`${prefix}-${issue.id}`} key={issue.id}>{issue.message}</span>)}</div>
+  <button type="button" disabled={busy} aria-label={`Completar datos en ${group.location}`} onClick={()=>onSelect(group.issues[0])}>Completar datos<ArrowRight size={15}/></button>
+ </div>)}</div>;
+}
+export function QuoteValidationList(props:PendingProps){
+ if(!props.issues.length)return null;
+ return <section className="quote-validation-list" aria-label="Datos pendientes de la cotización"><AlertCircle size={17} aria-hidden="true"/><QuotePendingGroups {...props}/></section>;
 }
 
 const controls='input,textarea,select,button[role="combobox"],button[role="checkbox"]';
