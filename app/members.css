@@ -52,3 +52,5 @@
 .team-loading-icon{animation:team-loading-turn .9s linear infinite;flex-shrink:0}@keyframes team-loading-turn{to{transform:rotate(360deg)}}
 @container(max-width:600px){.team-heading-actions{margin-left:0;width:100%}.team-heading-actions button{flex:1 1 150px}.team-loading,.team-refresh-status{padding-inline:18px}}
 @media(prefers-reduced-motion:reduce){.team-loading-icon{animation:none}}
+
+.team-heading-actions .team-add-user{background:#126452;color:#fff;border-color:#126452;font-weight:650}.team-heading-actions .team-add-user:hover{background:#0c4d40}
