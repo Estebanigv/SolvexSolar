@@ -13,7 +13,7 @@ export function proposalDiscount(q:SavedQuote){
  if(amount<=0)return null;
  // A negotiated closing price changes the effective saving. Do not advertise
  // the original percentage as if it still described the amount being paid.
- return {percent:c.totalAdjustment?undefined:q.input.discountPercent,amount,before,total:c.total};
+ return {percent:c.totalAdjustment?undefined:q.input.discountPercent,effectivePercent:Math.round(amount/before*10000)/100,adjusted:!!c.totalAdjustment,amount,before,total:c.total};
 }
 
 // Visibility only affects the customer document; the saved calculation remains intact.

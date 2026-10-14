@@ -1,4 +1,5 @@
 'use client';
+import {PaymentScheduleEditor} from './payment-schedule-editor';
 import {Input} from '@/components/ui/input';
 import {Button} from '@/components/ui/button';
 import {Textarea} from '@/components/ui/textarea';
@@ -23,6 +24,7 @@ export function CommercialFields({quote,settings,onChange}:{quote:QuoteInput;set
  <label>Garantías para el cliente<Textarea rows={6} maxLength={3000} value={document.warranty} onChange={e=>onChange({documentWarranty:e.target.value})}/></label>
  {(quote.documentTerms!==undefined||quote.documentWarranty!==undefined||quote.documentValidDays!==undefined)&&<Button type="button" variant="outline" onClick={()=>onChange({documentTerms:undefined,documentWarranty:undefined,documentValidDays:undefined})}>Restablecer textos y vigencia de Empresa</Button>}
  </fieldset>
+ <PaymentScheduleEditor quote={quote} settings={settings} onChange={onChange}/>
  <h3>Acompañamiento financiero</h3><label className="check-label"><Checkbox checked={!!quote.financingNote} onCheckedChange={checked=>onChange({financingNote:checked?greenCreditNote:''})}/>Incluir observación sobre crédito verde</label>{!!quote.financingNote&&<label>Observación para el cliente<Textarea aria-label="Observación de crédito verde" maxLength={1000} rows={4} value={quote.financingNote} onChange={e=>onChange({financingNote:e.target.value})}/></label>}<p className="help-text">Es una orientación comercial. No es un medio de pago ni una aprobación de crédito. Se incluye en la vista previa y el PDF de esta propuesta.</p>
  </section>;
 }

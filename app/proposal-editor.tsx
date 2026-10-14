@@ -8,6 +8,7 @@ import {newProposalContent,type ProposalContent} from '@/lib/proposal-content';
 import {proposalLayout} from '@/lib/proposal-layout';
 import {proposalCanvases} from '@/lib/proposal-canvas';
 import {AtlasProposal} from './atlas-proposal';
+import {PaymentScheduleEditor} from './payment-schedule-editor';
 import {DiscountField} from './discount-field';
 import {FinalQuoteTotal} from './final-quote-total';
 import {ProjectionPanel} from './projection-panel';
@@ -77,8 +78,7 @@ export function ProposalEditor({q,products,settings,rates,busy,onSave,onCancel}:
    <div className="proposal-editor-buttons"><Button variant="outline" onClick={()=>add(page.id)}>Agregar texto aquí</Button><Button variant="outline" onClick={()=>add()}>Agregar página</Button></div>
    <details data-editor="totals" className="proposal-edit-block"><summary>Total y pagos</summary>{working&&<FinalQuoteTotal quote={input} calculation={working.calculation} onChange={update}/>}
     <DiscountField quote={input} onChange={update}/><label>Forma de pago<Input value={input.payment} onChange={e=>update({payment:e.target.value})}/></label>
-    {(input.documentPaymentSchedule??settings.paymentSchedule??[]).map((row,i,all)=><div className="proposal-payment-edit" key={i}><label>Etapa {i+1}<Input value={row.label} maxLength={80} onChange={e=>update({documentPaymentSchedule:all.map((r,j)=>j===i?{...r,label:e.target.value}:r)})}/></label><label>Porcentaje<Input type="number" min={0} max={100} step={1} value={row.percent} onChange={e=>update({documentPaymentSchedule:all.map((r,j)=>j===i?{...r,percent:Number(e.target.value)}:r)})}/></label><Button variant="outline" onClick={()=>update({documentPaymentSchedule:all.filter((_,j)=>j!==i)})}>Quitar etapa</Button></div>)}
-    <Button variant="outline" disabled={(input.documentPaymentSchedule??settings.paymentSchedule??[]).length>=10} onClick={()=>update({documentPaymentSchedule:[...(input.documentPaymentSchedule??settings.paymentSchedule??[]),{label:'Nueva etapa',percent:0}]})}>Agregar etapa de pago</Button><p>Los porcentajes deben sumar 100%. Los montos se recalculan con el total final, en pesos chilenos.</p>
+    <PaymentScheduleEditor quote={input} settings={settings} onChange={update}/>
    </details>
    <details data-editor="projection" className="proposal-edit-block"><summary>Ahorro y gráficos</summary>{working&&<ProjectionPanel q={working} onChange={projection=>update({projection})}/>}</details>
    {input.proposalType!=='preliminary'&&<label className="proposal-visibility"><input type="checkbox" checked={input.technicalReviewed} onChange={e=>update({technicalReviewed:e.target.checked})}/>El comercial y el instalador revisaron modelos, compatibilidad, estructura y alcance de esta versión tras la visita técnica.</label>}

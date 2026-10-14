@@ -124,15 +124,26 @@ export function proposalCanvases(q:SavedQuote):CanvasPage[]{
    const col=500/payments.length;
    payments.forEach((m,i)=>{const xx=306+i*col;circle(xx+4,top+66,3.5,palette[i]);current.ops.at(-1)!.elementId=`${m.id}:marker`;lines(m.title,xx+15,top+58,col-21,11,true,colors.ink,`${m.id}:title`);text(m.value??'',xx+15,top+106,16,true,colors.ink,`${m.id}:value`,col-21);text(m.body,xx+15,top+123,9,false,colors.muted,`${m.id}:body`,col-21);});
   }
-  const col=770/3;let rowTop=top+152;
-  for(let offset=0;offset<notes.length;offset+=3){
-   const row=notes.slice(offset,offset+3);
-   const height=(note:ProposalBlock)=>wrap(note.title,13,col-20,true).length*18.2+wrap(note.body,10,col-20).length*14+26;
-   const h=Math.max(...row.map(height));
-   if(rowTop+h>546){y=rowTop;bodyPage(page,notes.slice(offset),true,true);return true;}
-   row.forEach((note,i)=>{const x=36+i*col;line(x,rowTop,x+col-20,rowTop,colors.green,2,undefined,`${note.id}:rule`);let yy=rowTop+10;yy+=lines(note.title,x,yy,col-20,13,true,colors.ink,`${note.id}:title`)+6;lines(note.body,x,yy,col-20,10,false,colors.muted,`${note.id}:body`);});
-   rowTop+=h;
-  }
+  // Long contractual paragraphs need readable columns, not narrow thirds.
+  // Keep payment context and short notes together, then pair terms/warranties.
+  const col=375,bodySize=10.5,titleSize=13;
+  const height=(note:ProposalBlock)=>wrap(note.title,titleSize,col,true).length*titleSize*1.4+wrap(note.body,bodySize,col).length*bodySize*1.4+26;
+  const rowsHeight=(items:ProposalBlock[])=>items.reduce((sum,n,i)=>i%2?sum:sum+Math.max(height(n),items[i+1]?height(items[i+1]):0),0);
+  y=top+150;
+  const deferred=rowsHeight(notes)>535-y?notes.filter(n=>['warranty','terms'].includes(n.id)):[];
+  const compact=notes.filter(n=>!deferred.includes(n));
+  const renderNotes=(items:ProposalBlock[])=>{
+   for(let offset=0;offset<items.length;offset+=2){
+    const row=items.slice(offset,offset+2),h=Math.max(...row.map(height));
+    if(y+h>535&&h<=350)start(page,true);
+    // Very long custom clauses retain the paginated full-width fallback.
+    if(y+h>535){bodyPage(page,items.slice(offset),true,true);return;}
+    row.forEach((note,i)=>{const x=36+i*395;line(x,y,x+col,y,colors.green,1,undefined,`${note.id}:rule`);let yy=y+10;yy+=lines(note.title,x,yy,col,titleSize,true,colors.ink,`${note.id}:title`)+6;lines(note.body,x,yy,col,bodySize,false,colors.muted,`${note.id}:body`);});
+    y+=h;
+   }
+  };
+  renderNotes(compact);
+  if(deferred.length){start(page,true);renderNotes(deferred);}
   if(outside(first)){pages.splice(first);return false;}return true;
  }
  function bodyPage(page:ProposalPage,blocks:ProposalBlock[],continuation=false,append=false){
@@ -167,28 +178,36 @@ export function proposalCanvases(q:SavedQuote):CanvasPage[]{
  function cover(page:ProposalPage){
   const client=page.blocks.find(b=>b.id==='client'),metrics=page.blocks.filter(b=>b.kind==='metric'),col=(770-14*Math.max(0,metrics.length-1))/Math.max(1,metrics.length);
   if(!canFit(page.title,36,413,3,true)||!canFit(page.subtitle,17,413,2)||client&&(!canFit(client.title,20,413,2,true)||!canFit(client.body,11,413,2))||metrics.length>3||metrics.some(m=>!canFit(m.title,11,col-40,2,true)||!canFit(m.value??'',27,col-40,1,true)||!canFit(m.body,9.5,col-40,3)))return false;
-  current={id:'cover',title:page.title,sourcePage:page.id,ops:[]};pages.push(current);rect(0,0,842,595,colors.white,undefined,`${page.id}:background`);rect(0,0,842,376,colors.dark,undefined,'cover:field');
-  if(style.coverPhoto)current.ops.push({kind:'image',elementId:'cover:photo',image:'roof',x:330,y:0,width:512,height:376,fit:'cover'});
+  const discount=page.blocks.find(b=>b.id==='discount');
+  const inlineDiscount=discount&&canFit(discount.title,11,738,1,true)&&canFit(discount.body,10,738,2)?discount:undefined;
+  const heroHeight=inlineDiscount?326:376,cardTop=heroHeight+20,cardHeight=inlineDiscount?126:141;
+  current={id:'cover',title:page.title,sourcePage:page.id,ops:[]};pages.push(current);rect(0,0,842,595,colors.white,undefined,`${page.id}:background`);rect(0,0,842,heroHeight,colors.dark,undefined,'cover:field');
+  if(style.coverPhoto)current.ops.push({kind:'image',elementId:'cover:photo',image:'roof',x:330,y:0,width:512,height:heroHeight,fit:'cover'});
   // Blend the photograph into the brand field; keep editable text above the image.
-  current.ops.push({kind:'rect',elementId:'cover:photo',x:330,y:0,width:512,height:376,color:colors.dark,opacity:.12});
-  current.ops.push({kind:'fade',elementId:'cover:photo',x:330,y:0,width:384,height:376,color:colors.dark,from:1,to:0,direction:'horizontal'});
+  current.ops.push({kind:'rect',elementId:'cover:photo',x:330,y:0,width:512,height:heroHeight,color:colors.dark,opacity:.12});
+  current.ops.push({kind:'fade',elementId:'cover:photo',x:330,y:0,width:384,height:heroHeight,color:colors.dark,from:1,to:0,direction:'horizontal'});
   current.ops.push({kind:'fade',elementId:'cover:photo',x:330,y:0,width:512,height:128,color:colors.dark,from:.7,to:0,direction:'vertical'});
   current.ops.push({kind:'image',elementId:'cover:logo',image:'logo',x:36,y:22,width:101,height:67,fit:'contain'});
   right(documentFolio(q),806,43,13,true,'#ffffff','cover:folio');right(documentTitle(q),806,62,9,true,colors.green,'cover:status');
   let top=115;top+=lines(page.title,36,top,413,36,true,colors.white,`${page.id}:title`)+14;top+=lines(page.subtitle,36,top,413,17,false,'#c7dcda',`${page.id}:subtitle`)+20;
   if(client){line(36,top,88,top,colors.green,2,undefined,'cover:client-rule');top+=15;top+=lines(client.title,36,top,413,20,true,colors.white,`${client.id}:title`)+8;top+=lines(client.body,36,top,413,11,false,'#c7dcda',`${client.id}:body`);}
-  if(top>353){pages.pop();return false;}
-  line(36,376,806,376,colors.green,3,undefined,'cover:bottom-rule');
+  if(top>heroHeight-23){pages.pop();return false;}
+  line(36,heroHeight,806,heroHeight,colors.green,3,undefined,'cover:bottom-rule');
   metrics.forEach((m,i)=>{
    const x=36+i*(col+14),primary=m.id==='investment',value=m.value??'';
-   rect(x,396,col,141,primary?'#16563f':m.id==='saving-summary'?'#e5f2cf':'#edf4e6',undefined,`${m.id}:box`);
+   rect(x,cardTop,col,cardHeight,primary?'#16563f':m.id==='saving-summary'?'#e5f2cf':'#edf4e6',undefined,`${m.id}:box`);
    const ink=primary?'#ffffff':'#244b35',valueColor=primary?'#d4ef83':'#176343';
-   lines(m.title,x+20,413,col-40,11,true,ink,`${m.id}:title`);
+   lines(m.title,x+20,cardTop+17,col-40,11,true,ink,`${m.id}:title`);
    const size=Math.min(value==='Por validar'?26:32,(col-40)/Math.max(1,width(value,1,true)));
-   text(value,x+20,476,size,true,valueColor,`${m.id}:value`,col-40);
-   lines(m.body,x+20,494,col-40,9.5,false,primary?'#e0eedc':'#435d40',`${m.id}:body`);
+   text(value,x+20,cardTop+70,size,true,valueColor,`${m.id}:value`,col-40);
+   lines(m.body,x+20,cardTop+86,col-40,9.5,false,primary?'#e0eedc':'#435d40',`${m.id}:body`);
   });
-  const extras=page.blocks.filter(b=>b.id!=='client'&&b.kind!=='metric');
+  if(inlineDiscount){
+   rect(36,484,770,55,colors.pale,undefined,'discount:box');
+   text(inlineDiscount.title,52,501,11,true,colors.teal,'discount:title',738);
+   lines(inlineDiscount.body,52,508,738,10,false,colors.ink,'discount:body');
+  }
+  const extras=page.blocks.filter(b=>b.id!=='client'&&b.kind!=='metric'&&b!==inlineDiscount);
   if(extras.length)bodyPage({...page,cover:false,title:'Resumen de la propuesta',subtitle:page.subtitle},extras,true);
   return true;
  }
@@ -218,7 +237,7 @@ export function proposalCanvases(q:SavedQuote):CanvasPage[]{
   if(op.kind==='rect'&&op.x===0&&op.y===0&&op.width===842&&op.height===595)color=style.background;
   if(op.kind==='text'){
    if(['#ffffff','#c7dcda','#bbd0ce','#ccdddc','#d5e3e1'].includes(op.color))color=readableOn(style.cover);
-   if(['#e0eedc','#d4ef83'].includes(op.color)||(page.id==='cover'&&op.y>=396&&op.color==='#ffffff'))color=readableOn(style.primary);
+   if(['#e0eedc','#d4ef83'].includes(op.color)||(page.id==='cover'&&op.elementId?.startsWith('investment:')&&op.color==='#ffffff'))color=readableOn(style.primary);
    if(op.color==='#435d40')color=readableOn(tint(style.accent));
   }
   return {...op,color,...('stroke' in op&&op.stroke?{stroke:map(op.stroke)}:{})};

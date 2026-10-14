@@ -34,6 +34,12 @@ export function roiReference(q:QuoteInput, c:Calculation, settings:Settings){
 // Retire the previous template's execution-time clause without changing payment dates or warranties.
 export function customerTerms(q:QuoteInput, settings:Settings){
   let terms=q.documentTerms??settings.terms.replace(/Precios con IVA y margen comercial incluidos\.?/gi,'Valor incluye IVA.');
+  // Only replace the inherited schedule, never rewrite negotiated free text.
+  if(q.documentPaymentSchedule&&q.documentTerms===undefined&&settings.paymentSchedule?.length){
+   const escape=(s:string)=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+   const oldSchedule=settings.paymentSchedule.map(row=>`${escape(row.label)}\\s+${row.percent}\\s*%`).join('(?:\\s*,\\s*|\\s+y\\s+)');
+   terms=terms.replace(new RegExp(oldSchedule,'gi'),()=>q.documentPaymentSchedule!.map(row=>`${row.label} ${row.percent}%`).join(', '));
+  }
   if(q.documentValidDays!==undefined)terms=terms.replace(/Vigencia(?: de la oferta)?\s*:\s*\d+\s*días\.?/gi,`Vigencia de la oferta: ${q.documentValidDays} días.`);
   terms=terms.replace(/El alcance y los plazos de ejecución se acuerdan tras la visita técnica\./gi,'El alcance se acuerda tras la visita técnica.');
   terms=terms.replace('los equipos y cantidades detallados en esta propuesta','los equipos y cantidades de la configuración cotizada')
