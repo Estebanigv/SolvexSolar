@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import {newQuote} from '../lib/quote';
+import {hasQuoteInProgress} from '../lib/quote-progress';
+import {renderToStaticMarkup} from 'react-dom/server';
+import {createElement} from 'react';
+import {QuoteProgressNotice} from '../app/quote-progress';
+const baseline=newQuote(),context={clientId:null,sourceQuoteId:null,fileCount:0};
+assert.equal(hasQuoteInProgress(newQuote(),baseline,context),false,'An untouched quote must not show a warning');
+assert.equal(hasQuoteInProgress({...baseline,quantities:Object.fromEntries(Object.entries(baseline.quantities).reverse())},baseline,context),false);
+for(const patch of [{notes:'Trabajo pendiente'},{discountPercent:10},{customer:{...baseline.customer,name:'Cliente de prueba'}},{quantities:{...baseline.quantities,'0-10':10}}])assert.equal(hasQuoteInProgress({...baseline,...patch},baseline,context),true);
+for(const patch of [{clientId:'client'},{sourceQuoteId:'quote'},{fileCount:1}])assert.equal(hasQuoteInProgress(baseline,baseline,{...context,...patch}),true);
+assert.equal(hasQuoteInProgress(newQuote(),baseline,context),false,'Resetting to the initial quote clears the notice');
+const props={customer:'Cliente de prueba',system:'On Grid',stage:'Instalación',onResume:()=>{}};
+const html=renderToStaticMarkup(createElement(QuoteProgressNotice,props));assert.match(html,/Retomar cotización/);assert.match(html,/Cliente de prueba/);assert.match(html,/Aún no guardada/);
+const saved=renderToStaticMarkup(createElement(QuoteProgressNotice,{...props,folio:'SVX-2026-000021'}));assert.match(saved,/SVX-2026-000021/);assert.ok(!saved.includes('Aún no guardada'));
+const failed=renderToStaticMarkup(createElement(QuoteProgressNotice,{...props,error:'No se pudo guardar'}));assert.match(failed,/role="alert"/);
+const recovery=renderToStaticMarkup(createElement(QuoteProgressNotice,{...props,recovery:true}));assert.match(recovery,/Ver borrador pendiente/);assert.ok(!recovery.includes('Los datos se conservan'));
+console.log('Cotización en curso: cambios, adjuntos, cliente, reinicio, historial, recuperación y errores: OK');

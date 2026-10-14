@@ -4,6 +4,8 @@ import {quoteValidationIssues,type QuoteIssue} from '@/lib/quote-validation';
 import {QuoteValidationList,useQuoteValidation,type ValidationFocus} from './quote-validation';
 import {DiscountField} from './discount-field';
 import {FinalQuoteTotal} from './final-quote-total';
+import {QuoteProgressNotice} from './quote-progress';
+import {hasQuoteInProgress} from '@/lib/quote-progress';
 import {DraftStatus,useQuoteDraft} from './quote-draft';
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {Sun,ArrowUpRight,Plus,Download,Printer,Mail,MessageCircle,Save,Check,AlertCircle,FileText,Package,History,Settings as SettingsIcon,ClipboardList,RotateCcw,Share2,LockKeyhole,ChevronRight,CalendarDays,PanelsTopLeft,ArrowLeft,ArrowRight,Zap,BatteryCharging,Unplug,Grid2X2,UserRound,Wrench,CheckCircle2} from 'lucide-react';
@@ -115,6 +117,9 @@ function QuoteWorkspace(){
  const draftFiles=useMemo(()=>bill.attachments.map(a=>a.file),[bill.attachments]);
  const draftValue=useMemo(()=>({input:quote,clientId,sourceQuoteId,step,files:draftFiles}),[quote,clientId,sourceQuoteId,step,draftFiles]);
  const draft=useQuoteDraft(profile?.id,draftValue,async recovered=>{await bill.restore(recovered.files);const recoveredQuote=reconcileQuoteProducts(recovered.input,products);setQuote({...recoveredQuote,quantities:panelQuantities(recoveredQuote,products)});if(recoveredQuote!==recovered.input)toast.warning('Se retiraron equipos que ya no están en el catálogo. Revisa la propuesta recuperada.');setClientId(recovered.clientId);setSourceQuoteId(recovered.sourceQuoteId);setStep(stages.some(s=>s.id===recovered.step)?recovered.step:'customer');setConfirmed([]);setSaved(null)});
+ const quoteInProgress=useMemo(()=>{const base=reconcileQuoteProducts(newQuote(),products);return hasQuoteInProgress(quote,{...base,quantities:panelQuantities(base,products)},{clientId,sourceQuoteId,fileCount:draftFiles.length})},[quote,products,clientId,sourceQuoteId,draftFiles.length]);
+ const progressInput=quoteInProgress?quote:draft.candidate?.input;
+ const progressStep=quoteInProgress?step:draft.candidate?.step;
  const complete={customer:ready.customer&&confirmed.includes('customer'),system:ready.system&&confirmed.includes('system'),installation:ready.installation&&confirmed.includes('installation'),review:ready.review&&['customer','system','installation'].every(id=>confirmed.includes(id))};
  function continueStep(){if(ready[step as keyof typeof ready])setConfirmed(previous=>Array.from(new Set([...previous,step])));moveStep(stages[Math.min(stageIndex+1,stages.length-1)].id)}
  const editCustomer=(k:keyof QuoteInput['customer'],v:string|number)=>update({customer:{...quote.customer,[k]:v}});
@@ -243,6 +248,7 @@ function QuoteWorkspace(){
 
  if(usesSupabase&&!loaded)return <WorkspaceStatus error={loadError||undefined} onRetry={()=>void load()}/>;
  return <Tabs className="app-root" orientation="vertical" value={tab} onValueChange={value=>{setCatalogTarget(null);setTab(value)}}><SidebarProvider style={{'--sidebar-width':'248px'} as React.CSSProperties}><AppNavigation tab={tab} isAdmin={isAdmin} usesSupabase={usesSupabase}/><SidebarInset className="app-main"><Toaster richColors position="top-center"/><AppToolbar profile={profile} status={isDemoDeployment?"Demostración":loaded?"Espacio conectado":loadError?"Sin conexión":"Conectando…"}/><div className="workspace"><div className="screen-only">
+ {tab!=='quote'&&progressInput&&<QuoteProgressNotice customer={progressInput.customer.name} system={systemNames[progressInput.system]} stage={stageTitles[progressStep||'customer']||'Cliente y boleta'} folio={quoteInProgress?saved?.folio:undefined} recovery={!quoteInProgress} status={quoteInProgress&&!draft.candidate?draft.status:undefined} error={draft.error||(quoteInProgress&&draft.candidate?'Hay otro borrador pendiente de recuperar. Vuelve al cotizador para decidir cuál conservar.':undefined)} onResume={()=>{setTab('quote');moveStep(step);}}/>}
  <div className="page-heading"><div><h1>{({quote:'Prepara tu próxima propuesta',dashboard:'Resumen de gestión',guide:'Manual de uso',clients:'Directorio de clientes',catalog:'Equipos y precios',history:'Tus cotizaciones',settings:'Tu empresa',members:'Usuarios del equipo',activity:'Historial de actividad',pending:'Documentación'} as Record<string,string>)[tab]}</h1><p className="heading-sub">{({quote:'Del consumo del cliente a una propuesta solar, paso a paso.',dashboard:'Actividad comercial del equipo, mes a mes.',guide:'Consulta el manual visual o encuentra una respuesta por tema.',clients:'Contactos, ubicaciones y datos de cada proyecto en un solo lugar.',catalog:'Un catálogo organizado para cotizar con confianza.',history:'Cada proyecto, con sus precios y versiones a mano.',settings:'La información que representa a Solvex Solar en cada propuesta.',members:'Un equipo de administradores para gestionar cada proyecto.',activity:'Quién cambió qué, cuándo y cómo quedó.',pending:'Respaldo técnico y comercial para tus proyectos.'} as Record<string,string>)[tab]}</p></div>{tab==='quote'&&<Button className="heading-preview" disabled={!calculation} onClick={()=>setPreview(snapshot())}><FileText size={17}/>Vista previa<ArrowUpRight size={16}/></Button>}</div>
 
  <BillBackupStatus backup={backup}/>{tab==='quote'&&<DraftStatus draft={draft}/>}
