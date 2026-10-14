@@ -1,4 +1,6 @@
 "use client";
+import {invalidCustomerEmail} from '@/lib/customer-email';
+import {calculateEditingQuote} from '@/lib/quote-editing';
 import {isIssued,issuanceProblems} from '@/lib/quote-issuance';
 import {QuoteIssuePanel} from './quote-issue-panel';
 import {quoteValidationIssues,type QuoteIssue} from '@/lib/quote-validation';
@@ -89,8 +91,8 @@ function QuoteWorkspace(){
  const [validationFocus,setValidationFocus]=useState<ValidationFocus|null>(null);
  const [catalogTarget,setCatalogTarget]=useState<{id:string;token:number}|null>(null);
  const [shareTarget,setShareTarget]=useState<{quote:SavedQuote;whatsapp:boolean}|null>(null);
- const emailInvalid=!!quote.customer.email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(quote.customer.email);
- const calculation=useMemo(()=>{try{return calculate(emailInvalid?{...quote,customer:{...quote.customer,email:''}}:quote,products,settings,installation)}catch{return null}},[quote,products,settings,emailInvalid,installation]);
+ const emailInvalid=invalidCustomerEmail(quote.customer.email);
+ const calculation=useMemo(()=>{try{return calculateEditingQuote(quote,products,settings,installation)}catch{return null}},[quote,products,settings,installation]);
  const ready=workflowReadiness(quote,products,calculation,installation);
  const liveIssues=calculation?quoteValidationIssues({id:'draft',folio:'BORRADOR-SVX',date:'',input:quote,settings,calculation}):[];
  useQuoteValidation(validationActive?liveIssues:[],validationFocus,tab+':'+step+':'+!!preview+':'+loaded);
@@ -140,7 +142,7 @@ function QuoteWorkspace(){
  }
  useEffect(()=>{void load();return()=>workspaceLoad.current?.abort()},[]);
  const stateRef=useRef({quote,products,settings,installation});stateRef.current={quote,products,settings,installation};
- useEffect(()=>{const context=(document as unknown as {modelContext?:{registerTool:(tool:unknown,options:unknown)=>unknown}}).modelContext;if(!context?.registerTool)return;const control=new AbortController();try{Promise.resolve(context.registerTool({name:'read_quote_summary',title:'Consultar cotización actual',description:'Lee el cálculo y validaciones de la propuesta que está en pantalla. No guarda ni envía.',inputSchema:{type:'object',properties:{},additionalProperties:false},annotations:{readOnlyHint:true},execute:(input:unknown)=>{if(!input||typeof input!=='object'||Object.keys(input).length)throw Error('No se aceptan parámetros.');const s=stateRef.current;return calculate(s.quote,s.products,s.settings,s.installation)}},{signal:control.signal})).catch(()=>{});}catch{}return()=>control.abort()},[]);
+ useEffect(()=>{const context=(document as unknown as {modelContext?:{registerTool:(tool:unknown,options:unknown)=>unknown}}).modelContext;if(!context?.registerTool)return;const control=new AbortController();try{Promise.resolve(context.registerTool({name:'read_quote_summary',title:'Consultar cotización actual',description:'Lee el cálculo y validaciones de la propuesta que está en pantalla. No guarda ni envía.',inputSchema:{type:'object',properties:{},additionalProperties:false},annotations:{readOnlyHint:true},execute:(input:unknown)=>{if(!input||typeof input!=='object'||Object.keys(input).length)throw Error('No se aceptan parámetros.');const s=stateRef.current;return calculateEditingQuote(s.quote,s.products,s.settings,s.installation)}},{signal:control.signal})).catch(()=>{});}catch{}return()=>control.abort()},[]);
  useEffect(()=>{const handler=(e:BeforeUnloadEvent)=>{if(configDirty){e.preventDefault();e.returnValue=''}};window.addEventListener('beforeunload',handler);return()=>window.removeEventListener('beforeunload',handler)},[configDirty]);
  function changeSystem(system:QuoteInput['system']){const rows=products.filter(p=>p.system===system);const quantities:Record<string,number>={};for(const cat of ['PANEL FOTOVOLTAICO','TIPO DE ESTRUCTURA','MATERIAL DE TECHO']){const p=rows.find(p=>p.category===cat);if(p)quantities[p.id]=8;}const inverter=rows.find(p=>p.category.includes('INVERSOR'));if(inverter)quantities[inverter.id]=1;for(const p of rows)if(isLinearService(p))quantities[p.id]=15;update({system,quantities,installationOverride:null,installationNote:''})}
  function choose(cat:string,id:string){const quantities={...quote.quantities};for(const p of products.filter(p=>p.system===quote.system&&p.category===cat))delete quantities[p.id];if(id!=='none'){const p=products.find(p=>p.id===id)!;quantities[id]=cat==='PANEL FOTOVOLTAICO'?(calculation?.panels||8):followsPanelCount(p)?(calculation?.panels||8):1;}update({quantities})}
@@ -162,7 +164,7 @@ function QuoteWorkspace(){
    focusCustomerReview();toast.error(customerReadBusy?'Espera a que termine la lectura de la boleta.':'Revisa y confirma los datos del cliente leídos de la boleta antes de guardar.');return null;
   }
   if(backup.pending){toast.error('Completa el respaldo pendiente antes de guardar otra versión.');return null}
-  if(emailInvalid){setValidationActive(true);setValidationFocus({issue:{id:'customer-email',message:'Corrige el correo electrónico del cliente.',tab:'quote',step:'customer',field:'Correo electrónico'},token:Date.now()});setStep('customer');toast.error('Revisa el correo electrónico del cliente.');return null}
+  if(invalidCustomerEmail(editedInput.customer.email)){setValidationActive(true);setValidationFocus({issue:{id:'customer-email',message:'Corrige el correo electrónico del cliente.',tab:'quote',step:'customer',field:'Correo electrónico'},token:Date.now()});setStep('customer');toast.error('Revisa el correo electrónico del cliente.');return null}
   if(configDirty){toast.error('Guarda primero los cambios del catálogo o configuración.');return null}
   const files=bill.attachments.map(document=>document.file);
   setBusy(true);

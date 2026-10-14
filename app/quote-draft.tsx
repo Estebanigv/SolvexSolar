@@ -3,13 +3,14 @@ import {persistentQuote} from '@/lib/quote-persistence';
 import {useEffect,useRef,useState} from 'react';
 import {Button} from '@/components/ui/button';
 import {readRecovery,saveDraft} from '@/lib/local-recovery';
-import {quoteSchema,type QuoteInput} from '@/lib/quote';
+import type {QuoteInput} from '@/lib/quote';
+import {editableQuoteSchema} from '@/lib/quote-editing';
 export type QuoteDraft={input:QuoteInput;clientId:string|null;sourceQuoteId:string|null;step:string;files:File[];savedAt:string};
 export function useQuoteDraft(ownerId:string|undefined,value:Omit<QuoteDraft,'savedAt'>,restore:(draft:QuoteDraft)=>Promise<void>){
  const [candidate,setCandidate]=useState<QuoteDraft|null>(null),[ready,setReady]=useState(false),[status,setStatus]=useState(''),[error,setError]=useState('');
  const current=useRef(value);current.current=value;const version=useRef<string|null>(null),queue=useRef(Promise.resolve()),last=useRef<typeof value|null>(null),scheduled=useRef<typeof value|null>(null),failed=useRef(false);
  const key=ownerId?'draft:'+ownerId:null;
- useEffect(()=>{if(!key)return;let cancelled=false;setReady(false);readRecovery<{version:string;value:QuoteDraft}>(key).then(record=>{if(cancelled)return;version.current=record?.version??null;if(record&&quoteSchema.safeParse(record.value.input).success){setCandidate(record.value);setStatus('Borrador disponible en este dispositivo')}else setReady(true)}).catch(()=>{if(!cancelled){setError('El navegador no permite recuperar borradores locales. Mantén esta página abierta hasta guardar.');setReady(true);failed.current=true}});return()=>{cancelled=true}},[key]);
+ useEffect(()=>{if(!key)return;let cancelled=false;setReady(false);readRecovery<{version:string;value:QuoteDraft}>(key).then(record=>{if(cancelled)return;version.current=record?.version??null;if(record&&editableQuoteSchema.safeParse(record.value.input).success){setCandidate(record.value);setStatus('Borrador disponible en este dispositivo')}else setReady(true)}).catch(()=>{if(!cancelled){setError('El navegador no permite recuperar borradores locales. Mantén esta página abierta hasta guardar.');setReady(true);failed.current=true}});return()=>{cancelled=true}},[key]);
  function persist(){if(!key||!ready||failed.current)return;const next=current.current;if(scheduled.current===next)return;scheduled.current=next;setStatus('Guardando borrador…');queue.current=queue.current.then(async()=>{if(failed.current)return;try{version.current=await saveDraft(key,{...next,input:persistentQuote(next.input),savedAt:new Date().toISOString()},version.current);last.current=next;if(current.current===next)setStatus('Borrador guardado en este dispositivo')}catch(e){failed.current=true;setError((e as Error).message)}})}
  useEffect(()=>{if(!ready)return;const timer=setTimeout(persist,600);return()=>clearTimeout(timer)},[value.input,value.clientId,value.sourceQuoteId,value.step,value.files,ready]);
  useEffect(()=>{const hide=()=>{if(document.visibilityState==='hidden')persist()};const warn=(e:BeforeUnloadEvent)=>{if(ready&&(last.current!==current.current||failed.current)){e.preventDefault();e.returnValue=''}};document.addEventListener('visibilitychange',hide);window.addEventListener('beforeunload',warn);return()=>{document.removeEventListener('visibilitychange',hide);window.removeEventListener('beforeunload',warn)}},[ready,key]);

@@ -1,3 +1,4 @@
+import {invalidCustomerEmail} from './customer-email';
 import type {SavedQuote} from './quote';
 import {issuanceProblems} from './quote-issuance';
 import {consumptionSummary} from './energy';
@@ -12,7 +13,7 @@ export function quoteValidationIssues(q:SavedQuote):QuoteIssue[]{
  const customer=(key:keyof typeof input.customer,message:string,field:string)=>add('customer-'+key,message,'customer',field);
  if(!input.customer.name.trim())customer('name','Completa el nombre y apellido del cliente.','Nombre y apellido');
  if(!input.customer.email.trim()&&!input.customer.phone.trim())customer('email',input.proposalType==='preliminary'?'Completa un correo o teléfono de contacto.':'Completa el correo electrónico del cliente.','Correo electrónico');
- if(input.customer.email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.customer.email))customer('email','Corrige el correo electrónico del cliente.','Correo electrónico');
+ if(invalidCustomerEmail(input.customer.email))customer('email','Corrige el correo electrónico del cliente.','Correo electrónico');
  if(c.tax===null||s.taxMode==='pending')add('tax','Confirma si los precios incluyen IVA.','review','Precios del catálogo e IVA','settings');
  const final=input.proposalType!=='preliminary'&&!c.official;
  if(final){
