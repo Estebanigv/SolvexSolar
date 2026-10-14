@@ -9,7 +9,7 @@ const result={formatted_address:'Av. La Dehesa 181, Lo Barnechea, Región Metrop
 const response=(results:unknown[])=>({status:'OK',results});
 assert.equal(streetAddress(input.address),'Av. La Dehesa 181. Lo Barnechea');
 assert.ok(!googleAddressQuery(input).includes('509'));
-for(const unit of ['DP 11','DP. 11','D.P. 11','DEPTO 11'])assert.equal(streetAddress('SAN CLEMENTE 8010 '+unit),'SAN CLEMENTE 8010');
+for(const unit of ['DP 11','DP. 11','D.P. 11','DEPTO 11'])assert.equal(streetAddress('CALLE DE EJEMPLO 8010 '+unit),'CALLE DE EJEMPLO 8010');
 assert.equal(streetAddress('Los Departamentos 11'),'Los Departamentos 11');
 assert.throws(()=>googleAddressQuery({...input,commune:'Santiago'}),/La dirección indica Lo Barnechea/);
 assert.equal(parseGoogleLocations(response([result,result]),input).length,1);
