@@ -8,7 +8,7 @@ export class GeocodingError extends Error {
 
 // Office/apartment numbers identify a unit, not the building's street number.
 export function streetAddress(address:string){
-  return address.replace(/\b(?:oficina|of\.?|departamento|depto\.?|dpto\.?|piso|local)\s*(?:n[º°o.]?\s*)?\d+[a-z]?\b/gi,'').replace(/\s+/g,' ').replace(/\s+([,.])/g,'$1').trim();
+  return address.replace(/\b(?:oficina|of\.?|departamento|depto\.?|dpto\.?|d\.?p\.?|piso|local)\s*(?:n[º°o.]?\s*)?\d+[a-z]?\b/gi,'').replace(/\s+/g,' ').replace(/\s+([,.])/g,'$1').trim();
 }
 export function googleAddressQuery(input:AddressQuery){
   const street=streetAddress(input.address),embedded=locationFromAddress(street);

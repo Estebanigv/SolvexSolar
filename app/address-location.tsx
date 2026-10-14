@@ -5,11 +5,14 @@ import {Button} from '@/components/ui/button';
 import {addressQuerySchema,type AddressQuery,type LocationCandidate} from '@/lib/geocoding';
 
 export type LocationLookup=(address:AddressQuery,signal:AbortSignal)=>Promise<LocationCandidate[]>;
-export function AddressLocation({address,onChoose,lookup}:{address:AddressQuery;onChoose:(point:LocationCandidate)=>void;lookup?:LocationLookup}){
+export function AddressLocation({address,onChoose,lookup,autoSearch=false,canAutoChoose=true,onAutoSearchComplete}:{address:AddressQuery;onChoose:(point:LocationCandidate)=>void;lookup?:LocationLookup;autoSearch?:boolean;canAutoChoose?:boolean;onAutoSearchComplete?:()=>void}){
   const [locations,setLocations]=useState<LocationCandidate[]>([]),[loading,setLoading]=useState(false),[error,setError]=useState(''),[selected,setSelected]=useState('');
   const controller=useRef<AbortController|null>(null);
+  // Read the latest callbacks and coordinate state when an async lookup completes.
+  const current=useRef({onChoose,canAutoChoose,onAutoSearchComplete});
+  useEffect(()=>{current.current={onChoose,canAutoChoose,onAutoSearchComplete}},[onChoose,canAutoChoose,onAutoSearchComplete]);
   useEffect(()=>()=>controller.current?.abort(),[]);
-  async function search(){
+  async function search(automatic=false){
     controller.current?.abort();const control=new AbortController();controller.current=control;
     setLoading(true);setError('');setLocations([]);setSelected('');
     try{let found:LocationCandidate[];if(lookup){found=await lookup(address,control.signal)}else{const response=await fetch('/api/energy/location',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(address),signal:control.signal});const data=await response.json() as {locations:LocationCandidate[];error?:string};
@@ -17,13 +20,24 @@ export function AddressLocation({address,onChoose,lookup}:{address:AddressQuery;
       found=data.locations;}
       if(control.signal.aborted)return;
       setLocations(found);if(!found.length)setError('No se encontró una dirección en esa comuna. Revisa calle y número o ingresa las coordenadas manualmente.');
-    }catch(e){if(!control.signal.aborted)setError((e as Error).message)}finally{if(!control.signal.aborted)setLoading(false)}
+      if(automatic&&current.current.canAutoChoose&&found.length===1&&!found[0].approximate){current.current.onChoose(found[0]);setSelected(found[0].label)}
+    }catch(e){if(!control.signal.aborted)setError((e as Error).message)}finally{if(!control.signal.aborted){setLoading(false);if(automatic)current.current.onAutoSearchComplete?.()}}
   }
+  const searchRef=useRef(search);
+  useEffect(()=>{searchRef.current=search});
+  useEffect(()=>{
+    if(!autoSearch)return;
+    // The keyed parent remounts on address changes; cleanup prevents stale results.
+    const timer=setTimeout(()=>void searchRef.current(true),200);
+    return ()=>{clearTimeout(timer);controller.current?.abort();setLoading(false)};
+  },[autoSearch]);
   return <div className="address-location">
     <strong>Buscar el lugar de instalación</strong>
     <p>{[address.address,address.commune,address.region].filter(Boolean).join(', ')||'Completa la dirección del cliente en el paso 1.'}</p>
-    <p className="energy-explanation">Al buscar se envían la dirección, comuna y región a Google Maps. No se envían la boleta ni los datos de contacto. Confirma que el resultado corresponda al lugar de instalación.</p>
-    <Button variant="outline" disabled={loading||!addressQuerySchema.safeParse(address).success} onClick={search}>{loading?<LoaderCircle className="animate-spin"/>:<MapPin/>}{loading?'Buscando ubicación…':'Buscar coordenadas por dirección'}</Button>
+    <p className="energy-explanation">Al leer una boleta con dirección completa, buscamos sus coordenadas en Google Maps. Solo se envían la dirección, comuna y región; no se envían la boleta ni los datos de contacto. Revisa que el punto corresponda al lugar de instalación.</p>
+    <Button variant="outline" disabled={loading||!addressQuerySchema.safeParse(address).success} onClick={()=>void search()}>{loading?<LoaderCircle className="animate-spin"/>:<MapPin/>}{loading?'Buscando ubicación…':'Buscar coordenadas por dirección'}</Button>
+    {loading&&<p role="status">Buscando latitud y longitud para la dirección de instalación…</p>}
+    {!loading&&!selected&&locations.length>0&&<p role="status">Confirma la ubicación: selecciona el resultado correcto para cargar la latitud y longitud.</p>}
     {!addressQuerySchema.safeParse(address).success&&<p className="energy-explanation">Completa calle y número, región y una comuna de esa región para buscar.</p>}
     {error&&<p className="energy-error" role="alert">{error}</p>}
     <div className="location-candidates">{locations.map(point=><div key={`${point.latitude},${point.longitude}`}><strong>{point.label}</strong><p>{point.approximate?'Ubicación aproximada de calle o sector; ajusta el punto de instalación.':'Dirección con numeración; verifica el punto de instalación.'}</p><small>{point.latitude.toFixed(6)}, {point.longitude.toFixed(6)}</small><div><a href={`https://www.google.com/maps/search/?api=1&query=${point.latitude},${point.longitude}${point.placeId?`&query_place_id=${encodeURIComponent(point.placeId)}`:""}`} target="_blank" rel="noreferrer">Ver en Google Maps</a><Button variant="outline" onClick={()=>{onChoose(point);setSelected(point.label)}}>Usar esta ubicación</Button></div></div>)}</div>
