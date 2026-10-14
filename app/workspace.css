@@ -143,3 +143,15 @@
  .system-option>span{font-size:11px}.solar-months{grid-template-columns:repeat(4,minmax(0,1fr))}.solar-consult{width:100%}
 }
 @media(prefers-reduced-motion:reduce){.energy-panel .animate-spin{animation:none}}
+
+/* Readable internal solar study, independent of generic review labels. */
+.energy-panel .solar-study>summary{padding:20px;gap:14px;background:#e8f1ee;color:#123f4b;line-height:1.5;min-height:88px}
+.energy-panel .solar-study>summary:hover{background:#dcebe5}
+.energy-panel .solar-study>summary:focus-visible{outline:3px solid #1a6550;outline-offset:-3px}
+.energy-panel .solar-study>summary>svg{color:#256b4b}
+.energy-panel .solar-study .solar-study-copy{min-width:0;display:block;color:#123f4b}
+.energy-panel .solar-study .solar-study-copy>strong{display:block;font-size:18px;font-weight:700;color:#123f4b;line-height:1.4}
+.energy-panel .solar-study .solar-study-copy>small{display:block;font-size:14px;font-weight:500;line-height:1.5;color:#36545e;margin-top:5px}
+.energy-panel .solar-study .solar-internal-label{display:inline-block;margin-top:9px;padding:4px 9px;border-radius:5px;font-size:12px;font-weight:650;line-height:1.5;background:#d2e5d9;color:#174b36;white-space:normal}
+.energy-panel .solar-study-body>.solar-customer-note{font-size:14px;line-height:1.6;color:#294f59;padding:12px 14px;background:#f0f6f3;border-left:3px solid #347555;margin:0 0 18px}
+@media(max-width:650px){.energy-panel .solar-study>summary{padding:16px 14px;gap:10px}.energy-panel .solar-study .solar-study-copy>strong{font-size:17px}}
