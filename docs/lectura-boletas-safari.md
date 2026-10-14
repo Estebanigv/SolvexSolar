@@ -17,3 +17,9 @@
 - TypeScript sin errores; lint de archivos afectados sin errores (advertencias existentes por miniaturas img locales).
 - Foto COPELEC 1.jpeg: 900 × 1600. El timbre no se decodificó con el lector anterior ni con el nuevo, tampoco con recortes, ampliación y contraste. Se requiere una toma más cercana y enfocada; no se inventan datos. No se incluye esa foto privada en el repositorio.
 - No hay un Safari físico disponible para validar el equipo de Nidia; faltan versión del sistema y comprobación en ese dispositivo. No se debe borrar su almacenamiento: puede contener cotizaciones pendientes.
+
+## Escaneo en vivo (14 de octubre de 2026)
+- Escanear código abre un lector de video. Iniciar cámara solicita la cámara trasera sin micrófono; detecta automáticamente QR, barras o PDF417 y adjunta solamente el fotograma detectado. Usar una foto conserva la captura alternativa.
+- Un único worker se reutiliza, sin acumular fotogramas. La cámara se detiene al detectar, cancelar, ocultar la página o superar 90 segundos; una autorización tardía también libera la cámara.
+- Prueba de navegador con MediaStream de un PDF417 ficticio: video → worker → detección → imagen adjunta → resumen de un código leído. No utiliza una cámara física ni documentos de clientes.
+- Pruebas de permisos denegados, cancelación y autorización tardía aprobadas. La comprobación física en el iPhone de Nidia sigue pendiente.
