@@ -1,3 +1,4 @@
+import {issuanceWarningCanvases} from './issuance-warning-canvas';
 import {measure,wrapProposal,printableText} from './proposal-typography';
 export {wrapProposal,printableText} from './proposal-typography';
 import {applyElementStyles,type CanvasElement} from './proposal-elements';
@@ -203,7 +204,7 @@ export function proposalCanvases(q:SavedQuote):CanvasPage[]{
   page.ops.push({kind:'text',elementId:`${page.sourcePage}:footer-text`,x:36,y:577,size:9,bold:false,color:colors.muted,text:printableText([q.settings.name,documentFolio(q)].filter(Boolean).join(' · '))});
   page.ops.push({kind:'text',elementId:`${page.sourcePage}:page-number`,x:755,y:577,size:9,bold:false,color:colors.muted,text:`${i+1} / ${pages.length}`});
  });
- return pages.map(page=>applyElementStyles({...page,font:style.font,ops:page.ops.map(op=>{
+ const styled=pages.map(page=>applyElementStyles({...page,font:style.font,ops:page.ops.map(op=>{
   if(!custom||op.kind==='image')return op;
   const map=(value:string)=>{
    const key=Object.entries(colors).find(([,hex])=>hex===value)?.[0] as keyof typeof colors|undefined;
@@ -222,4 +223,9 @@ export function proposalCanvases(q:SavedQuote):CanvasPage[]{
   }
   return {...op,color,...('stroke' in op&&op.stroke?{stroke:map(op.stroke)}:{})};
  })},q.input.proposalContent?.elements??{}));
+ const notices=issuanceWarningCanvases(q);
+ if(notices.length&&styled[0])styled[0].ops.push({kind:'text',x:36,y:548,text:'Emitida con información pendiente. Revisa las observaciones al final del documento.',size:8,bold:true,color:'#795514'});
+ const combined=[...styled,...notices];
+ if(notices.length)combined.forEach((page,i)=>{for(const op of page.ops)if(op.kind==='text'&&op.elementId?.endsWith(':page-number'))op.text=`${i+1} / ${combined.length}`;if(page.id.startsWith('issuance-notice'))page.ops.push({kind:'text',x:755,y:575,text:`${i+1} / ${combined.length}`,size:9,bold:false,color:'#665b47',font:'sans'});});
+ return combined;
 }

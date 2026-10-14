@@ -19,7 +19,7 @@ export function proposalLayout(original:SavedQuote,includeHidden=false):Proposal
  const pages:ProposalPage[]=[
   {id:'cover',cover:true,title:systemNames[input.system],subtitle:'Tu techo. Tu energía.',blocks:[
    {id:'client',kind:'text',title:input.customer.name||'Nombre del cliente',body:[input.customer.commune,new Date(q.issuedAt??q.date).toLocaleDateString('es-CL',{timeZone:'America/Santiago'})].filter(Boolean).join(' · ')},
-   {id:'investment',kind:'metric',title:'Inversión total',value:money(c.total),binding:'total',body:c.tax===null?'Pesos chilenos · IVA por confirmar':'Pesos chilenos · IVA incluido'},
+   {id:'investment',kind:'metric',title:c.complete?'Inversión total':'Importe parcial',value:money(c.total),binding:'total',body:c.tax===null?'Pesos chilenos · IVA por confirmar':'Pesos chilenos · IVA incluido'},
    {id:'power',kind:'metric',title:'Potencia instalada',value:`${c.kwp.toLocaleString('es-CL',{maximumFractionDigits:3})} kWp`,body:`${c.panels} paneles solares`},
    {id:'saving-summary',kind:'metric',title:'Ahorro mensual estimado',value:projection?money(projection.input.monthlySavings!):'Por validar',binding:'savings',body:projection?'Primer año · Según escenario validado':'Se confirma al validar el consumo y la generación.'},
    ...(discount?[{id:'discount',kind:'text' as const,binding:'discount' as const,title:'Descuento para tu proyecto',body:`${discount.percent?`${discount.percent}% de descuento. `:''}Ahorras ${money(discount.amount)}. Precio anterior: ${money(discount.before)}.`}]:[]),
@@ -38,7 +38,7 @@ export function proposalLayout(original:SavedQuote,includeHidden=false):Proposal
    ...(projection.co2Tonnes!==null?[{id:'environment',kind:'text' as const,title:'Impacto ambiental estimado',body:`${projection.co2Tonnes.toLocaleString('es-CL',{maximumFractionDigits:2})} toneladas de CO₂ evitadas en el primer año. ${projection.input.avoidedKwh?.toLocaleString('es-CL')} kWh sustituidos × ${projection.input.emissionFactor} kg CO₂/kWh. Fuente: ${projection.input.emissionSource}`}]:[]),
   ]}]:[]),
   {id:'investment-page',title:'Inversión y respaldo.',subtitle:'Tu propuesta, en detalle',blocks:[
-   {id:'closing-total',kind:'metric',title:'Total del proyecto',value:money(c.total),binding:'total',body:input.payment},
+   {id:'closing-total',kind:'metric',title:c.complete?'Total del proyecto':'Importe parcial',value:money(c.total),binding:'total',body:input.payment},
    ...paymentBreakdown(c.total,settings).map((p,i)=>({id:`payment-${i}`,kind:'metric' as const,title:p.label,value:money(p.amount),binding:'payment' as const,share:p.percent,body:`${p.percent}% del total`})),
    {id:'warranty',kind:'text',title:'Respaldo del proyecto',body:settings.warranty||'Garantías pendientes de confirmar.'},
    {id:'terms',kind:'text',title:'Condiciones comerciales',body:settings.terms||'Condiciones pendientes de confirmar.'},

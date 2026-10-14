@@ -1,6 +1,6 @@
 import {AtlasProposal} from './atlas-proposal';
 import {usesAtlasProposal} from '@/lib/proposal-layout';
-import {documentFolio,documentTitle,isIssued} from '@/lib/quote-issuance';
+import {documentFolio,documentTitle,isIssued,issuedWarnings} from '@/lib/quote-issuance';
 import type {SavedQuote} from '@/lib/quote';
 import {ProposalProjection} from './proposal-projection';
 import {money,systemNames} from '@/lib/quote';
@@ -44,6 +44,7 @@ function LegacyProposal({q:original}:{q:SavedQuote}){
     <p className="proposal-validity">Vigencia de {settings.validDays} días desde la emisión.</p>
     <section className="proposal-payments"><h3>Forma de pago</h3><p>{input.payment}</p>{payments.length>0&&<div>{payments.map((row,index)=><div key={row.label}><span>{index+1}</span><div><p>{row.label}</p><small>{row.percent}% del total</small></div><strong>{money(row.amount)}</strong></div>)}</div>}</section>
     {consumption&&input.energy&&<section className="proposal-consumption"><h3>Consumo de referencia</h3><div><div><small>Boleta informada</small><strong>{money(input.customer.bill)}</strong></div><div><small>Consumo del período</small><strong>{input.energy.consumptionKwh?.toLocaleString('es-CL')} <small>kWh</small></strong></div><div><small>Período facturado</small><strong>{input.energy.billingDays} <small>días</small></strong></div></div><p>{[input.energy.distributor,input.energy.tariff,input.energy.billReviewed?'Revisado con la boleta':'Pendiente de revisión'].filter(Boolean).join(' · ')}</p><p>Equivalente a 30 días: {consumption.equivalent30DaysKwh.toLocaleString('es-CL',{maximumFractionDigits:1})} kWh. No representa una proyección anual.</p></section>}
+    {issuedWarnings(q).length>0&&<section className="proposal-pending"><h3>Cotización emitida con información pendiente</h3><p>Sujeta a completar y validar los antecedentes indicados.</p><ul>{issuedWarnings(q).map(w=><li key={w}>{w}</li>)}</ul></section>}
     {!isIssued(q)&&c.warnings.length>0&&<section className="proposal-pending"><h3>Propuesta en revisión</h3><ul>{c.warnings.map(w=><li key={w}>{w}</li>)}</ul></section>}
    </div>{footer('Equipos y pagos')}
   </section>

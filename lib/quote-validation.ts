@@ -5,7 +5,7 @@ import {consumptionSummary} from './energy';
 export type QuoteIssue={id:string;message:string;tab:'quote'|'settings'|'catalog';step:'customer'|'system'|'installation'|'review';field:string;productId?:string};
 export const issueLocation=(issue:QuoteIssue)=>issue.tab==='settings'?'Empresa':issue.tab==='catalog'?'Equipos y precios':({customer:'1 · Cliente y boleta',system:'2 · Equipos',installation:'3 · Instalación',review:'4 · Revisión y envío'})[issue.step];
 
-// UI guidance for the existing issuance rules. It does not relax server checks.
+// Actionable field guidance. Missing information may be disclosed at issuance; invalid totals and incompatible services remain blocked.
 export function quoteValidationIssues(q:SavedQuote):QuoteIssue[]{
  const issues:QuoteIssue[]=[],input=q.input,c=q.calculation,s=q.settings;
  const add=(id:string,message:string,step:QuoteIssue['step'],field:string,tab:QuoteIssue['tab']='quote',productId?:string)=>{if(!issues.some(i=>i.id===id))issues.push({id,message,step,field,tab,productId})};

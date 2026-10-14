@@ -1,0 +1,27 @@
+import assert from 'node:assert/strict';
+import {createElement} from 'react';
+import {renderToStaticMarkup} from 'react-dom/server';
+import {PDFDocument} from 'pdf-lib';
+import {QuoteIssuePanel} from '../app/quote-issue-panel';
+import {newQuote,calculate,initialProducts,initialSettings,type SavedQuote} from '../lib/quote';
+import {issuanceWarnings} from '../lib/quote-issuance';
+import {proposalCanvases} from '../lib/proposal-canvas';
+import {quotePdf} from '../lib/pdf';
+import {Proposal} from '../app/proposal';
+async function run(){
+ const input={...newQuote(),customer:{...newQuote().customer,name:'Prueba pendiente'}};
+ const settings={...initialSettings,taxMode:'included' as const};
+ const q:SavedQuote={id:'test',folio:'TEST',date:'2026-10-14',input,settings,calculation:calculate(input,initialProducts,settings)};
+ const panel=renderToStaticMarkup(createElement(QuoteIssuePanel,{quote:q,onIssue:()=>{},onSelect:()=>{}}));
+ assert.match(panel,/Emitir con pendientes/);assert.match(panel,/Ver pendientes/);assert.ok(!panel.includes('disabled=""'));assert.ok(!panel.includes('<details open'));
+ const issued={...q,issuedAt:'2026-10-14',folio:'SVX-2026-000001',issuanceWarnings:issuanceWarnings(q)};
+ const hidden={...issued,input:{...input,proposalContent:{...input.proposalContent!,hidden:['issuance-notice'],elements:{'issuance-notice-0:title':{hidden:true,text:'Todo aprobado'}}}}};
+ const pages=proposalCanvases(hidden),notices=pages.filter(p=>p.id.startsWith('issuance-notice'));
+ assert.ok(notices.length);const noticeText=notices.flatMap(p=>p.ops).filter(o=>o.kind==='text').map(o=>o.text).join(' ');assert.match(noticeText,/Falta correo o teléfono/);assert.ok(!noticeText.includes('Todo aprobado'));
+ const pdf=await PDFDocument.load(await quotePdf(hidden));assert.equal(pdf.getPageCount(),pages.length);
+ const long={...issued,issuanceWarnings:Array.from({length:80},(_,i)=>`Pendiente ${i}: revisar los antecedentes indicados para este proyecto.`)};
+ const longPages=proposalCanvases(long).filter(p=>p.id.startsWith('issuance-notice'));assert.ok(longPages.length>1);for(const p of longPages)for(const op of p.ops)if(op.kind==='text')assert.ok(op.y<=575&&op.y>0);
+ const legacy={...issued,input:{...input,proposalContent:undefined}};const html=renderToStaticMarkup(createElement(Proposal,{q:legacy}));assert.match(html,/Falta correo o teléfono/);await quotePdf(legacy);
+ assert.equal(proposalCanvases({...issued,issuanceWarnings:undefined}).filter(p=>p.id.startsWith('issuance-notice')).length,0,'No alterar documentos emitidos antiguos');
+ console.log('Pendientes: emisión habilitada, panel compacto, advertencia HTML/PDF, paginación y versiones anteriores: OK');
+}void run();

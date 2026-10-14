@@ -6,7 +6,7 @@ import './quote-validation.css';
 
 export function QuoteValidationList({issues,onSelect,busy=false,prefix='validation'}:{issues:QuoteIssue[];onSelect:(issue:QuoteIssue)=>void;busy?:boolean;prefix?:string}){
  if(!issues.length)return null;
- return <section className="quote-validation-list" aria-label="Datos pendientes para emitir">
+ return <section className="quote-validation-list" aria-label="Datos pendientes de la cotización">
   <h3><AlertCircle size={20}/>Falta completar {issues.length} {issues.length===1?'dato':'datos'}</h3>
   <p>Selecciona un pendiente para ir al campo marcado en rojo.</p>
   <ul>{issues.map(issue=><li key={issue.id}><button type="button" disabled={busy} id={`${prefix}-${issue.id}`} onClick={()=>onSelect(issue)}><span><strong>{issue.message}</strong><small>{issueLocation(issue)}</small></span><ArrowRight size={17}/></button></li>)}</ul>

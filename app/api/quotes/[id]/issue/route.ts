@@ -16,7 +16,7 @@ export async function POST(request:Request,{params}:{params:Promise<{id:string}>
  const problems=issuanceProblems(found.data.payload as SavedQuote);
  if(problems.length)throw new AccessError(problems.join(' '),422);
  const {data,error}=await db.rpc('issue_quote',{quote_id:id});
- if(error?.code==='22023')throw new AccessError('Completa los datos y validaciones antes de emitir.',422);
+ if(error?.code==='22023')throw new AccessError('Revisa el nombre del cliente, el importe y la compatibilidad de los servicios antes de emitir.',422);
  if(error)databaseError(error);
  return Response.json(data,{headers:privateHeaders});
 })}
