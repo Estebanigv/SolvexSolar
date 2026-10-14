@@ -5,6 +5,7 @@ import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Checkbox} from '@/components/ui/checkbox';
 import {consumptionSummary, solarGenerationContext, newEnergyInput, solarSourceUrl, type EnergyInput, type SolarEstimate} from '@/lib/energy';
+import {DistributorInput} from './distributor-input';
 import {ProjectLocation} from './project-location';
 import {CneReferencePanel} from './cne-reference';
 import type {AddressQuery} from '@/lib/geocoding';
@@ -66,7 +67,7 @@ export function EnergyPanel({value, peakPower, onChange, address, onEditLocation
     <div className="field-grid energy-fields">
       <label>Consumo de la boleta (kWh)<Input type="number" min={0} max={1e8} step="any" value={energy.consumptionKwh ?? ''} placeholder="Ej. 350" onChange={e => edit({consumptionKwh: e.target.value === '' ? null : Math.max(0, Number(e.target.value))})}/></label>
       <label>Días del período facturado<Input type="number" min={1} max={366} step={1} value={energy.billingDays ?? ''} placeholder="Ej. 30" onChange={e => edit({billingDays: e.target.value === '' ? null : Math.min(366, Math.max(1, Math.round(Number(e.target.value))))})}/></label>
-      <label>Distribuidora<Input maxLength={120} value={energy.distributor} placeholder="Como aparece en la boleta" onChange={e => edit({distributor: e.target.value})}/></label>
+      <DistributorInput value={energy.distributor} onChange={distributor=>edit({distributor})}/>
       <label>Tarifa eléctrica<Input maxLength={50} value={energy.tariff} placeholder="Ej. BT1" onChange={e => edit({tariff: e.target.value})}/></label>
     </div>
     {consumption && <div className="consumption-result" role="status"><div><span>Consumo diario</span><strong>{number(consumption.dailyKwh)} <small>kWh/día</small></strong></div><div><span>Equivalente a 30 días</span><strong>{number(consumption.equivalent30DaysKwh)} <small>kWh</small></strong></div><p>Normalizado desde {energy.billingDays} días. Una boleta no representa todo el año; solicita 12 meses para revisar la estacionalidad.</p></div>}

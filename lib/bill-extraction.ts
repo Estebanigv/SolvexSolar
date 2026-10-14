@@ -1,3 +1,4 @@
+import {detectElectricityDistributor} from './electricity-distributors';
 import type {QuoteInput} from './quote';
 import {newEnergyInput} from './energy';
 import {findCommune,locationFromAddress,regionMatches} from './chile-location';
@@ -38,9 +39,9 @@ export function extractBill(pages:string[]):BillExtraction {
   const set=(key:BillField,value:string,source:string)=>{if(!values[key]){values[key]=value.trim();evidence[key]=source.trim()}};
   const conflicts=new Set<BillField>();
   const textMatch=(key:BillField,pattern:RegExp)=>{const matches=[...flat.matchAll(new RegExp(pattern.source,pattern.flags+'g'))].filter(m=>m[1].trim().length>1);const unique=new Set(matches.map(m=>normalize(m[1].trim())));if(unique.size>1){conflicts.add(key);warnings.push(`Se detectaron valores distintos para ${billFields.find(f=>f.key===key)!.label.toLowerCase()}. Revisa que los documentos sean de la misma boleta.`);}else if(matches.length)set(key,matches[0][1],matches[0][0])};
-  textMatch('name',/(?:Sr\.?\s*\(a\)|(?:Titular|Nombre del cliente|Nombre\s*\/\s*Raz[oó]n social)\s*:)\s*([^\n]{2,100})/i);
+  textMatch('name',/(?:(?:Sr\.?|Señor)\s*\(a\)|(?:Titular|Nombre del cliente|Nombre\s*\/\s*Raz[oó]n social)\s*:)\s*([^\n]{2,100})/i);
   if(values.name) values.name=values.name.replace(/\s*\(\s*Cliente\s*\).*$/i,'').trim();
-  textMatch('address',/(?:Direcci[oó]n\s+(?:de[l]?\s+)?(?:suministro|servicio|instalaci[oó]n)|Domicilio del cliente)\s*:?\s*([^\n]{3,180})/i);
+  textMatch('address',/(?:Direcci[oó]n\s+(?:de[l]?\s+)?(?:suministro|servicio|instalaci[oó]n)|Domicilio del cliente|Direcci[oó]n del cliente)\s*:?\s*([^\n]{3,180})/i);
   if(!values.address&&!conflicts.has('address'))textMatch('address',/Direcci[oó]n\s+(?:de\s+)?env[iíì]o\s*:\s*([^\n]{3,180})/i);
   textMatch('email',/(?:Correo(?: electr[oó]nico)?|E-?mail)\s+(?:del\s+)?cliente\s*:\s*([^\s\n]+@[^\s\n]+)/i);
   textMatch('phone',/(?:Tel[eé]fono|Celular)\s+(?:del\s+)?cliente\s*:\s*(\+?\d[\d ()-]{6,25})/i);
@@ -60,10 +61,9 @@ export function extractBill(pages:string[]):BillExtraction {
   // Use only the customer's supply address, never branch/office addresses elsewhere on the bill.
   const addressTown=values.address?.match(/,\s*([a-záéíóúñ][a-záéíóúñ .'-]{2,60})\s*$/i);
   if(!values.commune&&!conflicts.has('commune')&&addressTown)set('commune',addressTown[1].trim(),values.address!);
-  const suppliers=[...flat.matchAll(/\b(COPELEC|ENEL|CGE|CHILQUINTA|SAESA|FRONTEL|LUZ OSORNO|EDELAYSEN|EDELMAG|LUZ LINARES|LUZ PARRAL|EEPA|EMPRESA\s+EL[EÉ]CTRICA\s+PUENTE\s+ALTO)\b/gi)];
-  const supplierNames=[...new Set(suppliers.map(m=>/^empresa/i.test(m[1])?'EEPA':m[1].toUpperCase()))];
-  if(supplierNames.length===1)set('distributor',supplierNames[0],suppliers[0][0]);
-  else if(supplierNames.length>1)warnings.push('Aparecen varias distribuidoras. Confirma cuál emitió la boleta.');
+  const supplier=detectElectricityDistributor(flat);
+  if(supplier.name)set('distributor',supplier.name,supplier.evidence!);
+  else warnings.push(supplier.ambiguous?'Aparecen varias distribuidoras. Confirma cuál emitió la boleta.':'No se identificó la distribuidora. Selecciona o escribe la empresa de tu boleta; puedes continuar con cualquier proveedor de Chile.');
   textMatch('tariff',/(?:tipo de )?tarifa(?:\s+el[eé]ctrica|\s+contratada)?\s*:\s*((?:BT|AT)\s*\d[\w.-]*)\b/i);
   if(values.tariff)values.tariff=values.tariff.replace(/\s/g,'').toUpperCase();
   // Total boleta excludes previous debt; it must not compete with the explicitly labeled amount due.
@@ -73,7 +73,11 @@ export function extractBill(pages:string[]):BillExtraction {
   if(amounts.length===1)set('bill',String(amounts[0]),amountCandidates[0].source);
   else if(amounts.length>1)warnings.push('Se detectaron totales diferentes. Revisa el monto a pagar; podría haber saldo anterior o documentos distintos.');
   if([...flat.matchAll(/Saldo anterior(?:\s*\([^\n)]*\))?\s*[:=]?\s*\$?\s*(\d[\d.,]*)/gi)].some(m=>(billNumber(m[1])??0)>0))warnings.push('El total a pagar incluye saldo anterior. No lo uses como gasto mensual ni como base directa del ahorro; el consumo se calcula con los kWh y días del período.');
-  const usageCandidates=[...flat.matchAll(/(?:Consumo total del (?:mes|per[ií]odo)|Electricidad consumida|Consumo (?:del per[ií]odo|facturado|mensual))\s*[:=]?\s*\(?\s*(\d[\d.,]*)\s*k\s*w\s*h\b/gi)].map(m=>({n:billNumber(m[1]),source:m[0]})).filter(x=>x.n!==null&&x.n>=0&&x.n<=1e8);
+  const usageCandidates=[...flat.matchAll(/(?:Consumo total del (?:mes|per[ií]odo)|Electricidad consumida|Energ[ií]a consumida|Consumo (?:del per[ií]odo|facturado|mensual))\s*[:=]?\s*\(?\s*(\d[\d.,]*)\s*k\s*w\s*h\b/gi)].map(m=>({n:billNumber(m[1]),source:m[0]})).filter(x=>x.n!==null&&x.n>=0&&x.n<=1e8);
+  // Some layouts print the unit in the label rather than after the value.
+  for(const match of flat.matchAll(/(?:Consumo (?:total del (?:mes|per[ií]odo)|del per[ií]odo|facturado|mensual)|Electricidad consumida|Energ[ií]a consumida)\s*\(\s*k\s*w\s*h\s*\)\s*[:=]?\s*(\d[\d.,]*)(?!\d)/gi)){
+    const n=billNumber(match[1]);if(n!==null&&n>=0&&n<=1e8)usageCandidates.push({n,source:match[0]});
+  }
   const usages=[...new Set(usageCandidates.map(x=>x.n))];
   if(usages.length===1)set('consumptionKwh',String(usages[0]),usageCandidates[0].source);
   else if(usages.length>1)warnings.push('Las lecturas muestran consumos distintos. Selecciona el consumo facturado del período; no una lectura acumulada del medidor.');
@@ -86,7 +90,7 @@ export function extractBill(pages:string[]):BillExtraction {
     const issue=flat.match(/Fecha de emisi[oó]n\s*:\s*\d{1,2}\s+(\p{L}+)\s+(\d{4})/iu);
     if(namedPeriod&&issue){const sm=months.indexOf(normalize(namedPeriod[2]).slice(0,3))+1;const em=months.indexOf(normalize(namedPeriod[4]).slice(0,3))+1;const im=months.indexOf(normalize(issue[1]).slice(0,3))+1;if(sm&&em&&im){const year=+issue[2]-(em>im?1:0);start=validDate(+namedPeriod[1],sm,year-(sm>em?1:0));end=validDate(+namedPeriod[3],em,year);period=namedPeriod[0]}}
   }
-  const explicitDays=flat.match(/(?:D[ií]as (?:del per[ií]odo|facturados)|Per[ií]odo facturado)\s*:\s*(\d{1,3})(?:\s*d[ií]as)?/i);
+  const explicitDays=flat.match(/(?:D[ií]as (?:del per[ií]odo|facturados|de consumo)|Per[ií]odo facturado)\s*:\s*(\d{1,3})(?:\s*d[ií]as)?/i);
   if(explicitDays&&+explicitDays[1]>0&&+explicitDays[1]<=366)set('billingDays',explicitDays[1],explicitDays[0]);
   else if(start&&end){const days=(end.getTime()-start.getTime())/86400000;if(days>0&&days<=366){set('billingDays',String(days),period!);warnings.push('Los días se calcularon entre las fechas detectadas. Confirma la duración del período con la boleta.')}}
   if(!values.consumptionKwh)warnings.push('No se detectó un consumo facturado inequívoco. Agrega el reverso o ingresa los kWh manualmente.');
