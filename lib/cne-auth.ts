@@ -17,8 +17,8 @@ export function createCneTokenProvider(fetcher:typeof fetch=fetch,now:()=>number
   if(pending)return pending;
   pending=(async()=>{
    let response:Response;
-   try{response=await fetcher('https://api.cne.cl/api/login',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded',Accept:'application/json'},body:new URLSearchParams({email,password}),cache:'no-store',redirect:'error',signal:AbortSignal.timeout(15000)});}catch{throw new CneAuthError('unavailable')}
-   if(!response.ok)throw new CneAuthError(response.status===401||response.status===403?'credentials':response.status===429?'rate-limit':'unavailable');
+   try{response=await fetcher('https://api.cne.cl/api/login',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded',Accept:'application/json'},body:new URLSearchParams({email,password}),cache:'no-store',redirect:'error',signal:AbortSignal.timeout(15000)});}catch(error){const code=(error as {cause?:{code?:unknown}})?.cause?.code;console.warn('[CNE authentication]',{reason:'transport',code:typeof code==='string'&&/^[A-Z0-9_]{1,60}$/.test(code)?code:'unknown'});throw new CneAuthError('unavailable')}
+   if(!response.ok){console.warn('[CNE authentication]',{reason:'http',status:response.status});throw new CneAuthError(response.status===401||response.status===403?'credentials':response.status===429?'rate-limit':'unavailable');}
    let body:unknown;try{body=await response.json()}catch{throw new CneAuthError('invalid-response')}
    const parsed=z.object({token:z.string().min(10).max(16000)}).safeParse(body);
    if(!parsed.success)throw new CneAuthError('invalid-response');
