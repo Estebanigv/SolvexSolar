@@ -24,7 +24,7 @@ export function CneReferencePanel({commune='',region=''}:{commune?:string;region
   <p className="cne-period-note">El período inicial es diciembre de 2022, comprobado en la fuente. La disponibilidad varía por comuna y período.</p>
   <Button variant="outline" disabled={loading||!commune||!region} onClick={consult}>{loading?<LoaderCircle size={17} className="animate-spin"/>:<BarChart3 size={17}/>} {loading?'Consultando CNE…':'Consultar referencia CNE'}</Button>
   {(!commune||!region)&&<p className="cne-feedback">Selecciona primero la región y comuna del cliente.</p>}
-  {error?.key===key&&<p className="energy-error" role="alert">{error.message}</p>}
+  {error?.key===key&&<div className="energy-error" role="alert"><p>{error.message}</p><p>Esta consulta es opcional. Puedes continuar cotizando con los datos de la boleta; la referencia CNE no modifica el cálculo ni se incluye en el PDF del cliente.</p></div>}
   {result&&!current&&<p className="cne-feedback">La ubicación o el período cambió. Consulta nuevamente para actualizar la referencia.</p>}
   {current&&<div className="cne-result" aria-live="polite"><div className="cne-result-title"><strong>{current.commune} · {months[month-1]} de {year}</strong><span>Referencia histórica</span></div>{current.available?<>
    <div className="cne-metrics"><div><span>Promedio por cliente facturado</span><strong>{current.averageKwh===null?'No calculable':number(current.averageKwh)}{current.averageKwh!==null&&<small> kWh / mes</small>}</strong></div><div><span>Clientes facturados</span><strong>{number(current.clients)}</strong></div><div><span>Energía del conjunto</span><strong>{number(current.totalKwh)}<small> kWh</small></strong></div></div>

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {cneQuerySchema,getCneReference,summarizeCne,type CneQuery} from '../lib/cne';
-import {createCneTokenProvider} from '../lib/cne-auth';
+import {createCneTokenProvider,CneAuthError} from '../lib/cne-auth';
 const q:CneQuery={commune:'Puente Alto',region:'Metropolitana de Santiago',year:2022,month:12,sector:'residential'};
 const row={anio:2022,mes:12,region:'Región Metropolitana de Santiago',comuna:'Puente Alto',tipo_clientes:'Residencial',tarifa:'BT1',clientes_facturados:10,energia_kwh:1000};
 assert.equal(cneQuerySchema.safeParse({...q,region:'Valparaíso'}).success,false);
@@ -26,8 +26,14 @@ async function run(){
  await provider('test@example.com','test#password');assert.equal(logins,1);
  time+=3600000;await provider('test@example.com','test#password');assert.equal(logins,2);
  await provider('test@example.com','test#password',true);assert.equal(logins,3);
- await assert.rejects(()=>createCneTokenProvider((async()=>new Response('secret upstream body',{status:401})) as typeof fetch)('test@example.com','test#password'),/revisar el correo/);
+ await assert.rejects(()=>createCneTokenProvider((async()=>new Response('secret upstream body',{status:401})) as typeof fetch)('test@example.com','test#password'),/rechazó las credenciales/);
  await assert.rejects(()=>createCneTokenProvider((async()=>Response.json({token:'header.'+Buffer.from(JSON.stringify({exp:1})).toString('base64url')+'.signature'})) as typeof fetch)('test@example.com','test#password'),/vencida/);
+
+ for(const [status,code] of [[401,'credentials'],[403,'credentials'],[429,'rate-limit'],[500,'unavailable'],[502,'unavailable']] as const){
+  await assert.rejects(()=>createCneTokenProvider((async()=>new Response('secret upstream body',{status})) as typeof fetch)('test@example.com','secret'),e=>e instanceof CneAuthError&&e.code===code&&!e.message.includes('secret'));
+ }
+ await assert.rejects(()=>createCneTokenProvider((async()=>{throw Error('private network details')}) as typeof fetch)('test@example.com','secret'),e=>e instanceof CneAuthError&&e.code==='unavailable'&&!e.message.includes('private'));
+ await assert.rejects(()=>createCneTokenProvider((async()=>new Response('<html>upstream error</html>')) as typeof fetch)('test@example.com','secret'),e=>e instanceof CneAuthError&&e.code==='invalid-response');
  let calls=0;
  const result=await getCneReference(q,{token:'test-secret',fetcher:(async(url,init)=>{
   const u=new URL(String(url));calls++;assert.equal(u.hostname,'api.cne.cl');assert.equal(u.searchParams.get('page'),String(calls));assert.equal(u.searchParams.get('per_page'),'2000');assert.equal(u.searchParams.get('year'),'2022');assert.equal(init?.redirect,'error');assert.equal(new Headers(init?.headers).get('Authorization'),'Bearer test-secret');

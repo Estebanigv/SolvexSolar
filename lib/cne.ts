@@ -1,6 +1,6 @@
 import {z} from 'zod';
 import {findCommune,locationKey,regionMatches} from './chile-location';
-import {getCneToken} from './cne-auth';
+import {getCneToken,CneAuthError} from './cne-auth';
 export const cneSourceUrl='https://apidocs.cne.cl/facturacion-clientes-regulados-mensual-23961807e0';
 export const cneQuerySchema=z.object({commune:z.string().trim().min(2).max(100),region:z.string().trim().min(2).max(100),year:z.coerce.number().int().min(2015).max(new Date().getFullYear()),month:z.coerce.number().int().min(1).max(12),sector:z.enum(['residential','non-residential'])}).strict().refine(q=>{const place=findCommune(q.commune);return !!place&&regionMatches(q.region,place.region)},{message:'Selecciona una comuna y región válidas.'});
 export type CneQuery=z.infer<typeof cneQuerySchema>;
@@ -34,13 +34,13 @@ export async function getCneReference(input:CneQuery,options:{token?:string;fetc
  const key=`${q.year}-${q.month}`,useCache=!options.fetcher,hit=useCache?cache.get(key):undefined;
  if(hit&&hit.expires>Date.now())return summarizeCne(hit.rows,q,hit.retrievedAt);
  async function load(){
-  if(automatic){try{token=await getCneToken(email!,password!)}catch{throw new CneError('CNE no permitió renovar la conexión. El administrador debe revisar el correo y la contraseña configurados.')}}
+  if(automatic){try{token=await getCneToken(email!,password!)}catch(error){throw new CneError(error instanceof CneAuthError?error.message:'No fue posible conectar con CNE. Inténtalo nuevamente más tarde.')}}
   const fetcher=options.fetcher??fetch,signal=AbortSignal.timeout(25000);let lastPage=1,total:number|undefined;const rows:CneRow[]=[];
   for(let page=1;page<=lastPage;page++){
    const params=new URLSearchParams({per_page:'2000',page:String(page),year:String(q.year),month:String(q.month)});
    const request=()=>fetcher(`https://api.cne.cl/api/ea/facturacion/cltesregulados/mensual?${params}`,{headers:{Authorization:`Bearer ${token}`,Accept:'application/json'},cache:'no-store',signal,redirect:'error'});
    let response=await request();
-   if(response.status===401&&automatic){try{token=await getCneToken(email!,password!,true)}catch{throw new CneError('CNE no permitió renovar la conexión. El administrador debe revisar el correo y la contraseña configurados.')}response=await request()}
+   if(response.status===401&&automatic){try{token=await getCneToken(email!,password!,true)}catch(error){throw new CneError(error instanceof CneAuthError?error.message:'No fue posible conectar con CNE. Inténtalo nuevamente más tarde.')}response=await request()}
    if(response.status===401||response.status===403)throw new CneError('CNE rechazó la credencial. El administrador debe renovar la conexión.');
    if(!response.ok)throw new CneError('CNE no respondió correctamente. Inténtalo nuevamente.');
    const parsed=pageSchema.safeParse(await response.json());
