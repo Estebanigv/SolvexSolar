@@ -38,7 +38,7 @@
 .toolbar-account-popover>strong {display:block;font-size:17px;overflow-wrap:anywhere}
 .toolbar-account-popover>p {font-size:13px;color:#58717b;margin:5px 0 14px;overflow-wrap:anywhere}
 .toolbar-role {display:inline-flex;gap:6px;align-items:center;font-size:12px;color:#386244;background:#eef4e6;padding:5px 9px;border-radius:6px}
-.toolbar-account-actions {border-top:1px solid #e2ebee;margin-top:18px;padding-top:16px}
+.toolbar-account-actions {display:grid;gap:8px;border-top:1px solid #e2ebee;margin-top:18px;padding-top:16px}
 .toolbar-account-actions>button {width:100%;font-size:13px;min-height:42px}
 .toolbar-account:focus-visible,.toolbar-icon:focus-visible,.grouped-navigation [data-slot=sidebar-trigger]:focus-visible,.workspace-toolbar [data-slot=sidebar-trigger]:focus-visible {outline:2px solid #839e35;outline-offset:3px}
 @media(max-width:1100px){.toolbar-connection>span {display:none}.toolbar-connection {padding:0}.toolbar-brand-name,.toolbar-breadcrumb-arrow {display:none}}

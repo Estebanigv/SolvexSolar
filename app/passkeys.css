@@ -1,0 +1,15 @@
+.passkey-dialog{width:min(560px,calc(100vw - 24px));max-height:calc(100dvh - 32px);overflow-y:auto;color:#153b48}
+.passkey-dialog p{font-size:14px;line-height:1.6}
+.passkey-dialog h3{font-weight:650;margin-top:8px}
+.passkey-explanation{color:#536c75}
+.passkey-dialog a{text-decoration:underline;overflow-wrap:anywhere}
+.passkey-list{list-style:none;padding:0;margin:0;display:grid;gap:12px}
+.passkey-list li{padding:14px;border:1px solid #cbdcde;border-radius:10px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.passkey-list li>div:first-child{display:flex;align-items:center;gap:10px;min-width:0;overflow-wrap:anywhere}
+.passkey-list small{display:block;color:#536c75;margin-top:4px}
+.passkey-confirm{width:100%;display:flex;flex-wrap:wrap;gap:8px}
+.passkey-confirm p{width:100%}
+.passkey-error,.passkey-success{padding:12px 14px;border-radius:8px;border:1px solid}
+.passkey-error{color:#8a2e20;background:#fff3ef;border-color:#e2b2a6}
+.passkey-success{color:#175b42;background:#eef8f1;border-color:#afcdb9}
+.passkey-dialog button{min-height:44px;white-space:normal;height:auto}

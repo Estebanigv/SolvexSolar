@@ -86,3 +86,11 @@
 }
 .auth-card .auth-password-toggle:hover { background: #eaf1f3; color: #153b48; }
 .auth-card .auth-password-toggle:focus-visible { outline: 2px solid #789c33; outline-offset: 2px; }
+.auth-biometric{margin-top:24px}
+.auth-card .auth-biometric button{width:100%;background:#eaf4ee;color:#17563f;border:1px solid #a5c8b2;line-height:1.4}
+.auth-card .auth-biometric p{font-size:12px;margin:10px 0 18px}
+.auth-biometric>span{display:flex;align-items:center;gap:12px;font-size:12px;color:#607984}
+.auth-biometric>span::before,.auth-biometric>span::after{content:'';flex:1;height:1px;background:#dce7eb}
+.auth-biometric+form{margin-top:12px}
+.auth-card .field-error{color:#9a3324}
+.auth-card button:focus-visible{outline:3px solid #739a40;outline-offset:3px}

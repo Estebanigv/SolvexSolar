@@ -1,3 +1,3 @@
 import {createBrowserClient} from '@supabase/ssr';
 import {supabaseUrl,supabaseKey} from './config';
-export function browserDatabase(){return createBrowserClient(supabaseUrl,supabaseKey)}
+export function browserDatabase(){return createBrowserClient(supabaseUrl,supabaseKey,{auth:{experimental:{passkey:true}}})}
