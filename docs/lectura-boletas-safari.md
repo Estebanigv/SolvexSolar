@@ -23,3 +23,10 @@
 - Un único worker se reutiliza, sin acumular fotogramas. La cámara se detiene al detectar, cancelar, ocultar la página o superar 90 segundos; una autorización tardía también libera la cámara.
 - Prueba de navegador con MediaStream de un PDF417 ficticio: video → worker → detección → imagen adjunta → resumen de un código leído. No utiliza una cámara física ni documentos de clientes.
 - Pruebas de permisos denegados, cancelación y autorización tardía aprobadas. La comprobación física en el iPhone de Nidia sigue pendiente.
+
+## Direcciones partidas en fotos (14 de octubre de 2026)
+- La extracción conserva la continuación de la dirección de suministro (departamento y comuna), incluso con confusiones OCR Deplo/Deplto. No toma la continuación de la dirección postal si hay dirección de suministro ni une direcciones entre documentos.
+- La región se resuelve desde la comuna del cliente mediante el catálogo territorial existente. Direcciones de sucursales y subestaciones no se utilizan para ubicar al cliente.
+- Si no se lee el año de emisión, se calcula la duración entre días/meses solo cuando es idéntica en años comunes y bisiestos. Un período que cruza febrero y depende del año permanece pendiente.
+- Prueba local con las dos fotos COPELEC originales: 8 campos autocompletados frente a 5, incluida dirección con departamento, Chillán/Ñuble y 29 días. El consumo kWh permanece vacío porque no está visible. No se guardaron cotizaciones ni se incorporaron fotos o transcripciones privadas al repositorio.
+- El banco de prueba solo en desarrollo permite consultar el texto OCR para diagnosticar variaciones del navegador. No se expone ese panel en producción.

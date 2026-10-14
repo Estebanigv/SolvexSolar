@@ -149,3 +149,51 @@ assert.equal(expanded.values.bill,'120000');
 assert.equal(expanded.values.email,'prueba@example.com');
 assert.equal(expanded.values.phone,'+56 9 1111 2222');
 assert.equal(extractBill(['Cliente: 123456789']).values.name,undefined,'Account numbers are not customer names');
+// Folded photo: OCR reads Deplo; only the supply continuation may locate the client.
+const foldedFront=`COPELEC
+CASA MATRIZ: Calle Oficina 9, Santiago
+Sr. (a) Cliente Ficticio (Cliente)
+Dirección de envío: Calle Postal 90 Depto 2
+Temuco
+Dirección de suministro: Avenida Ejemplo 123
+DEplo 7 Chillan
+Fecha de emisión: 25 Jun 2026
+Monto del período 26 Abril - 25 Mayo
+Total a pagar $ 180.000`;
+const officeBack=`COPELEC
+Tipo de tarifa contratada: BT1
+Potencia conectada: 9,9 kW
+PAGO PRESENCIAL
+Chillán, Calle Oficina 100
+Bulnes, Calle Otra 200
+San Carlos, Calle Tres 300`;
+const folded=extractBill([foldedFront,officeBack]);
+assert.equal(folded.values.address,'Avenida Ejemplo 123 Depto 7');
+assert.equal(folded.values.commune,'Chillán');
+assert.equal(folded.values.region,'Ñuble');
+assert.equal(folded.values.billingDays,'29');
+assert.equal(folded.values.tariff,'BT1');
+assert.equal(folded.values.distributor,'COPELEC');
+assert.equal(folded.values.consumptionKwh,undefined,'Connected power is not billed energy');
+assert.match(folded.evidence.address!,/DEplo 7 Chillan/);
+const splitTown=extractBill(['Dirección de suministro: Calle Ejemplo 123\nDepto 7\nChillan']);
+assert.equal(splitTown.values.address,'Calle Ejemplo 123 Depto 7');
+assert.equal(splitTown.values.commune,'Chillán');
+assert.equal(extractBill(['Dirección de suministro: Calle Ejemplo 123\nTotal a pagar $ 180.000',officeBack]).values.commune,undefined,'Never use branch locations');
+assert.equal(extractBill(['Dirección de suministro: Calle Ejemplo 123','Depto 7 Chillan']).values.commune,undefined,'Never join separate documents as address lines');
+assert.equal(extractBill(['Dirección de suministro: Calle Ejemplo 123\nDepto 7 Chillan','Dirección de suministro: Calle Ejemplo 123\nDepto 9 Chillan']).values.address,undefined,'Different apartments require review');
+const deliveryOnly=extractBill(['Dirección de envío: Calle Ejemplo 123\nDpto 7 Chillan']);
+assert.equal(deliveryOnly.values.commune,'Chillán');
+assert.equal(deliveryOnly.values.region,'Ñuble');
+console.log('Dirección en fotos: continuación OCR, departamento, comuna, región, caras combinadas y sucursales: OK');
+const inlineAddress=extractBill(['Dirección de suministro: Calle Ejemplo 123 Comuna: Chillán Región: Ñuble']);
+assert.equal(inlineAddress.values.address,'Calle Ejemplo 123');
+assert.equal(inlineAddress.values.commune,'Chillán');
+const browserPhoto=extractBill([foldedFront.replace('DEplo','DEplto').replace('Fecha de emisión:','Fecha de o'),officeBack]);
+assert.equal(browserPhoto.values.address,'Avenida Ejemplo 123 Depto 7');
+assert.equal(browserPhoto.values.commune,'Chillán');
+assert.equal(browserPhoto.values.billingDays,'29');
+assert.match(browserPhoto.warnings.join(' '),/año de emisión/);
+assert.equal(extractBill(['Monto del período 28 Febrero - 1 Marzo']).values.billingDays,undefined,'Leap-year ambiguity needs confirmation');
+assert.equal(extractBill(['Monto del período 30 Febrero - 5 Marzo']).values.billingDays,undefined);
+assert.equal(extractBill(['Monto del período 20 Diciembre - 20 Enero']).values.billingDays,'31');

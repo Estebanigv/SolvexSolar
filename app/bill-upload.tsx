@@ -49,7 +49,7 @@ export function useBillAttachment(onDocumentChange:()=>void,onRead:(result:BillE
  function remove(id:string){const old=list.current.find(d=>d.id===id);if(old){URL.revokeObjectURL(old.url);urls.current.delete(old.url)}changeList(list.current.filter(d=>d.id!==id))}
  function rotate(id:string){changeList(list.current.map(d=>d.id===id?{...d,rotation:(d.rotation+90)%360}:d))}
  function clear(){readCache.current.clear();selection.current++;cancel();urls.current.forEach(url=>URL.revokeObjectURL(url));urls.current.clear();list.current=[];setAttachments([]);setError('');setLoading(false);setProgress('');change.current()}
- return {attachments,error,loading,reading,progress,result,select,restore,remove,rotate,clear,cancel,read};
+ return {attachments,error,loading,reading,progress,result,select,restore,remove,rotate,clear,cancel,read,getDiagnosticTexts:()=>process.env.NODE_ENV==='development'?[...readCache.current.values()].flatMap(item=>item.texts):[]};
 }
 
 export function BillUpload({bill,quote,onApply}:{bill:ReturnType<typeof useBillAttachment>;quote:QuoteInput;onApply:(patch:Partial<QuoteInput>)=>void}){

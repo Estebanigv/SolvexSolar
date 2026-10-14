@@ -30,32 +30,49 @@ function validDate(day:number,month:number,year:number) {
 }
 const months=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
 
+function splitBillLabels(text:string){return text.replace(/[ \t]+(?=(?:Comuna|Regi[oó]n|Correo(?: electr[oó]nico)? del cliente|Tel[eé]fono del cliente|Tipo de tarifa contratada)\s*:)/gi,'\n').replace(/\n+/g,'\n');}
+
+/** Follow address continuations only next to the chosen customer label, within one page. */
+function customerAddresses(pages:string[],delivery=false){
+  const label=delivery?/Direcci[oó]n\s+(?:de\s+)?env[iíì]o\s*:\s*([^\n]{3,180})/gi:/(?:Direcci[oó]n\s+(?:de[l]?\s+)?(?:suministro|servicio|instalaci[oó]n)|Domicilio del cliente|Direcci[oó]n del cliente)\s*:?\s*([^\n]{3,180})/gi;
+  const unit=/^(?:D[eé]p(?:t|l|lt)o\.?|Dpto\.?|Departamento|Casa|Oficina|Of\.?)\s+([a-z0-9][a-z0-9/-]*)(?:[ \"'.,-]+[^:\n]{1,65})?$/i;
+  return pages.flatMap(page=>{
+    const clean=splitBillLabels(page.replace(/\r/g,'').replace(/[ \t]+/g,' '));
+    return [...clean.matchAll(label)].map(match=>{
+      let address=match[1].trim(),source=match[0];
+      const next=clean.slice(match.index!+match[0].length).split('\n').slice(1).map(line=>line.trim()).filter(Boolean).slice(0,2);
+      for(const line of next){
+        if(unit.test(line)&&!/(?:Depto|Dpto|Departamento|Casa|Oficina)\s+\w/i.test(address)){
+          // A common OCR confusion on folded bills: Deplo instead of Depto.
+          address+=' '+line.replace(/^D[eé]p(?:t|l|lt)o\.?/i,'Depto').replace(/([0-9])["']+(?=\s|$)/g,'$1');source+='\n'+line;
+        }else if(findCommune(line)){address+=' '+line;source+='\n'+line;break}
+        else break;
+      }
+      return {address,source};
+    });
+  });
+}
+
 /** Extract only explicitly labeled bill data. Utility phone numbers/emails are never customer data. */
 export function extractBill(pages:string[]):BillExtraction {
   const text=pages.join('\n\n').replace(/\r/g,'').replace(/[ \t]+/g,' ');
   // Some PDFs place multiple labeled fields on the same physical line.
-  const flat=text.replace(/[ \t]+(?=(?:Comuna|Regi[oó]n|Correo(?: electr[oó]nico)? del cliente|Tel[eé]fono del cliente|Tipo de tarifa contratada)\s*:)/gi,'\n').replace(/\n+/g,'\n');
+  const flat=splitBillLabels(text);
   const values:BillValues={}; const evidence:BillExtraction['evidence']={}; const warnings:string[]=[];
   const set=(key:BillField,value:string,source:string)=>{if(!values[key]){values[key]=value.trim();evidence[key]=source.trim()}};
   const conflicts=new Set<BillField>();
   const textMatch=(key:BillField,pattern:RegExp)=>{const matches=[...flat.matchAll(new RegExp(pattern.source,pattern.flags+'g'))].filter(m=>m[1].trim().length>1);const unique=new Set(matches.map(m=>normalize(m[1].trim())));if(unique.size>1){conflicts.add(key);warnings.push(`Se detectaron valores distintos para ${billFields.find(f=>f.key===key)!.label.toLowerCase()}. Revisa que los documentos sean de la misma boleta.`);}else if(matches.length)set(key,matches[0][1],matches[0][0])};
   textMatch('name',/(?:(?:Sr\.?|Señor)\s*\(a\)|(?:Titular|Nombre del cliente|Nombre\s*\/\s*Raz[oó]n social)\s*:)\s*([^\n]{2,100})/i);
   if(values.name) values.name=values.name.replace(/\s*\(\s*Cliente\s*\).*$/i,'').trim();
-  textMatch('address',/(?:Direcci[oó]n\s+(?:de[l]?\s+)?(?:suministro|servicio|instalaci[oó]n)|Domicilio del cliente|Direcci[oó]n del cliente)\s*:?\s*([^\n]{3,180})/i);
-  if(!values.address&&!conflicts.has('address'))textMatch('address',/Direcci[oó]n\s+(?:de\s+)?env[iíì]o\s*:\s*([^\n]{3,180})/i);
+  const supplyAddresses=customerAddresses(pages);
+  const addresses=supplyAddresses.length?supplyAddresses:customerAddresses(pages,true);
+  const uniqueAddresses=new Set(addresses.map(item=>normalize(item.address)));
+  if(uniqueAddresses.size>1){conflicts.add('address');warnings.push('Se detectaron direcciones de suministro distintas. Revisa que los documentos sean de la misma boleta.');}
+  else if(addresses.length)set('address',addresses[0].address,addresses[0].source);
   textMatch('email',/(?:Correo(?: electr[oó]nico)?|E-?mail)\s+(?:del\s+)?cliente\s*:\s*([^\s\n]+@[^\s\n]+)/i);
   textMatch('phone',/(?:Tel[eé]fono|Celular)\s+(?:del\s+)?cliente\s*:\s*(\+?\d[\d ()-]{6,25})/i);
-  const addressBlock=flat.match(/Direcci[oó]n\s+(?:de\s+)?(?:suministro|env[iíì]o)\s*:\s*([^\n]+)\n(?:Datos de mi suministro\n)?((?:Depto\.?|Dpto\.?|Casa|Oficina)\s+[^\n]+)/i);
-  if(addressBlock&&values.address&&!/\b(?:Depto|Dpto|Casa|Oficina)\b/i.test(values.address)) values.address+=' '+addressBlock[2];
   textMatch('commune',/\bComuna(?:[ \t]*[:–-][ \t]*|\n|[ \t]+)\s*([^\n]{2,70})/i);
   textMatch('region',/\bRegi[oó]n(?:[ \t]*[:–-][ \t]*|\n|[ \t]+)\s*([^\n]{2,70})/i);
-  const addressLines=flat.split('\n');
-  if(values.address&&!values.commune&&!conflicts.has('commune')){
-    const index=addressLines.findIndex(line=>line.includes(values.address!));
-    const next=index>=0?addressLines[index+1]?.trim():undefined;
-    const nextPlace=next?findCommune(next):undefined;
-    if(nextPlace)set('commune',nextPlace.commune,`${addressLines[index]}\n${next}`);
-  }
   const town=(values.address??'').match(/(?:Depto\.?|Dpto\.?|Casa|Oficina)\s+[\w-]+\s+([a-záéíóúñ][a-záéíóúñ .'-]{2,45})$/i);
   if(!values.commune&&!conflicts.has('commune')&&town)set('commune',town[1],values.address!);
   // Use only the customer's supply address, never branch/office addresses elsewhere on the bill.
@@ -83,16 +100,25 @@ export function extractBill(pages:string[]):BillExtraction {
   else if(usages.length>1)warnings.push('Las lecturas muestran consumos distintos. Selecciona el consumo facturado del período; no una lectura acumulada del medidor.');
   let period:string|undefined;
   const numericPeriod=flat.match(/(?:Per[ií]odo de (?:lectura|facturaci[oó]n)|Monto del per[ií]odo)\s*:?\s*(\d{1,2})[/-](\d{1,2})[/-](\d{4})\s*(?:-|al?|hasta)\s*(\d{1,2})[/-](\d{1,2})[/-](\d{4})/i);
-  let start:Date|null=null,end:Date|null=null;
+  let start:Date|null=null,end:Date|null=null;let yearlessDays:number|undefined;
   if(numericPeriod){start=validDate(+numericPeriod[1],+numericPeriod[2],+numericPeriod[3]);end=validDate(+numericPeriod[4],+numericPeriod[5],+numericPeriod[6]);period=numericPeriod[0]}
   else {
     const namedPeriod=flat.match(/(?:Monto del per[ií]odo|Per[ií]odo de (?:lectura|facturaci[oó]n))\s*:?\s*(\d{1,2})\s+(\p{L}+)\s*(?:-|al?|hasta)\s*(\d{1,2})\s+(\p{L}+)/iu);
     const issue=flat.match(/Fecha de emisi[oó]n\s*:\s*\d{1,2}\s+(\p{L}+)\s+(\d{4})/iu);
     if(namedPeriod&&issue){const sm=months.indexOf(normalize(namedPeriod[2]).slice(0,3))+1;const em=months.indexOf(normalize(namedPeriod[4]).slice(0,3))+1;const im=months.indexOf(normalize(issue[1]).slice(0,3))+1;if(sm&&em&&im){const year=+issue[2]-(em>im?1:0);start=validDate(+namedPeriod[1],sm,year-(sm>em?1:0));end=validDate(+namedPeriod[3],em,year);period=namedPeriod[0]}}
+    // With an unreadable issue year, use a duration only when leap/common years agree.
+    if(namedPeriod&&!start&&!end){
+      const sm=months.indexOf(normalize(namedPeriod[2]).slice(0,3))+1,em=months.indexOf(normalize(namedPeriod[4]).slice(0,3))+1;
+      if(sm&&em){
+        const durations=[2024,2025,2026].map(year=>{const a=validDate(+namedPeriod[1],sm,year-(sm>em?1:0)),b=validDate(+namedPeriod[3],em,year);return a&&b?(b.getTime()-a.getTime())/86400000:null});
+        if(durations.every(days=>days!==null&&days>0&&days<=366)&&new Set(durations).size===1){yearlessDays=durations[0]!;period=namedPeriod[0]}
+      }
+    }
   }
   const explicitDays=flat.match(/(?:D[ií]as (?:del per[ií]odo|facturados|de consumo)|Per[ií]odo facturado)\s*:\s*(\d{1,3})(?:\s*d[ií]as)?/i);
   if(explicitDays&&+explicitDays[1]>0&&+explicitDays[1]<=366)set('billingDays',explicitDays[1],explicitDays[0]);
   else if(start&&end){const days=(end.getTime()-start.getTime())/86400000;if(days>0&&days<=366){set('billingDays',String(days),period!);warnings.push('Los días se calcularon entre las fechas detectadas. Confirma la duración del período con la boleta.')}}
+  if(!values.billingDays&&yearlessDays){set('billingDays',String(yearlessDays),period!);warnings.push('Los días se calcularon con los días y meses del período; el año de emisión no se pudo leer. Confirma el período en la boleta.');}
   if(!values.consumptionKwh)warnings.push('No se detectó un consumo facturado inequívoco. Agrega el reverso o ingresa los kWh manualmente.');
   if(!values.billingDays)warnings.push('No se pudo determinar el período. Completa los días facturados.');
   if(pages.length>1){
