@@ -94,3 +94,17 @@
 .auth-biometric+form{margin-top:12px}
 .auth-card .field-error{color:#9a3324}
 .auth-card button:focus-visible{outline:3px solid #739a40;outline-offset:3px}
+.client-current{display:flex;flex-direction:column;gap:6px;padding:18px;background:white;border:1px solid #bad0c8;border-left:4px solid #1c644d;border-radius:8px;overflow-wrap:anywhere;min-width:0}
+.client-current-status{font-size:13px;color:#256149;font-weight:600}
+.client-current>strong{font-size:20px;line-height:1.35;color:#103f4a}
+.client-current>span:not(.client-current-status){font-size:14px;color:#45645b}
+.client-search{margin-top:18px;min-width:0}
+.client-search>label{display:block;margin-bottom:8px;font-weight:600}
+.client-search>input{width:100%;min-width:0;min-height:48px;padding:10px 14px;border:1px solid #a9c6b9;border-radius:8px;background:white;font-size:16px;color:#103f4a}
+.client-search>input:focus-visible,.client-search-results button:focus-visible{outline:3px solid #408770;outline-offset:2px}
+.client-search-results{list-style:none;padding:0;margin:12px 0;max-height:320px;overflow:auto;border:1px solid #bad0c8;border-radius:8px;background:white}
+.client-search-results li+li{border-top:1px solid #dce7e2}
+.client-search-results button{display:flex;flex-direction:column;gap:4px;width:100%;padding:12px 16px;text-align:left;white-space:normal;overflow-wrap:anywhere;background:white;color:#103f4a;cursor:pointer}
+.client-search-results button:hover{background:#edf5f0}
+.client-search-results span{font-size:13px;color:#45645b}
+.client-search-results small{color:#256149;font-weight:600}
