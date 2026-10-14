@@ -1,4 +1,4 @@
-import {useId} from 'react';
+import {useId,useState} from 'react';
 import type {SavedQuote} from '@/lib/quote';
 import {proposalCanvases,canvasSize,type CanvasPage} from '@/lib/proposal-canvas';
 import {elementDescription,type ElementSelection} from '@/lib/proposal-elements';
@@ -8,7 +8,8 @@ import './atlas-proposal.css';
 
 export function AtlasProposal({q,canvases,selection,onSelect}:{q:SavedQuote;canvases?:CanvasPage[];selection?:ElementSelection|null;onSelect?:(value:ElementSelection)=>void}){
  const prefix=useId().replace(/:/g,'');
- return <article className="atlas-proposal" aria-label="Cotización horizontal de Solvex Solar">{(canvases??proposalCanvases(q)).map((page,index)=><section className="atlas-sheet" key={page.id} aria-label={`Página ${index+1}: ${page.title}`}><svg viewBox={`0 0 ${canvasSize.width} ${canvasSize.height}`} xmlns="http://www.w3.org/2000/svg" role={onSelect?"group":"img"} aria-label={`Página ${index+1}: ${page.title}`}>
+ const [enlarged,setEnlarged]=useState(false);
+ return <article className="atlas-proposal" data-enlarged={enlarged} aria-label="Cotización horizontal de Solvex Solar"><div className="atlas-view-controls screen-only" role="group" aria-label="Tamaño de la vista previa"><button type="button" aria-pressed={!enlarged} onClick={()=>setEnlarged(false)}>Ajustar al ancho</button><button type="button" aria-pressed={enlarged} onClick={()=>setEnlarged(true)}>Ampliar para leer</button>{enlarged&&<span>Desplázate dentro de cada página para ver los detalles.</span>}</div>{(canvases??proposalCanvases(q)).map((page,index)=><section className="atlas-sheet" key={page.id} tabIndex={enlarged?0:undefined} aria-label={`Página ${index+1}: ${page.title}`}><svg viewBox={`0 0 ${canvasSize.width} ${canvasSize.height}`} xmlns="http://www.w3.org/2000/svg" role={onSelect?"group":"img"} aria-label={`Página ${index+1}: ${page.title}`}>
   {page.ops.map((op,i)=>{
    if(op.kind==='fade'){const id=`${prefix}-${index}-${i}-fade`;return <g key={i}><defs><linearGradient id={id} x1="0%" y1="0%" x2={op.direction==='horizontal'?'100%':'0%'} y2={op.direction==='vertical'?'100%':'0%'}><stop offset="0%" stopColor={op.color} stopOpacity={op.from}/><stop offset="100%" stopColor={op.color} stopOpacity={op.to}/></linearGradient></defs><rect x={op.x} y={op.y} width={op.width} height={op.height} fill={`url(#${id})`}/></g>;}
    if(op.kind==='text')return <text key={i} x={op.x} y={op.y} fill={op.color} fontSize={op.size} fontWeight={op.bold?700:400} fontFamily={proposalFonts[op.font??page.font??'sans']}>{op.text}</text>;

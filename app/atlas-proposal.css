@@ -1,3 +1,14 @@
 .atlas-proposal{width:100%;max-width:1200px;margin:auto;display:grid;gap:24px;background:#e4ebeb;padding:20px;color:#103b45}.atlas-sheet{min-width:0;background:white;box-shadow:0 5px 20px #123e4815}.atlas-sheet>svg{display:block;width:100%;height:auto}.preview-dialog:has(.atlas-proposal){max-width:min(1500px,96vw)!important;width:96vw!important}.atlas-proposal text{letter-spacing:normal}
 @media screen and (max-width:700px){.atlas-proposal{padding:8px;gap:14px}.atlas-sheet{overflow-x:auto}.atlas-sheet>svg{min-width:720px}.preview-dialog:has(.atlas-proposal){width:98vw!important;max-width:98vw!important;padding:10px!important}}
 @media print{.preview-dialog:has(.atlas-proposal){width:100%!important;max-width:none!important;padding:0!important}.proposal-editor-workspace{display:block}.proposal-editor-preview{max-height:none;overflow:visible}.atlas-proposal{print-color-adjust:exact;-webkit-print-color-adjust:exact}@page atlas{size:A4 landscape;margin:0}.atlas-proposal{display:block;max-width:none;padding:0;background:white}.atlas-sheet{page:atlas;box-shadow:none;break-after:page;width:297mm;height:210mm}.atlas-sheet:last-child{break-after:auto}.atlas-sheet>svg{width:297mm;height:210mm;min-width:0}.proposal-editor-tools,.proposal-editor-toolbar{display:none!important}}
+
+/* Fit the document by default; deliberate enlargement scrolls inside each page. */
+@media screen {
+ .atlas-view-controls{display:flex;align-items:center;flex-wrap:wrap;gap:8px;color:#365866;font-size:12px}
+ .atlas-view-controls button{min-height:40px;padding:8px 12px;border:1px solid #a8bfc5;border-radius:7px;background:white;color:#173e4b;font:inherit;font-weight:650}
+ .atlas-view-controls button[aria-pressed=true]{background:#0e5264;border-color:#0e5264;color:white}
+ .atlas-proposal .atlas-sheet{overflow-x:auto;overscroll-behavior-inline:contain;scrollbar-gutter:stable}
+ .atlas-proposal .atlas-sheet>svg{min-width:0}
+ .atlas-proposal[data-enlarged=true] .atlas-sheet>svg{min-width:1100px}
+ .atlas-sheet:focus-visible{outline:3px solid #668c27;outline-offset:2px}
+}
