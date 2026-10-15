@@ -19,6 +19,13 @@ assert.deepEqual(quoteValidationIssues(snapshot(withoutName)).map(i=>i.id),['cus
 const prelim={...complete,proposalType:'preliminary' as const,technicalReviewed:false,energy:undefined,customer:{...input.customer,name:'Cliente prueba',phone:'+56900000000'}};
 const preliminary:SavedQuote={...snapshot(),input:prelim,calculation:calculate(prelim,initialProducts,settings)};
 assert.deepEqual(quoteValidationIssues(preliminary),[],'Do not impose final-quote requirements on a preliminary quote');
+const unapprovedPreliminary={...preliminary,settings:{...settings,approved:false}};
+const approvalIssues=quoteValidationIssues(unapprovedPreliminary);
+assert.deepEqual(approvalIssues.map(i=>i.id),['settings-approved']);
+assert.equal(approvalIssues[0].tab,'settings','La aprobación comercial debe ser accesible también en precotizaciones');
+const approvalWarnings=calculate(complete,initialProducts,{...settings,approved:false}).warnings;
+assert.ok(approvalWarnings.includes('Pendiente de aprobación de la empresa: datos, precios y condiciones comerciales.'));
+assert.ok(!approvalWarnings.some(w=>w.startsWith('Faltan datos')),'No decir que faltan campos cuando solo falta aprobar');
 const incompleteCompany={...settings,approved:false,legal:'',rut:'',terms:'',warranty:'',taxMode:'pending' as const};
 const companyIssues=quoteValidationIssues({...snapshot(complete),settings:incompleteCompany,calculation:calculate(complete,initialProducts,incompleteCompany)});
 for(const id of ['tax','settings-legal','settings-rut','settings-terms','settings-warranty','settings-approved'])assert.equal(companyIssues.find(i=>i.id===id)?.tab,'settings',id);

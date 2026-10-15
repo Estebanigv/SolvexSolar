@@ -88,7 +88,10 @@ export function calculate(input:QuoteInput,products:Product[],settings:Settings,
  const net=tax===null?total:total-tax;
  if(settings.taxMode==='pending')warnings.push('Confirmar si los precios del Excel incluyen IVA. No se ha agregado IVA a los valores de origen.');
  if(q.proposalType!=='preliminary'&&!q.technicalReviewed)warnings.push('Pendiente de revisión técnica: modelos, compatibilidad, estructura y alcance.');
- if(!settings.approved||!settings.legal||!settings.rut||!settings.terms||!settings.warranty)warnings.push('Faltan datos y condiciones comerciales aprobados de la empresa.');
+ const missingCompany=[['legal','razón social'],['rut','RUT'],['terms','condiciones comerciales'],['warranty','garantías']] as const;
+ const missingCompanyFields=missingCompany.filter(([key])=>!settings[key].trim()).map(([,label])=>label);
+ if(missingCompanyFields.length)warnings.push(`Faltan datos de la empresa: ${missingCompanyFields.join(', ')}.`);
+ if(!settings.approved)warnings.push('Pendiente de aprobación de la empresa: datos, precios y condiciones comerciales.');
  if(!consumptionSummary(q.energy))warnings.push('Ingresa el consumo en kWh y los días del período de la boleta.');
  else if(!q.energy?.billReviewed)warnings.push('Verifica los datos energéticos con la boleta del cliente.');
  if(!q.customer.name.trim()||!q.customer.email||!q.customer.phone.trim()||!q.customer.region.trim()||!q.customer.commune.trim()||q.customer.bill<=0)warnings.push('Completa los datos del cliente y su monto de boleta.');

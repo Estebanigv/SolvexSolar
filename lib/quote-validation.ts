@@ -15,6 +15,8 @@ export function quoteValidationIssues(q:SavedQuote):QuoteIssue[]{
  if(!input.customer.email.trim()&&!input.customer.phone.trim())customer('email',input.proposalType==='preliminary'?'Completa un correo o teléfono de contacto.':'Completa el correo electrónico del cliente.','Correo electrónico');
  if(invalidCustomerEmail(input.customer.email))customer('email','Corrige el correo electrónico del cliente.','Correo electrónico');
  if(c.tax===null||s.taxMode==='pending')add('tax','Confirma si los precios incluyen IVA.','review','Precios del catálogo e IVA','settings');
+  for(const [key,label] of [['legal','Razón social'],['rut','RUT'],['terms','Condiciones de pago, inclusiones y exclusiones'],['warranty','Garantías de equipos e instalación']] as const)if(!s[key]?.trim())add('settings-'+key,'Completa '+label.toLocaleLowerCase('es')+' de la empresa.','review',label,'settings');
+  if(!s.approved)add('settings-approved','Confirma la aprobación de los datos, precios y condiciones de la empresa.','review','La empresa ha aprobado estos datos, precios y condiciones.','settings');
  const final=input.proposalType!=='preliminary'&&!c.official;
  if(final){
   if(!input.customer.email.trim())customer('email','Completa el correo electrónico del cliente.','Correo electrónico');
@@ -26,8 +28,6 @@ export function quoteValidationIssues(q:SavedQuote):QuoteIssue[]{
   if(input.energy?.billingDays==null)add('billing-days','Ingresa los días del período facturado.','customer','Días del período facturado');
   if(!input.energy?.billReviewed)add('bill-review','Verifica los datos energéticos y marca la revisión de la boleta.','customer',consumptionSummary(input.energy)?'Verifiqué estos datos en la boleta del cliente.':input.energy?.consumptionKwh==null?'Consumo de la boleta (kWh)':'Días del período facturado');
   if(!input.technicalReviewed)add('technical','Confirma la revisión técnica de modelos, compatibilidad, estructura y alcance.','review','El comercial y el instalador revisaron modelos, compatibilidad, estructura y alcance tras la visita técnica.');
-  for(const [key,label] of [['legal','Razón social'],['rut','RUT'],['terms','Condiciones de pago, inclusiones y exclusiones'],['warranty','Garantías de equipos e instalación']] as const)if(!s[key]?.trim())add('settings-'+key,'Completa '+label.toLocaleLowerCase('es')+' de la empresa.','review',label,'settings');
-  if(!s.approved)add('settings-approved','Confirma la aprobación de los datos, precios y condiciones de la empresa.','review','La empresa ha aprobado estos datos, precios y condiciones.','settings');
   if(input.adviserId&&!s.advisers?.some(a=>a.id===input.adviserId))add('adviser','Selecciona un comercial vigente.','review','Comercial asignado');
  }
  if(!c.complete||final){

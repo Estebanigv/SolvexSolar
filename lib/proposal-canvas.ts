@@ -1,4 +1,4 @@
-import {issuanceWarningCanvases} from './issuance-warning-canvas';
+import {appendIssuanceWarning,issuanceWarningCanvases} from './issuance-warning-canvas';
 import {measure,wrapProposal,printableText} from './proposal-typography';
 export {wrapProposal,printableText} from './proposal-typography';
 import {applyElementStyles,type CanvasElement} from './proposal-elements';
@@ -242,8 +242,9 @@ export function proposalCanvases(q:SavedQuote):CanvasPage[]{
   }
   return {...op,color,...('stroke' in op&&op.stroke?{stroke:map(op.stroke)}:{})};
  })},q.input.proposalContent?.elements??{}));
- const notices=issuanceWarningCanvases(q);
- if(notices.length&&styled[0])styled[0].ops.push({kind:'text',x:36,y:548,text:'Emitida con información pendiente. Revisa las observaciones al final del documento.',size:8,bold:true,color:'#795514'});
+ const inlineNotice=appendIssuanceWarning(q,styled.at(-1));
+ const notices=inlineNotice?[]:issuanceWarningCanvases(q);
+ if((inlineNotice||notices.length)&&styled[0])styled[0].ops.push({kind:'text',x:36,y:548,text:'Emitida con información pendiente. Revisa las observaciones al final del documento.',size:8,bold:true,color:'#795514'});
  const combined=[...styled,...notices];
  if(notices.length)combined.forEach((page,i)=>{for(const op of page.ops)if(op.kind==='text'&&op.elementId?.endsWith(':page-number'))op.text=`${i+1} / ${combined.length}`;if(page.id.startsWith('issuance-notice'))page.ops.push({kind:'text',x:755,y:575,text:`${i+1} / ${combined.length}`,size:9,bold:false,color:'#665b47',font:'sans'});});
  return combined;
