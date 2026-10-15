@@ -2,7 +2,7 @@
 import {invalidCustomerEmail} from '@/lib/customer-email';
 import {calculateEditingQuote} from '@/lib/quote-editing';
 import {isIssued,issuanceProblems} from '@/lib/quote-issuance';
-import {QuoteIssuePanel} from './quote-issue-panel';
+import {QuoteIssuePanel,IssuedQuotePending} from './quote-issue-panel';
 import {quoteValidationIssues,type QuoteIssue} from '@/lib/quote-validation';
 import {QuoteValidationList,useQuoteValidation,type ValidationFocus} from './quote-validation';
 import {DiscountField} from './discount-field';
@@ -248,7 +248,7 @@ function QuoteWorkspace(){
   if(issue.tab==='catalog')setCatalogTarget(issue.productId?{id:issue.productId,token}:null);
   setTab(issue.tab);setStep(issue.step);setValidationFocus({issue,token});
  }
- const actions=(q:SavedQuote)=><>{!isIssued(q)&&<QuoteIssuePanel quote={q} busy={busy} enabled={usesSupabase} onIssue={()=>void issueForCustomer(q)} onSelect={issue=>void goToValidation(issue,q)}/>}
+ const actions=(q:SavedQuote)=><><IssuedQuotePending quote={q}/>{!isIssued(q)&&<QuoteIssuePanel quote={q} busy={busy} enabled={usesSupabase} onIssue={()=>void issueForCustomer(q)} onSelect={issue=>void goToValidation(issue,q)}/>}
  <div className="doc-actions"><Button variant="outline" disabled={busy} onClick={()=>void editProposal(q)}>Editar propuesta</Button><Button disabled={busy||!isIssued(q)} onClick={()=>download(q)}><Download/>Descargar PDF</Button><Button variant="outline" disabled={busy||!isIssued(q)} onClick={()=>{setPreview(q);setTimeout(()=>window.print(),250)}}><Printer/>Imprimir</Button><Button variant="outline" disabled={busy||!isIssued(q)} onClick={()=>setShareTarget({quote:q,whatsapp:true})}><MessageCircle/>WhatsApp</Button><Button variant="outline" disabled={busy||!isIssued(q)} onClick={openEmail} title="Abrir correo corporativo en Hostinger (nueva pestaña)"><Mail/>Correo</Button><Button variant="outline" disabled={busy||!isIssued(q)} onClick={()=>setShareTarget({quote:q,whatsapp:false})}><Share2/>Compartir archivo</Button></div></>;
 
  if(usesSupabase&&!loaded)return <WorkspaceStatus error={loadError||undefined} onRetry={()=>void load()}/>;

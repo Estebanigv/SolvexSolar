@@ -1,37 +1,46 @@
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {createElement} from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
-import {PDFDocument} from 'pdf-lib';
-import {QuoteIssuePanel} from '../app/quote-issue-panel';
+import {PDFDocument,PDFArray,PDFRawStream} from 'pdf-lib';
+import {QuoteIssuePanel,IssuedQuotePending} from '../app/quote-issue-panel';
 import {newQuote,calculate,initialProducts,initialSettings,type SavedQuote} from '../lib/quote';
-import {issuanceWarnings} from '../lib/quote-issuance';
+import {issuanceWarnings,issuedWarnings,documentTitle} from '../lib/quote-issuance';
 import {proposalCanvases} from '../lib/proposal-canvas';
-import {appendIssuanceWarning} from '../lib/issuance-warning-canvas';
-import type {CanvasPage} from '../lib/proposal-canvas';
 import {quotePdf} from '../lib/pdf';
 import {Proposal} from '../app/proposal';
+async function pdfContents(q:SavedQuote){
+ const pdf=await PDFDocument.load(await quotePdf(q));
+ return pdf.getPages().map(page=>{
+  const contents=page.node.Contents();
+  const streams=contents instanceof PDFArray?contents.asArray():[contents];
+  return streams.map(ref=>Array.from((pdf.context.lookup(ref) as PDFRawStream).getContents()));
+ });
+}
 async function run(){
  const input={...newQuote(),customer:{...newQuote().customer,name:'Prueba pendiente'}};
  const settings={...initialSettings,taxMode:'included' as const};
  const q:SavedQuote={id:'test',folio:'TEST',date:'2026-10-14',input,settings,calculation:calculate(input,initialProducts,settings)};
  const panel=renderToStaticMarkup(createElement(QuoteIssuePanel,{quote:q,onIssue:()=>{},onSelect:()=>{}}));
- assert.match(panel,/Emitir con pendientes/);assert.match(panel,/Ver pendientes/);assert.ok(!panel.includes('disabled=""'));assert.ok(!panel.includes('<details open'));
+ assert.match(panel,/Emitir con pendientes/);assert.match(panel,/Ver pendientes/);assert.match(panel,/Pendientes internos/);
+ assert.ok(!panel.includes('disabled=""'));assert.ok(!panel.includes('<details open'));assert.ok(!panel.includes('Advertencias incluidas en el documento'));
  const issued={...q,issuedAt:'2026-10-14',folio:'SVX-2026-000001',issuanceWarnings:issuanceWarnings(q)};
- const hidden={...issued,input:{...input,proposalContent:{...input.proposalContent!,hidden:['issuance-notice'],elements:{'issuance-notice-0:title':{hidden:true,text:'Todo aprobado'}}}}};
- const pages=proposalCanvases(hidden);
- const noticeText=pages.flatMap(p=>p.ops).filter(o=>o.kind==='text').map(o=>o.text).join(' ');assert.match(noticeText,/Falta correo o teléfono/);assert.ok(!noticeText.includes('Todo aprobado'));
- const short={...issued,input:{...input,proposalContent:{...input.proposalContent!,sections:[{id:'review',title:'Condiciones',body:'Condiciones de prueba.'}]}},issuanceWarnings:['Faltan datos y condiciones comerciales aprobados de la empresa.']};
- const before=JSON.stringify(short),withoutNotice=proposalCanvases({...short,issuanceWarnings:[]}),compact=proposalCanvases(short);
- assert.equal(compact.length,withoutNotice.length,'Un pendiente breve usa el espacio de la última página');
- assert.ok(!compact.some(p=>p.id.startsWith('issuance-notice')));
- assert.ok(compact.at(-1)!.ops.some(o=>o.kind==='text'&&o.text.includes(short.issuanceWarnings[0])));
- assert.equal(JSON.stringify(short),before,'El formato no modifica el registro emitido');
- const fullPage:CanvasPage={id:'last',title:'Prueba',ops:[{kind:'rect',x:36,y:100,width:770,height:420,color:'#ffffff'}]};
- const fullBefore=JSON.stringify(fullPage);assert.equal(appendIssuanceWarning(short,fullPage),false);assert.equal(JSON.stringify(fullPage),fullBefore,'No superponer avisos sobre cajas o texto existentes');
- const pdf=await PDFDocument.load(await quotePdf(hidden));assert.equal(pdf.getPageCount(),pages.length);
- const long={...issued,issuanceWarnings:Array.from({length:80},(_,i)=>`Pendiente ${i}: revisar los antecedentes indicados para este proyecto.`)};
- const longPages=proposalCanvases(long).filter(p=>p.id.startsWith('issuance-notice'));assert.ok(longPages.length>1);for(const p of longPages)for(const op of p.ops)if(op.kind==='text')assert.ok(op.y<=575&&op.y>0);
- const legacy={...issued,input:{...input,proposalContent:undefined}};const html=renderToStaticMarkup(createElement(Proposal,{q:legacy}));assert.match(html,/Falta correo o teléfono/);await quotePdf(legacy);
- assert.equal(proposalCanvases({...issued,issuanceWarnings:undefined}).filter(p=>p.id.startsWith('issuance-notice')).length,0,'No alterar documentos emitidos antiguos');
- console.log('Pendientes: emisión habilitada, panel compacto, advertencia HTML/PDF, paginación y versiones anteriores: OK');
+ const before=JSON.stringify(issued);
+ const internal=renderToStaticMarkup(createElement(IssuedQuotePending,{quote:issued}));
+ assert.match(internal,/Falta correo o teléfono/);assert.match(internal,/Solo para el equipo/);assert.ok(!internal.includes('<details open'));
+ assert.equal(renderToStaticMarkup(createElement(IssuedQuotePending,{quote:{...issued,issuanceWarnings:[]}})),'');
+ assert.equal(documentTitle(issued),'COTIZACIÓN');
+ for(const legacy of [false,true]){
+  const document={...issued,input:{...input,proposalContent:legacy?undefined:input.proposalContent}};
+  const clean={...document,issuanceWarnings:[]};
+  assert.equal(renderToStaticMarkup(createElement(Proposal,{q:document})),renderToStaticMarkup(createElement(Proposal,{q:clean})),'El documento del cliente no depende de los pendientes internos');
+  assert.deepEqual(await pdfContents(document),await pdfContents(clean),'El PDF no contiene avisos internos, tampoco en el formato antiguo');
+ }
+ assert.deepEqual(proposalCanvases(issued),proposalCanvases({...issued,issuanceWarnings:[]}));
+ const long={...issued,issuanceWarnings:Array.from({length:80},(_,i)=>`Pendiente interno ${i}`)};
+ assert.deepEqual(proposalCanvases(long),proposalCanvases({...long,issuanceWarnings:[]}), 'Los pendientes no agregan páginas ni cambian el encabezado');
+ assert.deepEqual(issuedWarnings(issued),issued.issuanceWarnings);
+ assert.equal(JSON.stringify(issued),before,'Conservar los pendientes almacenados para seguimiento interno');
+ assert.match(readFileSync('app/quote-validation.css','utf8'),/@media print\s*\{\.quote-issue-panel\s*\{display:none!important/,'El panel interno no se imprime');
+ console.log('Pendientes internos antes y después de emitir; HTML, PDF y formato antiguo limpios; impresión oculta; historial intacto: OK');
 }void run();

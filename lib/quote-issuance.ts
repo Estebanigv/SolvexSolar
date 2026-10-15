@@ -2,7 +2,7 @@ import type {SavedQuote} from './quote';
 import {hasCertificationConflict,certificationConflictMessage} from './additional-services';
 
 export function isIssued(q:SavedQuote){return !!q.issuedAt&&/^SVX-\d{4}-\d{6,}$/.test(q.folio);}
-export function documentTitle(q:SavedQuote){return isIssued(q)?(q.issuanceWarnings?.length?'COTIZACIÓN CON PENDIENTES':'COTIZACIÓN'):q.input.proposalType==='preliminary'?'PRECOTIZACIÓN':'PROPUESTA DE COTIZACIÓN';}
+export function documentTitle(q:SavedQuote){return isIssued(q)?'COTIZACIÓN':q.input.proposalType==='preliminary'?'PRECOTIZACIÓN':'PROPUESTA DE COTIZACIÓN';}
 export function documentFolio(q:SavedQuote){return /borrador/i.test(q.folio)?'':q.folio;}
 // These are invalid/incompatible values, not missing optional information.
 export function issuanceProblems(q:SavedQuote):string[]{

@@ -1,6 +1,6 @@
 import {atlasPdf} from './atlas-pdf';
 import {usesAtlasProposal} from './proposal-layout';
-import {documentFolio,documentTitle,isIssued,issuedWarnings} from './quote-issuance';
+import {documentFolio,documentTitle} from './quote-issuance';
 import {PDFDocument,StandardFonts,rgb,pushGraphicsState,popGraphicsState,rectangle,clip,endPath,type PDFImage} from 'pdf-lib';
 import {customerDocumentSettings,assignedAdviser,paymentBreakdown,netbillingScope,preliminaryNote} from './commercial';
 import {consumptionSummary} from './energy';
@@ -93,9 +93,7 @@ export async function quotePdf(q:SavedQuote,logoBytes?:ArrayBuffer,photos:Propos
  y-=16;
  const consumption=consumptionSummary(q.input.energy);
  if(consumption&&q.input.energy){space(104);heading('Consumo de referencia');const values=[['Boleta informada',money(q.input.customer.bill)],['Consumo del período',q.input.energy.consumptionKwh?.toLocaleString('es-CL')+' kWh'],['Período facturado',q.input.energy.billingDays+' días']];values.forEach(([label,value],i)=>{const x=M+i*(factWidth+14);draw(label,x,y-8,8,false,muted);draw(value,x,y-29,17,true)});y-=41;text([q.input.energy.distributor,q.input.energy.tariff,q.input.energy.billReviewed?'Revisado con la boleta':'Pendiente de revisión'].filter(Boolean).join(' · '),8);text(`Equivalente a 30 días: ${consumption.equivalent30DaysKwh.toLocaleString('es-CL',{maximumFractionDigits:1})} kWh. No representa una proyección anual.`,8);}
- const pending=issuedWarnings(q);
- if(pending.length){heading('Cotización emitida con información pendiente');text('Sujeta a completar y validar los antecedentes indicados.',10,true);for(const warning of pending)text('- '+warning,9,false,rgb(.46,.36,.16));}
- else if(!isIssued(q)&&c.warnings.length){heading('Propuesta en revisión');for(const warning of c.warnings)text('- '+warning,9,false,rgb(.46,.36,.16))}
+
  const forecast=publishedProjection(q);
  if(forecast){
   newPage('Proyección y supuestos');title('El valor de tu energía','Escenario estimado, sujeto a los supuestos revisados del proyecto.');

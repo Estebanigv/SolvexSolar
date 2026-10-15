@@ -30,4 +30,4 @@ assert.ok(warnings.some(w=>w.includes('aprobación técnica')));
 assert.equal(new Set(warnings).size,warnings.length);
 for(const total of [0,-1,NaN,Infinity])assert.ok(issuanceProblems({...draft,calculation:{...draft.calculation,total}}).length);
 const withWarnings={...issued,issuanceWarnings:warnings};
-assert.equal(documentTitle(withWarnings),'COTIZACIÓN CON PENDIENTES');
+assert.equal(documentTitle(withWarnings),'COTIZACIÓN');
