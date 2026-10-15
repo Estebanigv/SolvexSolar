@@ -1,5 +1,5 @@
 'use client';
-import {AlertCircle,CheckCircle2,ChevronDown} from 'lucide-react';
+import {AlertCircle,CheckCircle2,ChevronDown,ClipboardList,LockKeyhole} from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import type {SavedQuote} from '@/lib/quote';
 import {issuanceProblems,issuanceWarnings,issuedWarnings} from '@/lib/quote-issuance';
@@ -21,9 +21,14 @@ export function IssuedQuotePending({quote}:{quote:SavedQuote}){
  const warnings=issuedWarnings(quote);
  if(!warnings.length)return null;
  return <aside className="quote-issue-panel quote-internal-pending" data-pending="true" aria-label="Pendientes internos de la cotización">
-  <details className="quote-issue-details"><summary>Pendientes internos ({warnings.length})<ChevronDown size={16}/></summary>
-   <p>Registrados al emitir. Solo para el equipo; no aparecen en el documento del cliente.</p>
-   <ul className="quote-issue-warnings">{warnings.map((warning,index)=><li key={index}>{warning}</li>)}</ul>
+  <details className="quote-internal-details"><summary className="quote-internal-header">
+   <span className="quote-internal-icon"><ClipboardList size={20} aria-hidden="true"/></span>
+   <span className="quote-internal-heading"><strong>Pendientes internos <span className="quote-internal-count">{warnings.length}</span></strong><span>Información por revisar al emitir esta cotización</span></span>
+   <span className="quote-internal-private"><LockKeyhole size={13} aria-hidden="true"/>Solo para el equipo</span>
+   <ChevronDown className="quote-internal-chevron" size={18} aria-hidden="true"/>
+  </summary>
+   <div className="quote-internal-body"><ul className="quote-internal-list">{warnings.map((warning,index)=><li key={index}><span className="quote-internal-dot" aria-hidden="true"/>{warning}</li>)}</ul>
+   <p><LockKeyhole size={13} aria-hidden="true"/>Estos avisos no aparecen en el PDF ni en la impresión del cliente.</p></div>
   </details>
  </aside>;
 }
