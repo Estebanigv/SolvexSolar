@@ -3,7 +3,7 @@ import {newQuote,initialProducts,initialSettings,calculate,type SavedQuote} from
 import {proposalCanvases} from '../lib/proposal-canvas';
 import {proposalLayout} from '../lib/proposal-layout';
 import {proposalDiscount} from '../lib/proposal-document';
-import {customerTerms,customerDocumentSettings,paymentBreakdown} from '../lib/commercial';
+import {paymentSchedulePreset,customerTerms,customerDocumentSettings,paymentBreakdown} from '../lib/commercial';
 
 const input={...newQuote(),discountPercent:30,showDiscount:true,customer:{...newQuote().customer,name:'Cliente de prueba',commune:'Santiago'}};
 const settings={...initialSettings,taxMode:'included' as const,paymentSchedule:[{label:'Anticipo',percent:20},{label:'Inicio de obras',percent:30},{label:'Entrega',percent:50}],
@@ -37,3 +37,13 @@ const document=customerDocumentSettings(paymentInput,settings);
 assert.deepEqual(paymentBreakdown(q.calculation.total,document),[{label:'Pago único',percent:100,amount:3610000}]);
 assert.equal(JSON.stringify(q),snapshot,'Rediagramar no modifica el snapshot ni importes emitidos');
 console.log('Minuta: descuento integrado, porcentaje efectivo, cláusulas completas y pagos coherentes: OK');
+
+for(const count of [2,3] as const){
+ const schedule=paymentSchedulePreset(count);
+ assert.equal(schedule.length,count);
+ assert.deepEqual(schedule.map(p=>p.percent),count===2?[50,50]:[20,30,50]);
+ const configuration=customerDocumentSettings({...input,documentPaymentSchedule:schedule},settings);
+ assert.equal(paymentBreakdown(1234567,configuration).reduce((sum,p)=>sum+p.amount,0),1234567);
+ assert.ok(customerTerms({...input,documentPaymentSchedule:schedule},settings).includes(`Anticipo ${schedule[0].percent}%`));
+}
+assert.equal(proposalLayout(q)[0].blocks.find(b=>b.id==='discount')?.title,'Descuento para tu proyecto · 29,97%');

@@ -1,0 +1,6 @@
+.automatic-savings-summary{display:grid;gap:6px;margin:18px 0;padding:16px;border:1px solid #b9d5ce;border-radius:10px;background:#f2f8f5;color:#174c48;min-width:0}
+.automatic-savings-summary>span{font-size:14px;font-weight:600}
+.automatic-savings-summary>strong{font-size:26px;line-height:1.2;overflow-wrap:anywhere}
+.automatic-savings-summary small{font-size:12px;color:#365e58}
+.automatic-savings-summary p{font-size:13px;line-height:1.5;margin:2px 0 6px;color:#45665f}
+.automatic-savings-summary button{width:100%;white-space:normal}

@@ -3,9 +3,11 @@
 .payment-schedule-heading h3{margin:0 0 6px;font-size:17px;color:#103b45}
 .payment-schedule-heading p,.payment-schedule-fields>p{margin:0;font-size:14px;line-height:1.5;color:#49646c}
 .payment-schedule-fields{display:grid;gap:14px;margin-top:16px}
-.payment-schedule-row{display:grid;grid-template-columns:minmax(0,1fr) 120px auto;gap:10px;align-items:end}
+.payment-schedule-row{display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:10px;align-items:end}
 .payment-schedule-row label{display:grid;gap:5px;min-width:0;font-size:13px}
 .payment-schedule-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:14px}
 .proposal-editor-tools .payment-schedule-row{grid-template-columns:minmax(0,1fr) 95px}
 .proposal-editor-tools .payment-schedule-row>button{grid-column:1/-1;justify-self:start}
 @media(max-width:600px){.payment-schedule-editor{padding:14px}.payment-schedule-row{grid-template-columns:minmax(0,1fr) 95px}.payment-schedule-row>button{grid-column:1/-1;justify-self:start}.payment-schedule-heading>button{width:100%}}
+
+.payment-schedule-presets{margin-top:14px}

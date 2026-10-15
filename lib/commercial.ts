@@ -4,6 +4,7 @@ import type {Settings, QuoteInput, Calculation} from './quote';
 export const adviserSchema = z.object({id:z.string().min(1).max(80),name:z.string().min(1).max(150),email:z.string().email(),phone:z.string().max(40)});
 export const roiReferenceSchema = z.object({source:z.string().max(200),panelWatts:z.number().positive(),monthlyByPanels:z.array(z.object({panels:z.number().int().positive(),amount:z.number().positive()})).max(100)});
 export const paymentScheduleSchema = z.array(z.object({label:z.string().max(80),percent:z.number().int().min(0).max(100)})).max(10).refine(rows=>rows.reduce((sum,row)=>sum+row.percent,0)===100,'Los pagos deben sumar 100%.');
+export function paymentSchedulePreset(count:2|3){return count===2?[{label:'Anticipo',percent:50},{label:'Entrega',percent:50}]:[{label:'Anticipo',percent:20},{label:'Inicio de obras',percent:30},{label:'Entrega',percent:50}];}
 export const preliminaryNote = 'Precotización sujeta a visita técnica. El comercial y el instalador ajustarán y validarán equipos, compatibilidad y alcance antes de emitir la cotización final.';
 
 export function proposalTitle(q:QuoteInput, official:boolean){

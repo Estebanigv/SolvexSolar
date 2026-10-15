@@ -2,7 +2,7 @@
 import {useState} from 'react';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
-import {paymentScheduleSchema} from '@/lib/commercial';
+import {paymentScheduleSchema,paymentSchedulePreset} from '@/lib/commercial';
 import type {QuoteInput,Settings} from '@/lib/quote';
 import './payment-schedule-editor.css';
 
@@ -18,10 +18,11 @@ export function PaymentScheduleEditor({quote,settings,onChange}:{quote:QuoteInpu
  }
  return <section className="payment-schedule-editor" aria-label="Hitos de pago de esta cotización">
   <div className="payment-schedule-heading"><div><h3>Hitos de pago</h3><p>{current.length?current.map(row=>`${row.label}: ${row.percent}%`).join(' · '):'Define cómo se pagará esta cotización.'}</p></div>{!editing&&<Button type="button" variant="outline" onClick={()=>{setRows(current.map(row=>({...row})));setError('');setEditing(true);}}>Personalizar pagos</Button>}</div>
+  <div className="payment-schedule-actions payment-schedule-presets" aria-label="Elegir distribución de pagos">{([2,3] as const).map(count=><Button key={count} type="button" variant="outline" onClick={()=>{setRows(paymentSchedulePreset(count));setError('');setEditing(true);}}>{count===2?'2 hitos · 50% / 50%':'3 hitos · 20% / 30% / 50%'}</Button>)}</div>
   {editing&&<div className="payment-schedule-fields">
-   <p>Agrega etapas o elige un pago único. Los cambios se incorporan al aplicar; la cotización conserva sus importes mientras editas.</p>
-   {rows.map((row,i)=><div className="payment-schedule-row" key={i}><label>Etapa {i+1}<Input aria-label={`Nombre de etapa ${i+1}`} value={row.label} maxLength={80} onChange={e=>change(i,{label:e.target.value})}/></label><label>Porcentaje (%)<Input aria-label={`Porcentaje de etapa ${i+1}`} type="number" min={0} max={100} step={1} value={row.percent} onFocus={e=>e.currentTarget.select()} onChange={e=>change(i,{percent:Number(e.target.value)})}/></label><Button type="button" variant="outline" aria-label={`Quitar etapa ${i+1}`} onClick={()=>setRows(rows.filter((_,j)=>j!==i))}>Quitar</Button></div>)}
-   <div className="payment-schedule-actions"><Button type="button" variant="outline" disabled={rows.length>=10} onClick={()=>setRows([...rows,{label:'Nueva etapa',percent:0}])}>Agregar etapa</Button><Button type="button" variant="outline" onClick={()=>{setRows([{label:'Pago único',percent:100}]);setError('');}}>Pago único · 100%</Button><span role="status" className={sum===100?'':'field-error'}>Asignado: {sum}% de 100%</span></div>
+   <p>Elige dos o tres hitos y revisa sus porcentajes. Los cambios se incorporan al aplicar; la cotización conserva sus importes mientras editas.</p>
+   {rows.map((row,i)=><div className="payment-schedule-row" key={i}><label>Etapa {i+1}<Input aria-label={`Nombre de etapa ${i+1}`} value={row.label} maxLength={80} onChange={e=>change(i,{label:e.target.value})}/></label><label>Porcentaje (%)<Input aria-label={`Porcentaje de etapa ${i+1}`} type="number" min={0} max={100} step={1} value={row.percent} onFocus={e=>e.currentTarget.select()} onChange={e=>change(i,{percent:Number(e.target.value)})}/></label></div>)}
+   <div className="payment-schedule-actions"><span role="status" className={sum===100?'':'field-error'}>Asignado: {sum}% de 100%</span></div>
    {error&&<p className="field-error" role="alert">{error}</p>}
    {quote.documentTerms!==undefined&&<p className="help-text">Revisa que las condiciones personalizadas coincidan con estos pagos. Puedes registrar excepciones en Alcance y comentarios.</p>}
    <div className="payment-schedule-actions"><Button type="button" onClick={apply}>Aplicar pagos</Button><Button type="button" variant="ghost" onClick={()=>{setEditing(false);setError('');}}>Cancelar</Button></div>
