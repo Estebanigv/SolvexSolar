@@ -24,7 +24,8 @@ export const projectionSchema=z.object({
  emissionSource:z.string().max(500),reviewedFor:z.string().max(20000),
 });
 export type ProjectionInput=z.infer<typeof projectionSchema>;
-export const newProjection=():ProjectionInput=>({savingsMode:'automatic',selfConsumptionPercent:70,energyRate:null,exportRate:0,monthlySavings:null,savingsSource:'',years:25,tariffGrowth:0,degradation:0.5,annualMaintenance:0,replacementYear:null,replacementCost:0,avoidedKwh:null,emissionFactor:null,emissionSource:'',reviewedFor:''});
+export const DEFAULT_TARIFF_GROWTH=5;
+export const newProjection=(tariffGrowth=DEFAULT_TARIFF_GROWTH):ProjectionInput=>({savingsMode:'automatic',selfConsumptionPercent:70,energyRate:null,exportRate:0,monthlySavings:null,savingsSource:'',years:25,tariffGrowth,degradation:0.5,annualMaintenance:0,replacementYear:null,replacementCost:0,avoidedKwh:null,emissionFactor:null,emissionSource:'',reviewedFor:''});
 
 export function automaticSavings(q:SavedQuote,p:ProjectionInput){
  const energy=q.input.energy,generation=savingsGeneration(q,p),issues:string[]=[];
@@ -60,7 +61,7 @@ export function automaticSavings(q:SavedQuote,p:ProjectionInput){
 
 // Legacy projections remain manual. New proposals default to the automatic model.
 export function resolvedProjection(q:SavedQuote):ProjectionInput{
- const p=q.input.projection??newProjection();
+ const p=q.input.projection??newProjection(q.settings.defaultTariffGrowth);
  if(p.savingsMode!=='automatic')return p;
  const automatic=automaticSavings(q,p);
  return {...p,monthlySavings:automatic.result?.monthlySavings??null,savingsSource:automatic.result?.source??''};

@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import {newEnergyInput} from '../lib/energy';
 import {persistentQuote} from '../lib/quote-persistence';
-import {newProjection,calculateProjection,projectionContext,publishedProjection} from '../lib/projection';
-import {newQuote,initialSettings,quoteSchema,type SavedQuote} from '../lib/quote';
-const p={...newProjection(),savingsMode:'manual' as const,monthlySavings:100000,savingsSource:'Estudio técnico QA',degradation:0,years:10};
+import {newProjection,calculateProjection,projectionContext,publishedProjection,resolvedProjection} from '../lib/projection';
+import {newQuote,initialSettings,quoteSchema,settingsSchema,type SavedQuote} from '../lib/quote';
+const p={...newProjection(),savingsMode:'manual' as const,monthlySavings:100000,savingsSource:'Estudio técnico QA',tariffGrowth:0,degradation:0,years:10};
 let r=calculateProjection(p,6000000)!;
 assert.equal(r.payback,5);assert.equal(r.cumulative,12000000);assert.equal(r.net,6000000);assert.equal(r.co2Tonnes,null);
 r=calculateProjection({...p,annualMaintenance:200000,replacementYear:5,replacementCost:2000000},6000000)!;
@@ -30,3 +30,20 @@ const context=projectionContext(googleQuote,p);
 assert.equal(context,projectionContext({...googleQuote,input:persistentQuote(googleQuote.input)},p));
 assert.ok(!context.includes('-33.36'));
 assert.notEqual(context,projectionContext({...googleQuote,input:{...googleQuote.input,energy:{...googleQuote.input.energy,googlePlaceId:'different-place'}}},p));
+
+// A configurable default applies only when no projection has been saved.
+assert.equal(newProjection().tariffGrowth,5);
+const fresh={...q,input:{...q.input,projection:undefined}};
+assert.equal(resolvedProjection({...fresh,settings:{...initialSettings,defaultTariffGrowth:undefined}}).tariffGrowth,5);
+for(const value of [0,3,7.5,20]){
+ const settings=settingsSchema.parse({...initialSettings,defaultTariffGrowth:value});
+ assert.equal(resolvedProjection({...fresh,settings}).tariffGrowth,value);
+ // Editing or restoring an existing projection preserves even an explicit zero.
+ assert.equal(resolvedProjection({...q,settings}).tariffGrowth,0);
+ const edited=quoteSchema.parse({...fresh.input,projection:{...newProjection(value),tariffGrowth:2}});
+ assert.equal(resolvedProjection({...fresh,input:edited,settings}).tariffGrowth,2);
+}
+for(const value of [-1,20.1,Infinity,NaN])assert.equal(settingsSchema.safeParse({...initialSettings,defaultTariffGrowth:value}).success,false);
+const growing=calculateProjection({...p,tariffGrowth:5,years:2},6000000)!;
+assert.equal(growing.cumulative,2460000);
+console.log('Variación de tarifa: 5% predeterminado, ajuste compartido y conservación de cotizaciones: OK');
