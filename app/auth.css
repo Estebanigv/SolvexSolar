@@ -114,14 +114,10 @@
 .client-owner-label>svg{flex-shrink:0}
 .customer-bill-review{margin:16px 0;padding:16px;border:1px solid #d4ab55;border-radius:8px;background:#fffaf0;scroll-margin-top:90px}
 .customer-bill-review[data-reviewed=true]{border-color:#86b39d;background:#edf7f0}
-.customer-bill-review dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0}
-.customer-bill-review dt{font-size:12px;color:#53645d}
-.customer-bill-review dd{font-size:14px;font-weight:600;overflow-wrap:anywhere;margin:0}
 .customer-bill-review>button{padding:8px 0;text-decoration:underline;text-align:left;color:#164f40}
 .customer-bill-review .customer-review-check{display:flex;align-items:flex-start;gap:10px;margin-top:12px;cursor:pointer;line-height:1.5}
 .customer-review-check input{width:20px;height:20px;flex:0 0 20px;margin-top:2px;accent-color:#1c644d}
 .customer-review-check input:focus-visible{outline:3px solid #408770;outline-offset:3px}
-@media(max-width:480px){.customer-bill-review dl{grid-template-columns:minmax(0,1fr)}}
 
 .customer-bill-review[data-loading=true]{border-color:#9bbec4;background:#f0f7f8}
 .customer-bill-review-heading{display:flex;align-items:center;gap:10px;color:#164d5b}
