@@ -94,7 +94,7 @@
 .auth-biometric+form{margin-top:12px}
 .auth-card .field-error{color:#9a3324}
 .auth-card button:focus-visible{outline:3px solid #739a40;outline-offset:3px}
-.client-current{display:flex;flex-direction:column;gap:6px;padding:18px;background:white;border:1px solid #bad0c8;border-left:4px solid #1c644d;border-radius:8px;overflow-wrap:anywhere;min-width:0}
+.client-current{display:flex;flex-direction:column;gap:6px;padding:18px;background:white;border:1px solid #bad0c8;border-radius:8px;overflow-wrap:anywhere;min-width:0}
 .client-current-status{font-size:13px;color:#256149;font-weight:600}
 .client-current>strong{font-size:20px;line-height:1.35;color:#103f4a}
 .client-current>span:not(.client-current-status){font-size:14px;color:#45645b}
