@@ -11,6 +11,9 @@ assert.equal(historyActionSchema.safeParse({action:'send',sentOn:'2026-02-30',ch
 assert.equal(historyActionSchema.safeParse({action:'send',sentOn:'2099-01-01',channel:'email'}).success,false);
 assert.equal(historyActionSchema.safeParse({action:'send',sentOn:chileDate(),channel:'whatsapp'}).success,true);
 assert.equal(historyActionSchema.safeParse({action:'delete-forever'}).success,false);
+assert.equal(historyActionSchema.safeParse({action:'test-label',isTest:true}).success,true);
+assert.equal(historyActionSchema.safeParse({action:'test-label',isTest:false}).success,true);
+assert.equal(historyActionSchema.safeParse({action:'test-label',isTest:'true'}).success,false);
 const input=newQuote(),q={id:'test',folio:'test',date:'2026-01-01',input,settings:initialSettings,calculation:calculate(input,initialProducts,initialSettings),owner:{id:'dev',name:'Dev'}};
 assert.equal(responsible(q).name,'Dev');
 assert.equal(responsible({...q,input:{...input,adviserId:'a'},settings:{...initialSettings,advisers:[{id:'a',name:'Comercial A',email:'a@example.com',phone:''}]}}).name,'Comercial A');

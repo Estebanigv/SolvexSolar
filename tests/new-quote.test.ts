@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {freshQuote} from '../lib/new-quote';
+import {initialProducts,initialSettings,calculate,quoteSchema} from '../lib/quote';
+import {hasQuoteInProgress} from '../lib/quote-progress';
+import {proposalCanvases} from '../lib/proposal-canvas';
+const fresh=freshQuote(initialProducts);
+assert.equal(fresh.customer.name,'');assert.equal(fresh.customer.email,'');assert.equal(fresh.isTest,undefined);
+assert.equal(hasQuoteInProgress(fresh,fresh,{clientId:null,sourceQuoteId:null,fileCount:0}),false);
+const previous={...fresh,isTest:true,customer:{...fresh.customer,name:'Prueba'},notes:'Notas anteriores',discountPercent:20};
+assert.notDeepEqual(previous,fresh);assert.deepEqual(freshQuote(initialProducts),fresh);
+assert.equal(quoteSchema.parse(previous).isTest,true);
+const q={id:'qa',folio:'QA',date:'2026-10-16',input:fresh,settings:initialSettings,calculation:calculate(fresh,initialProducts,initialSettings)};
+assert.deepEqual(proposalCanvases(q),proposalCanvases({...q,isTest:true,input:{...fresh,isTest:true}}),'La etiqueta es interna y no modifica el documento');
+console.log('Nueva cotización limpia, marca de prueba validada y documento intacto: OK');

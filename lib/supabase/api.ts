@@ -25,9 +25,9 @@ export async function workspacePut(request:Request){return protectedApi(async()=
 })}
 export async function quotesGet(request:Request){return protectedApi(async()=>{
   const {db}=await requireMember();const id=new URL(request.url).searchParams.get('id');
-  if(id){z.string().uuid().parse(id);const {data,error}=await db.from('quotes').select('payload').eq('id',id).maybeSingle();if(error)databaseError(error);return data?reply(data.payload):reply({error:'Cotización no encontrada.'},404)}
-  const {data,error}=await db.from('quotes').select('payload').order('created_at',{ascending:false}).limit(100);
-  if(error)databaseError(error);return reply({quotes:data?.map(r=>r.payload)??[]});
+  if(id){z.string().uuid().parse(id);const {data,error}=await db.from('quotes').select('payload,is_test').eq('id',id).maybeSingle();if(error)databaseError(error);return data?reply({...data.payload,isTest:data.is_test}):reply({error:'Cotización no encontrada.'},404)}
+  const {data,error}=await db.from('quotes').select('payload,is_test').order('created_at',{ascending:false}).limit(100);
+  if(error)databaseError(error);return reply({quotes:data?.map(r=>({...r.payload,isTest:r.is_test}))??[]});
 })}
 export async function quotesPost(request:Request){return protectedApi(async()=>{
   checkOrigin(request);const {db}=await requireMember();

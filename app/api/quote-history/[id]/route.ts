@@ -10,13 +10,13 @@ export async function PATCH(request:Request,{params}:{params:Promise<{id:string}
   const {id}=await params;z.string().uuid().parse(id);
   const action=historyActionSchema.parse(await request.json());
   const {db}=await requireMember(action.action==='trash'||action.action==='restore');
-  const patch=action.action==='send'?{sent_on:action.sentOn,sent_channel:action.channel}:
+  const patch=action.action==='test-label'?{is_test:action.isTest}:action.action==='send'?{sent_on:action.sentOn,sent_channel:action.channel}:
     action.action==='clear-send'?{sent_on:null,sent_channel:null}:
     {deleted_at:action.action==='trash'?new Date().toISOString():null};
   let query=db.from('quotes').update(patch).eq('id',id);
   query=action.action==='restore'?query.not('deleted_at','is',null):query.is('deleted_at',null);
-  const {data,error}=await query.select('id,sent_on,sent_channel,deleted_at').maybeSingle();
+  const {data,error}=await query.select('id,is_test,sent_on,sent_channel,deleted_at').maybeSingle();
   if(error){if(error.code==='22023')throw new AccessError('Revisa la fecha de envío: debe estar entre la creación de la cotización y hoy.',400);databaseError(error);}
   if(!data)throw new AccessError('La cotización ya cambió o no está disponible. Actualiza el historial.',404);
-  return Response.json({id:data.id,sentOn:data.sent_on,sentChannel:data.sent_channel,deletedAt:data.deleted_at},{headers:privateHeaders});
+  return Response.json({id:data.id,isTest:data.is_test,sentOn:data.sent_on,sentChannel:data.sent_channel,deletedAt:data.deleted_at},{headers:privateHeaders});
 })}
