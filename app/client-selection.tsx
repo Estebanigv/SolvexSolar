@@ -1,7 +1,14 @@
 'use client';
 import {useId,useState} from 'react';
+import {UserRound} from 'lucide-react';
 import type {QuoteInput} from '@/lib/quote';
-import {searchClients,type SearchableClient} from '@/lib/client-search';
+import {searchClients,type ClientOwner,type SearchableClient} from '@/lib/client-search';
+import {memberColorStyle} from '@/lib/member-color';
+
+function ClientOwnerLabel({owner}:{owner?:ClientOwner|null}){
+  const name=owner?.full_name?.trim();
+  return <span className="client-owner-label" style={name&&owner?memberColorStyle(owner.identification_color,owner.id):undefined}><UserRound size={14} aria-hidden="true"/>{name?`Responsable: ${name}`:'Responsable no disponible'}</span>;
+}
 
 export function ClientSelection({customer,clientId,clients,onSelect,loading=false,unavailable=false,disabled=false}:{
   customer:QuoteInput['customer'];clientId:string|null;clients:SearchableClient[];
@@ -15,6 +22,7 @@ export function ClientSelection({customer,clientId,clients,onSelect,loading=fals
     <div className="client-current" aria-live="polite" aria-atomic="true">
       <span className="client-current-status">{clientId?'Cliente registrado':'Nuevo cliente · Pendiente de guardar'}</span>
       <strong>{customer.name.trim()||'Carga una boleta o ingresa los datos del cliente'}</strong>
+      {clientId&&!loading&&!unavailable&&<ClientOwnerLabel owner={clients.find(client=>client.id===clientId)?.owner}/>}
       {customer.address&&<span>{[customer.address,customer.commune].filter(Boolean).join(' · ')}</span>}
       {(customer.email||customer.phone)&&<span>{[customer.email,customer.phone].filter(Boolean).join(' · ')}</span>}
     </div>
@@ -27,7 +35,7 @@ export function ClientSelection({customer,clientId,clients,onSelect,loading=fals
       {searching&&!loading&&!unavailable&&matches.length>0&&<ul className="client-search-results" aria-label="Clientes encontrados">
         {matches.slice(0,8).map(client=><li key={client.id}><button type="button" disabled={disabled||client.id===clientId}
           onClick={()=>{onSelect(client);setQuery('')}}>
-          <strong>{client.details.name}</strong>
+          <span className="client-result-heading"><strong>{client.details.name}</strong><ClientOwnerLabel owner={client.owner}/></span>
           <span>{[client.details.email,client.details.phone,client.details.commune].filter(Boolean).join(' · ')}</span>
           <small>{client.id===clientId?'Cliente actual':'Cargar cliente'}</small>
         </button></li>)}

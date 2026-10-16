@@ -13,7 +13,7 @@ export default function Preview(){
  const [quote,setQuote]=useState(newQuote);
  const [live,setLive]=useState(false);
  const [clientId,setClientId]=useState<string|null>(null);
- const clients=[{id:'demo-1',details:{...newQuote().customer,name:'Cliente Álvarez de prueba',email:'demo@example.com',phone:'+56 9 1234 5678'}}];
+ const clients=[{id:'demo-1',owner:{id:'demo-owner',full_name:'Responsable de ejemplo',identification_color:'violet'},details:{...newQuote().customer,name:'Cliente Álvarez de prueba',email:'demo@example.com',phone:'+56 9 1234 5678'}}];
  const [diagnosticTexts,setDiagnosticTexts]=useState<string[]>([]);
  const bill=useBillAttachment(()=>{},extraction=>{const merged=autoFillBill(quote,extraction,{});setQuote(q=>mergeQuotePatch(q,merged.patch));return merged.result});
  const [accepted,setAccepted]=useState<string|null>(null);

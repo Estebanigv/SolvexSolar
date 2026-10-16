@@ -5,12 +5,12 @@ import {z} from 'zod';
 const missingTrash=(error:{code?:string;message?:string}|null)=>!!error&&['42703','PGRST204'].includes(error.code??'')&&!!error.message?.includes('deleted_at');
 export async function GET(request:Request){return protectedApi(async()=>{
  const {db}=await requireMember();const trash=new URL(request.url).searchParams.get('trash')==='true';
- let query=db.from('clients').select('id,details,updated_at,deleted_at').order('updated_at',{ascending:false}).limit(500);
+ let query=db.from('clients').select('id,details,updated_at,deleted_at,owner:profiles!clients_owner_id_fkey(id,full_name,identification_color)').order('updated_at',{ascending:false}).limit(500);
  query=trash?query.not('deleted_at','is',null):query.is('deleted_at',null);
  const result=await query;
  if(missingTrash(result.error)){
    if(trash)return Response.json({clients:[],trashAvailable:false},{headers:privateHeaders});
-   const fallback=await db.from('clients').select('id,details,updated_at').order('updated_at',{ascending:false}).limit(500);
+   const fallback=await db.from('clients').select('id,details,updated_at,owner:profiles!clients_owner_id_fkey(id,full_name,identification_color)').order('updated_at',{ascending:false}).limit(500);
    if(fallback.error)databaseError(fallback.error);
    return Response.json({clients:fallback.data,trashAvailable:false},{headers:privateHeaders});
  }

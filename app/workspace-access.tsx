@@ -2,6 +2,7 @@
 import {useEffect,useRef,useState,type ReactNode} from 'react';
 import {readRecovery,writeRecovery} from '@/lib/local-recovery';
 import {ClientSelection} from './client-selection';
+import type {SearchableClient} from '@/lib/client-search';
 import {ClientCreateDialog} from './client-create-dialog';
 import {Button} from '@/components/ui/button';
 import {toast} from 'sonner';
@@ -16,7 +17,7 @@ export function SignOutButton({compact=false,preview=false}:{compact?:boolean;pr
   async function logout(){setBusy(true);try{await api('/auth/signout',{method:'POST'});window.location.assign('/acceso')}catch(e){toast.error((e as Error).message);setBusy(false)}}
   return <Button type="button" variant="ghost" className={compact?"toolbar-icon toolbar-signout":"nav-signout"} title="Cerrar sesión" aria-label={busy?"Cerrando sesión…":"Cerrar sesión"} disabled={busy||preview} onClick={logout}><LogOut size={16} aria-hidden="true"/><span className={compact?'sr-only':undefined}>{busy?'Cerrando sesión…':'Cerrar sesión'}</span></Button>;
 }
-type Client={id:string;details:QuoteInput['customer']};
+type Client=SearchableClient;
 export function ClientPicker({customer,clientId,onSelect,onSave,refresh=0,onManage,review,reviewPending=false}:{review?:ReactNode;reviewPending?:boolean;refresh?:number;onManage?:()=>void;customer:QuoteInput['customer'];clientId:string|null;onSelect:(client:Client|null)=>void;onSave:(id:string)=>void}){
   const [creating,setCreating]=useState(false);
   const [loading,setLoading]=useState(true);
@@ -24,7 +25,7 @@ export function ClientPicker({customer,clientId,onSelect,onSave,refresh=0,onMana
   function load(){return api<{clients:Client[]}>('/api/clients').then(body=>{setClients(body.clients);setError('');setLoading(false)},(e:Error)=>{setError(e.message);setLoading(false)})}
   useEffect(()=>{void load()},[refresh]);
   async function save(){if(reviewPending)return;setBusy(true);try{const body=await api<{id:string}>('/api/clients',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({details:customer,id:clientId})});onSave(body.id);await load();toast.success('Cliente guardado.')}catch(e){toast.error((e as Error).message)}finally{setBusy(false)}}
-  return <section className="client-picker"><div className="client-picker-heading"><strong>Cliente de esta cotización</strong><Button type="button" onClick={()=>setCreating(true)} disabled={busy}>Nuevo cliente</Button></div><ClientSelection customer={customer} clientId={clientId} clients={clients} onSelect={onSelect} loading={loading} unavailable={!!error} disabled={busy}/>{review}<p>Guardar una cotización también guarda los datos del cliente. Puedes guardarlos ahora, aunque aún no tengas la propuesta.</p><Button variant="outline" onClick={save} disabled={busy||reviewPending||!customer.name.trim()||!/^$|^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.email)}>{busy?'Guardando…':clientId?'Actualizar cliente':'Guardar datos del cliente'}</Button>{onManage&&<Button variant="ghost" onClick={onManage}>Ver y administrar clientes</Button>}{error&&<p role="alert">{error} <button onClick={load}>Reintentar</button></p>}{creating&&<ClientCreateDialog onClose={()=>setCreating(false)} onCreated={client=>{setClients(list=>[client,...list.filter(item=>item.id!==client.id)]);onSelect(client);setCreating(false);toast.success('Cliente creado y seleccionado.');}}/>}</section>;
+  return <section className="client-picker"><div className="client-picker-heading"><strong>Cliente de esta cotización</strong><Button type="button" onClick={()=>setCreating(true)} disabled={busy}>Nuevo cliente</Button></div><ClientSelection customer={customer} clientId={clientId} clients={clients} onSelect={onSelect} loading={loading} unavailable={!!error} disabled={busy}/>{review}<p>Guardar una cotización también guarda los datos del cliente. Puedes guardarlos ahora, aunque aún no tengas la propuesta.</p><Button variant="outline" onClick={save} disabled={busy||reviewPending||!customer.name.trim()||!/^$|^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.email)}>{busy?'Guardando…':clientId?'Actualizar cliente':'Guardar datos del cliente'}</Button>{onManage&&<Button variant="ghost" onClick={onManage}>Ver y administrar clientes</Button>}{error&&<p role="alert">{error} <button onClick={load}>Reintentar</button></p>}{creating&&<ClientCreateDialog onClose={()=>setCreating(false)} onCreated={client=>{setClients(list=>[client,...list.filter(item=>item.id!==client.id)]);onSelect(client);setCreating(false);void load();toast.success('Cliente creado y seleccionado.');}}/>}</section>;
 }
 export {Members} from './members';
 export function useQuoteBillBackup(ownerId?:string){

@@ -1,6 +1,7 @@
 import type {QuoteInput} from './quote';
 
-export type SearchableClient = {id:string;details:QuoteInput['customer']};
+export type ClientOwner = {id:string;full_name:string|null;identification_color?:string|null};
+export type SearchableClient = {id:string;details:QuoteInput['customer'];owner?:ClientOwner|null};
 const normalize = (value:string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
 
 export function searchClients(clients:SearchableClient[],query:string){
