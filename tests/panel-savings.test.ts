@@ -57,7 +57,8 @@ const approved={...saved,input:{...saved.input,projection:{...p,reviewedFor:proj
 assert.equal(publishedProjection(approved)?.input.monthlySavings,147508);
 assert.equal(publishedProjection({...approved,calculation:quote(10,620).calculation}),null,'Equipment changes invalidate PDF review');
 const document=JSON.stringify(proposalLayout(approved));
-assert.match(document,/147.508/);assert.match(document,/205 CLP/);
+assert.match(document,/147.508/);assert.doesNotMatch(document,/205 CLP|Supuestos del escenario/);
+assert.match(approved.input.projection.savingsSource,/205 CLP/,'Conservar el fundamento dentro del cotizador');
 const comparison=savingsBillComparison({...q,input:{...q.input,customer:{...q.input.customer,bill:200000},energy:{...newEnergyInput(),billingDays:60}}},p)!;
 assert.equal(comparison.referenceDays,30);assert.equal(comparison.monthlyBill,100000);
 

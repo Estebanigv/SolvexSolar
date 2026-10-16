@@ -7,7 +7,7 @@ import {consumptionSummary} from './energy';
 import {proposalDiscount,proposalEquipment,proposalWarranties,proposalReadingSections,type ProposalTextBlock} from './proposal-document';
 import type {SavedQuote} from './quote';
 import {money,systemNames} from './quote';
-import {publishedProjection,projectionAssumptions,savingsBillComparison} from './projection';
+import {publishedProjection,savingsBillComparison} from './projection';
 
 type ProposalPhotos={roof?:ArrayBuffer;home?:ArrayBuffer};
 export async function quotePdf(q:SavedQuote,logoBytes?:ArrayBuffer,photos:ProposalPhotos={}){
@@ -116,7 +116,6 @@ export async function quotePdf(q:SavedQuote,logoBytes?:ArrayBuffer,photos:Propos
   }
   y-=8;text('Ahorro acumulado: '+money(forecast.cumulative)+'. Balance después de inversión: '+money(forecast.net)+'.',10,true);
   if(forecast.co2Tonnes!==null){heading('Impacto ambiental estimado');text(forecast.co2Tonnes.toLocaleString('es-CL',{maximumFractionDigits:2})+' t CO2 evitadas en el primer año',15,true,teal);text(forecast.input.avoidedKwh?.toLocaleString('es-CL')+' kWh sustituidos x '+forecast.input.emissionFactor+' kg CO2/kWh. Fuente: '+forecast.input.emissionSource,9)}
-  heading('Cómo se calculó');text(forecast.input.savingsSource,10);text(projectionAssumptions(forecast.input),9);y-=6;text('La recuperación es el primer cruce del ahorro acumulado con la inversión. Reposiciones posteriores pueden reducir el balance. El ahorro mensual inicial se expresa antes de costos.',9);
  }
  const reading=proposalReadingSections(q);
  function bulletList(items:string[],x=M,width=CW,size=10){

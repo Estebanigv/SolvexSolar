@@ -8,6 +8,7 @@ import {newQuote,calculate,initialProducts,initialSettings,type SavedQuote} from
 import {issuanceWarnings,issuedWarnings,documentTitle} from '../lib/quote-issuance';
 import {proposalCanvases} from '../lib/proposal-canvas';
 import {quotePdf} from '../lib/pdf';
+import {newProjection,projectionContext,publishedProjection} from '../lib/projection';
 import {Proposal} from '../app/proposal';
 async function pdfContents(q:SavedQuote){
  const pdf=await PDFDocument.load(await quotePdf(q));
@@ -35,6 +36,21 @@ async function run(){
   const clean={...document,issuanceWarnings:[]};
   assert.equal(renderToStaticMarkup(createElement(Proposal,{q:document})),renderToStaticMarkup(createElement(Proposal,{q:clean})),'El documento del cliente no depende de los pendientes internos');
   assert.deepEqual(await pdfContents(document),await pdfContents(clean),'El PDF no contiene avisos internos, tampoco en el formato antiguo');
+ }
+ // Savings explanations stay internal, including already saved overrides of the removed block.
+ for(const legacy of [false,true]){
+  const scenario={...newProjection(),savingsMode:'manual' as const,monthlySavings:100000,savingsSource:'INTERNAL-SAVINGS-NOTE'};
+  const document={...issued,input:{...input,projection:scenario,proposalContent:legacy?undefined:{...input.proposalContent!,text:{'assumptions:body':'OLD-INTERNAL-OVERRIDE'}}}};
+  scenario.reviewedFor=projectionContext(document,scenario);
+  const forecast=publishedProjection(document)!;
+  assert.ok(forecast);assert.equal(forecast.input.monthlySavings,100000);
+  const html=renderToStaticMarkup(createElement(Proposal,{q:document}));
+  assert.doesNotMatch(html,/INTERNAL-SAVINGS-NOTE|OLD-INTERNAL-OVERRIDE|Supuestos del escenario|Cómo se calculó/);
+  const changedScenario={...scenario,savingsSource:'DIFFERENT-INTERNAL-NOTE'};
+  const changed={...document,input:{...document.input,projection:changedScenario}};
+  changedScenario.reviewedFor=projectionContext(changed,changedScenario);
+  assert.deepEqual(await pdfContents(document),await pdfContents(changed),'El comentario interno no cambia el PDF de ninguno de los formatos');
+  assert.equal(document.input.projection.savingsSource,'INTERNAL-SAVINGS-NOTE');
  }
  assert.deepEqual(proposalCanvases(issued),proposalCanvases({...issued,issuanceWarnings:[]}));
  const long={...issued,issuanceWarnings:Array.from({length:80},(_,i)=>`Pendiente interno ${i}`)};
