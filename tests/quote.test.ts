@@ -52,7 +52,7 @@ for(const taxMode of ['included','net','pending'] as const){
   assert.equal(payments.reduce((sum,p)=>sum+p.amount,0),amount);
   assert.ok(payments.every(p=>Number.isInteger(p.amount)));
   const document=proposalDiscount({id:'test',folio:'TEST',date:'2026-10-06',input:manual,settings,calculation:c});
-  if(document){assert.equal(document.amount,document.before-amount);assert.equal(document.percent,undefined,'No anunciar un porcentaje que cambió al negociar el total');}
+  if(document){assert.equal(document.amount,document.before-amount);assert.equal(document.percent,manual.discountPercent||undefined,'Conservar el descuento ingresado; el ajuste de cierre se informa por separado');}
   const restored=calculate({...reopened,finalTotalOverride:null},initialProducts,settings);
   assert.deepEqual(restored,baseline,'Restaurar devuelve el cálculo original');
  }

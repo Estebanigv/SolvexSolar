@@ -15,7 +15,10 @@ const text=(p:typeof pages[number])=>p.ops.filter(o=>o.kind==='text').map(o=>o.t
 const cover=pages[0],discount=proposalDiscount(q)!;
 assert.equal(discount.effectivePercent,29.97);
 assert.equal(discount.amount,1544907);
-assert.ok(text(cover).includes('29,97% efectivo'));
+assert.equal(discount.percent,30);
+assert.ok(text(cover).includes('Descuento para tu proyecto · 30%'));
+assert.ok(!text(cover).includes('29,97%'));
+assert.ok(text(cover).includes('Total final con redondeo.'));
 assert.ok(text(cover).includes('Precio anterior: $5.154.907 · Total final: $3.610.000'));
 assert.equal(pages.filter(p=>p.sourcePage==='cover').length,1,'El descuento normal no genera una hoja de continuación');
 assert.ok(pages.length<=4,'Las cláusulas y notas habituales se distribuyen sin hojas casi vacías');
@@ -36,7 +39,7 @@ assert.equal(customerTerms({...paymentInput,documentTerms:'Reserva especial 20%.
 const document=customerDocumentSettings(paymentInput,settings);
 assert.deepEqual(paymentBreakdown(q.calculation.total,document),[{label:'Pago único',percent:100,amount:3610000}]);
 assert.equal(JSON.stringify(q),snapshot,'Rediagramar no modifica el snapshot ni importes emitidos');
-console.log('Minuta: descuento integrado, porcentaje efectivo, cláusulas completas y pagos coherentes: OK');
+console.log('Minuta: descuento integrado, porcentaje seleccionado, cláusulas completas y pagos coherentes: OK');
 
 for(const count of [2,3] as const){
  const schedule=paymentSchedulePreset(count);
@@ -46,4 +49,27 @@ for(const count of [2,3] as const){
  assert.equal(paymentBreakdown(1234567,configuration).reduce((sum,p)=>sum+p.amount,0),1234567);
  assert.ok(customerTerms({...input,documentPaymentSchedule:schedule},settings).includes(`Anticipo ${schedule[0].percent}%`));
 }
-assert.equal(proposalLayout(q)[0].blocks.find(b=>b.id==='discount')?.title,'Descuento para tu proyecto · 29,97%');
+assert.equal(proposalLayout(q)[0].blocks.find(b=>b.id==='discount')?.title,'Descuento para tu proyecto · 30%');
+
+// Regression: 10% stays 10% even when the final commercial total rounds up.
+const tenPercent:SavedQuote={...q,input:{...q.input,discountPercent:10,finalTotalOverride:null},calculation:{...q.calculation,subtotal:9876138,discount:987614,calculatedTotal:8888524,total:8890000,totalAdjustment:1476}};
+const originalTen=JSON.stringify(tenPercent);
+assert.equal(proposalDiscount(tenPercent)?.effectivePercent,9.99);
+assert.equal(proposalDiscount(tenPercent)?.percent,10);
+const tenBlock=proposalLayout(tenPercent)[0].blocks.find(b=>b.id==='discount')!;
+assert.equal(tenBlock.title,'Descuento para tu proyecto · 10%');
+assert.ok(tenBlock.body.includes('Ahorras $986.138.'));
+assert.ok(tenBlock.body.includes('Total final: $8.890.000'));
+assert.ok(tenBlock.body.includes('Total final con redondeo.'));
+const tenText=proposalCanvases(tenPercent).map(text).join(' ');
+assert.ok(tenText.includes('Descuento para tu proyecto · 10%'));
+assert.ok(!tenText.includes('9,99%'));
+assert.equal(JSON.stringify(tenPercent),originalTen,'La presentación conserva los importes originales');
+// A negotiated closing total keeps the entered percentage and explains its adjustment.
+const negotiated={...tenPercent,input:{...tenPercent.input,finalTotalOverride:8890000}};
+assert.equal(proposalDiscount(negotiated)?.percent,10);
+assert.equal(proposalLayout(negotiated)[0].blocks.find(b=>b.id==='discount')?.title,'Descuento para tu proyecto · 10%');
+assert.ok(proposalLayout(negotiated)[0].blocks.find(b=>b.id==='discount')?.body.includes('Incluye el ajuste del precio final.'));
+const legacy={...tenPercent,input:{...tenPercent.input,discountPercent:undefined}};
+assert.equal(proposalDiscount(legacy)?.percent,undefined);
+console.log('Descuento: 10% seleccionado visible pese al redondeo; ahorro e importes intactos: OK');
