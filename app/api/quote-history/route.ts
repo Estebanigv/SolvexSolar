@@ -13,7 +13,7 @@ export async function GET(request:Request){return protectedApi(async()=>{
   const basis=z.enum(['created','sent']).parse(url.searchParams.get('basis')??'sent');
   const offset=z.coerce.number().int().min(0).max(100000).parse(url.searchParams.get('offset')??0);
   const {db}=await requireMember(view==='trash');
-  let query=db.from('quotes').select('is_test,project_id,parent_quote_id,payload,owner_id,created_at,sent_on,sent_channel,deleted_at,owner:profiles!quotes_owner_id_fkey(id,full_name,email,identification_color)',{count:'exact'});
+  let query=db.from('quotes').select('purge_started_at,is_test,project_id,parent_quote_id,payload,owner_id,created_at,sent_on,sent_channel,deleted_at,owner:profiles!quotes_owner_id_fkey(id,full_name,email,identification_color)',{count:'exact'});
   query=view==='trash'?query.not('deleted_at','is',null):query.is('deleted_at',null);
   if(view==='calendar'){
     const month=z.string().regex(/^(20\d{2})-(0[1-9]|1[0-2])$/).parse(url.searchParams.get('month'));
@@ -37,6 +37,6 @@ export async function GET(request:Request){return protectedApi(async()=>{
     const snapshot=row.payload as SavedQuote;
     const adviser=snapshot.settings.advisers?.find(a=>a.id===snapshot.input.adviserId);
     const responsibleColor=resolveResponsibleColor(adviser?.email,{id:row.owner_id,identification_color:owner?.identification_color},members??[]);
-    return {...row.payload,isTest:row.is_test,projectId:row.project_id,parentQuoteId:row.parent_quote_id,followup:tracking.data?.find(f=>f.project_id===row.project_id)??null,responsibleColor,date:row.created_at,owner:{id:row.owner_id,name:owner?.full_name||owner?.email||'Usuario'},sentOn:row.sent_on,sentChannel:row.sent_channel,deletedAt:row.deleted_at};
+    return {...row.payload,isTest:row.is_test,projectId:row.project_id,parentQuoteId:row.parent_quote_id,followup:tracking.data?.find(f=>f.project_id===row.project_id)??null,responsibleColor,date:row.created_at,owner:{id:row.owner_id,name:owner?.full_name||owner?.email||'Usuario'},sentOn:row.sent_on,sentChannel:row.sent_channel,deletedAt:row.deleted_at,purgeStartedAt:row.purge_started_at};
   }),total:count??0},{headers:privateHeaders});
 })}

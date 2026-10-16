@@ -16,3 +16,4 @@ await import('./activity-route.test.mjs');
 await import('./proposal-style-route.test.mjs');
 
 await import('./quote-issue-route.test.mjs');
+await import('./quote-trash.test.mjs');

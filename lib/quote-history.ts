@@ -10,6 +10,7 @@ export type HistoryQuote=SavedQuote&{
   sentOn?:string|null;
   sentChannel?:'whatsapp'|'email'|'other'|null;
   deletedAt?:string|null;
+  purgeStartedAt?:string|null;
 };
 export const channelNames={whatsapp:'WhatsApp',email:'Correo',other:'Otro canal'};
 export function chileDate(value:Date|string=new Date()){
@@ -19,6 +20,7 @@ export const dateSchema=z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(s=>/^\d{4
 export const historyActionSchema=z.discriminatedUnion('action',[
   z.object({action:z.literal('send'),sentOn:dateSchema.refine(s=>s<=chileDate(),'El envío no puede ser futuro'),channel:z.enum(['whatsapp','email','other'])}),
   z.object({action:z.literal('test-label'),isTest:z.boolean()}),
+  z.object({action:z.literal('purge'),confirmFolio:z.string().trim().min(1).max(100)}),
   z.object({action:z.literal('clear-send')}),z.object({action:z.literal('trash')}),z.object({action:z.literal('restore')}),
 ]);
 export type HistoryAction=z.infer<typeof historyActionSchema>;

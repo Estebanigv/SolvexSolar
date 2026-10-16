@@ -25,3 +25,5 @@
 .document-share-attachment strong{font-size:14px}.document-share-attachment p{font-size:13px;line-height:1.7;margin:5px 0 0;color:#415f6b}
 .document-share-dialog>.field-error{font-size:14px;line-height:1.6}
 .document-share-dialog>[role=status]{display:flex;align-items:center;gap:10px;font-size:13px;line-height:1.6;color:#315f61}
+
+.qh-retention{font-size:.78rem;line-height:1.45;color:#536974}.qh-purge-warning{display:flex;gap:12px;padding:16px;border:1px solid #e8b8b4;background:#fff5f3;border-radius:12px;color:#9b3028;margin-bottom:18px}.qh-purge-warning>svg{flex-shrink:0;margin-top:2px}.qh-purge-warning p{margin:6px 0 0;line-height:1.5;font-size:.9rem}.qh-dialog input{max-width:100%}
