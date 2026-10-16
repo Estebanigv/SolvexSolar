@@ -1,5 +1,5 @@
 "use client";
-import {useEffect, useRef, useState} from 'react';
+import {useEffect, useRef, useState, type DragEvent} from 'react';
 import {Upload, Camera, FileText, Eye, Trash2, RotateCw, ScanText, LoaderCircle, X, ScanBarcode} from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription} from '@/components/ui/dialog';
@@ -54,15 +54,25 @@ export function useBillAttachment(onDocumentChange:()=>void,onRead:(result:BillE
 
 export function BillUpload({bill,quote,onApply}:{bill:ReturnType<typeof useBillAttachment>;quote:QuoteInput;onApply:(patch:Partial<QuoteInput>)=>void}){
  const input=useRef<HTMLInputElement>(null),camera=useRef<HTMLInputElement>(null),codeCamera=useRef<HTMLInputElement>(null),replace=useRef(false);const [preview,setPreview]=useState<string|null>(null);const [scanning,setScanning]=useState(false);
+ const [dragging,setDragging]=useState(false),[dropError,setDropError]=useState('');const dragDepth=useRef(0);
  const {attachments,error,loading,reading}=bill;const selected=attachments.find(d=>d.id===preview);
  function pick(replaceAll=false){replace.current=replaceAll;input.current?.click()}
- return <section className="bill-upload" aria-labelledby="bill-upload-title">
+ function hasFiles(event:DragEvent){return Array.from(event.dataTransfer.types).includes('Files')}
+ function drop(event:DragEvent){
+  event.preventDefault();dragDepth.current=0;setDragging(false);if(loading)return;
+  const files=Array.from(event.dataTransfer.files);
+  if(!files.length){setDropError('Arrastra el archivo PDF, JPG o PNG desde tu equipo; los enlaces no son archivos.');return}
+  setDropError('');void bill.select(files);
+ }
+ return <section className="bill-upload" aria-labelledby="bill-upload-title" onDragEnter={event=>{if(hasFiles(event)){event.preventDefault();dragDepth.current++;if(!loading)setDragging(true)}}} onDragOver={event=>{if(hasFiles(event)){event.preventDefault();event.dataTransfer.dropEffect=loading?'none':'copy'}}} onDragLeave={event=>{if(hasFiles(event)){dragDepth.current=Math.max(0,dragDepth.current-1);if(!dragDepth.current)setDragging(false)}}} onDrop={drop}>
   <div className="bill-upload-heading"><span className="bill-symbol"><ScanText size={24}/></span><div><h3 id="bill-upload-title">Escanea la boleta del cliente</h3><p>Adjunta el frente, el reverso y los acercamientos que necesites de la misma boleta. Puedes cargar boletas de cualquier distribuidora o cooperativa eléctrica de Chile. Leemos los datos disponibles; revisa y completa los que falten.</p></div></div>
   <input ref={input} className="sr-only" tabIndex={-1} type="file" multiple accept=".pdf,.jpg,.jpeg,.png" aria-label="Seleccionar fotos o PDF de la boleta" onChange={e=>{void bill.select(Array.from(e.target.files??[]),replace.current);e.target.value=''}}/>
   <input ref={camera} className="sr-only" tabIndex={-1} type="file" accept="image/jpeg,image/png" capture="environment" aria-label="Fotografiar boleta con cámara" onChange={e=>{void bill.select(Array.from(e.target.files??[]));e.target.value=''}}/>
   <input ref={codeCamera} className="sr-only" tabIndex={-1} type="file" accept="image/jpeg,image/png" capture="environment" aria-label="Fotografiar código de barras o QR" onChange={e=>{void bill.select(Array.from(e.target.files??[]),false,true);e.target.value=''}}/>
+  <button type="button" className="bill-drop-zone" data-dragging={dragging} disabled={loading} onClick={()=>pick()}><Upload size={25} aria-hidden="true"/><span><strong>{dragging?'Suelta aquí la boleta':'Arrastra aquí fotos o PDF de la boleta'}</strong><small>También puedes hacer clic para elegir archivos. Se agregan a los documentos cargados.</small></span></button>
+  {dropError&&<p className="field-error" role="alert">{dropError}</p>}
   <div className="bill-capture-actions"><Button disabled={loading||attachments.length>=maxBillFiles} onClick={()=>camera.current?.click()}><Camera/>Tomar foto</Button><Button variant="outline" disabled={loading||attachments.length>=maxBillFiles} onClick={()=>pick()}><Upload/>{attachments.length?'Agregar fotos o PDF':'Adjuntar boleta'}</Button><Button variant="outline" disabled={loading||attachments.length>=maxBillFiles} onClick={()=>{if(reading)bill.cancel();setScanning(true)}}><ScanBarcode/>Escanear código</Button></div>
-  <p className="bill-capture-hint">{attachments.length} de {maxBillFiles} archivos · PDF, JPG o PNG · 10 MB por archivo · 40 MB en total. En el celular, “Tomar foto” abre la cámara si el dispositivo lo permite. “Escanear código” detecta en vivo el QR, código de barras o timbre PDF417 al apuntar la cámara. También permite usar una foto. Adjunta también la boleta completa para leer todos los datos.</p>
+  <p className="bill-capture-hint">{attachments.length} de {maxBillFiles} archivos · PDF, JPG o PNG · 10 MB por archivo · 40 MB en total. En el celular, “Tomar foto” abre la cámara si el dispositivo lo permite. “Escanear código” detecta en vivo el QR, código de barras o timbre PDF417 al apuntar la cámara. También permite usar una foto. Adjunta también la boleta completa para leer todos los datos. Para capturas con texto muy pequeño, prefiere el PDF original o fotos de cerca.</p>
   {attachments.map((doc,i)=><div className="bill-document" key={doc.id}><button className="bill-thumbnail" type="button" onClick={()=>setPreview(doc.id)} aria-label={`Ver documento ${i+1}`}>{doc.mime==='application/pdf'?<FileText size={27}/>:<img src={doc.url} alt={`Foto ${i+1} de la boleta`} style={{transform:`rotate(${doc.rotation}deg)`}}/>}</button><div className="bill-document-name"><strong>Documento {i+1}</strong><span>{doc.file.name}</span></div><div className="bill-document-actions"><Button variant="ghost" aria-label={`Ver documento ${i+1}`} onClick={()=>setPreview(doc.id)}><Eye/></Button>{doc.mime!=='application/pdf'&&<Button variant="ghost" aria-label={`Girar documento ${i+1}`} onClick={()=>bill.rotate(doc.id)} disabled={loading}><RotateCw/></Button>}<Button variant="ghost" aria-label={`Quitar documento ${i+1}`} onClick={()=>bill.remove(doc.id)} disabled={loading}><Trash2/></Button></div></div>)}
   {attachments.length>0&&<div className="bill-secondary-actions"><Button variant="link" disabled={loading} onClick={()=>pick(true)}>Reemplazar documentos</Button>{!reading&&<Button variant="outline" disabled={loading} onClick={()=>void bill.read(undefined,true)}><ScanText/>Volver a leer</Button>}</div>}
   {bill.progress&&<div className="bill-reading" role="status" aria-live="polite">{reading&&<LoaderCircle size={18} className="animate-spin"/>}<span>{bill.progress}</span>{reading&&<Button variant="ghost" onClick={bill.cancel}><X/>Cancelar</Button>}</div>}

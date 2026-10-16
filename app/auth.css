@@ -122,3 +122,13 @@
 .customer-review-check input{width:20px;height:20px;flex:0 0 20px;margin-top:2px;accent-color:#1c644d}
 .customer-review-check input:focus-visible{outline:3px solid #408770;outline-offset:3px}
 @media(max-width:480px){.customer-bill-review dl{grid-template-columns:minmax(0,1fr)}}
+
+.customer-bill-review[data-loading=true]{border-color:#9bbec4;background:#f0f7f8}
+.customer-bill-review-heading{display:flex;align-items:center;gap:10px;color:#164d5b}
+.customer-read-spinner{flex-shrink:0;animation:customer-read-spin 1s linear infinite}
+.customer-bill-review .customer-read-progress{font-size:13px;color:#426571;overflow-wrap:anywhere}
+.customer-read-skeleton{display:block;width:75%;max-width:250px;height:18px;margin-top:5px;border-radius:4px;background:linear-gradient(90deg,#d7e6e9 25%,#edf5f6 50%,#d7e6e9 75%);background-size:200% 100%;animation:customer-read-shimmer 1.6s ease-in-out infinite}
+.customer-bill-review[data-loading=true] .customer-review-check{opacity:.65;cursor:wait}
+@keyframes customer-read-spin{to{transform:rotate(360deg)}}
+@keyframes customer-read-shimmer{from{background-position:200% 0}to{background-position:-200% 0}}
+@media(prefers-reduced-motion:reduce){.customer-read-spinner,.customer-read-skeleton{animation:none}}

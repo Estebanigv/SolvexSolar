@@ -118,7 +118,7 @@ function QuoteWorkspace(){
   setPreview(null);setTab('quote');setStep('customer');
   requestAnimationFrame(()=>{const target=document.querySelector<HTMLElement>(edit?'input[aria-label="Nombre y apellido"]':'#customer-bill-confirm');target?.scrollIntoView({block:'center',behavior:'smooth'});target?.focus({preventScroll:true})});
  }
- const customerReviewPanel=customerReview&&<CustomerBillReview customer={quote.customer} checked={!customerReviewPending} busy={customerReadBusy} onChange={checked=>setAcceptedCustomerReview(checked?customerReview:null)} onEdit={()=>focusCustomerReview(true)}/>;
+ const customerReviewPanel=(customerReview||customerReadBusy)&&<CustomerBillReview customer={quote.customer} checked={!customerReviewPending} busy={customerReadBusy} progress={bill.loading?'Preparando archivos…':bill.progress} onChange={checked=>setAcceptedCustomerReview(checked?customerReview:null)} onEdit={()=>focusCustomerReview(true)}/>;
  const draftFiles=useMemo(()=>bill.attachments.map(a=>a.file),[bill.attachments]);
  const draftValue=useMemo(()=>({input:quote,clientId,sourceQuoteId,step,files:draftFiles}),[quote,clientId,sourceQuoteId,step,draftFiles]);
 

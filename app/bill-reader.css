@@ -56,3 +56,7 @@
 .bill-live-dialog p{font-size:14px;line-height:1.6}.bill-live-dialog small{font-size:12px;line-height:1.6;color:#4c6873}
 .bill-live-actions{display:flex;gap:8px;flex-wrap:wrap}.bill-live-actions button{min-height:44px;flex:1}
 @media(max-width:480px){.bill-live-dialog{padding:18px!important}.bill-live-actions{display:grid;grid-template-columns:1fr 1fr}.bill-live-actions button:last-child{grid-column:1/-1}}
+
+.bill-drop-zone{display:flex;align-items:center;justify-content:center;gap:14px;width:100%;padding:22px 18px;margin-top:20px;border:1px solid #90b6bd;border-radius:10px;background:#f7fbfa;color:#124d5b;text-align:left;cursor:pointer;transition:background .15s,border-color .15s}
+.bill-drop-zone>svg{flex-shrink:0}.bill-drop-zone strong,.bill-drop-zone small{display:block}.bill-drop-zone strong{font-size:15px;font-weight:650}.bill-drop-zone small{font-size:12px;line-height:1.6;color:#4e6c76;margin-top:4px}.bill-drop-zone:hover,.bill-drop-zone[data-dragging=true]{background:#e4f2ed;border-color:#186b57}.bill-drop-zone:focus-visible{outline:2px solid #186b57;outline-offset:3px}.bill-drop-zone:disabled{opacity:.6;cursor:wait}
+@media(max-width:480px){.bill-drop-zone{padding:16px 12px;gap:10px}.bill-drop-zone strong{font-size:14px}}
