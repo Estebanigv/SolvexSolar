@@ -12,6 +12,7 @@ export const billFields = [
 ] as const;
 export type BillField = typeof billFields[number]['key'];
 export type BillValues = Partial<Record<BillField,string>>;
+export const missingBillConsumptionMessage='No se identificaron los kWh del período. Adjunta la página «Detalle de tu cuenta», donde aparece «Electricidad consumida» o «Consumo total del mes», o ingresa ese valor manualmente. La potencia en kW y el monto a pagar no son el consumo en kWh.';
 export type BillExtraction = {values:BillValues; evidence:Partial<Record<BillField,string>>; warnings:string[]; codes?:{format:string;text:string}[]; period?:string; autoApplied?:BillField[]; preserved?:BillField[]};
 const normalize = (s:string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 export function billTextScore(text:string) {
@@ -119,7 +120,7 @@ export function extractBill(pages:string[]):BillExtraction {
   if(explicitDays&&+explicitDays[1]>0&&+explicitDays[1]<=366)set('billingDays',explicitDays[1],explicitDays[0]);
   else if(start&&end){const days=(end.getTime()-start.getTime())/86400000;if(days>0&&days<=366){set('billingDays',String(days),period!);warnings.push('Los días se calcularon entre las fechas detectadas. Confirma la duración del período con la boleta.')}}
   if(!values.billingDays&&yearlessDays){set('billingDays',String(yearlessDays),period!);warnings.push('Los días se calcularon con los días y meses del período; el año de emisión no se pudo leer. Confirma el período en la boleta.');}
-  if(!values.consumptionKwh)warnings.push('No se detectó un consumo facturado inequívoco. Agrega el reverso o ingresa los kWh manualmente.');
+  if(!values.consumptionKwh)warnings.push(missingBillConsumptionMessage);
   if(!values.billingDays)warnings.push('No se pudo determinar el período. Completa los días facturados.');
   if(pages.length>1){
     const individual=pages.map(page=>extractBill([page]));

@@ -197,3 +197,18 @@ assert.match(browserPhoto.warnings.join(' '),/año de emisión/);
 assert.equal(extractBill(['Monto del período 28 Febrero - 1 Marzo']).values.billingDays,undefined,'Leap-year ambiguity needs confirmation');
 assert.equal(extractBill(['Monto del período 30 Febrero - 5 Marzo']).values.billingDays,undefined);
 assert.equal(extractBill(['Monto del período 20 Diciembre - 20 Enero']).values.billingDays,'31');
+
+// Adding the missing consumption page completes energy without losing reviewed customer data.
+const partialCopelec=autoFillBill(newQuote(),folded);
+const partialQuote={...newQuote(),...partialCopelec.patch};
+assert.equal(partialQuote.energy?.consumptionKwh,null);
+const withContact={...partialQuote,customer:{...partialQuote.customer,email:'revisado@example.com'}};
+const detailAdded=autoFillBill(withContact,extractBill([foldedFront,officeBack,'Electricidad consumida (510 kWh)']),partialCopelec.automatic);
+assert.equal(detailAdded.patch.energy?.consumptionKwh,510);
+assert.equal(detailAdded.patch.energy?.billingDays,29);
+assert.equal(detailAdded.patch.customer?.email,'revisado@example.com');
+assert.equal(detailAdded.patch.customer?.address,partialQuote.customer.address);
+assert.equal(detailAdded.patch.energy?.billReviewed,false);
+const manualConsumption={...withContact,energy:{...withContact.energy!,consumptionKwh:490}};
+assert.equal(autoFillBill(manualConsumption,extractBill([foldedFront,officeBack,'Electricidad consumida (510 kWh)']),partialCopelec.automatic).patch.energy?.consumptionKwh,490,'Preserve manually entered consumption');
+console.log('Consumo faltante: página adicional completa kWh y conserva datos revisados: OK');

@@ -1,10 +1,11 @@
 "use client";
-import {useEffect, useRef, useState} from 'react';
+import {useEffect, useId, useRef, useState} from 'react';
 import {Activity, ExternalLink, MapPin, Sun, LoaderCircle} from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Checkbox} from '@/components/ui/checkbox';
 import {consumptionSummary, solarGenerationContext, newEnergyInput, solarSourceUrl, type EnergyInput, type SolarEstimate} from '@/lib/energy';
+import {missingBillConsumptionMessage} from '@/lib/bill-extraction';
 import {DistributorInput} from './distributor-input';
 import {ProjectLocation} from './project-location';
 import {CneReferencePanel} from './cne-reference';
@@ -13,10 +14,12 @@ import type {AddressQuery} from '@/lib/geocoding';
 const number = (value: number) => value.toLocaleString('es-CL', {maximumFractionDigits: 1});
 const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 
-export function EnergyPanel({value, peakPower, onChange, address, onEditLocation, mode = 'consumption'}: {
-  address?:AddressQuery; onEditLocation?:()=>void; mode?: 'consumption' | 'solar'; value?: EnergyInput; peakPower: number; onChange: (value: EnergyInput) => void;
+export function EnergyPanel({value, peakPower, onChange, address, onEditLocation, mode = 'consumption', hasBill = false}: {
+  hasBill?:boolean; address?:AddressQuery; onEditLocation?:()=>void; mode?: 'consumption' | 'solar'; value?: EnergyInput; peakPower: number; onChange: (value: EnergyInput) => void;
 }) {
   const energy = value ?? newEnergyInput();
+  const consumptionHintId=useId();
+  const missingConsumption=hasBill&&energy.consumptionKwh==null;
   const latestEnergy=useRef(energy);latestEnergy.current=energy;
   const latestOnChange=useRef(onChange);latestOnChange.current=onChange;
   const consumption = consumptionSummary(energy);
@@ -65,11 +68,12 @@ export function EnergyPanel({value, peakPower, onChange, address, onEditLocation
   return <section className="energy-panel" aria-label={mode === 'consumption' ? 'Perfil energético del cliente' : 'Estudio de generación solar'}>
     {mode === 'consumption' && <><div className="energy-heading"><span className="energy-icon"><Activity size={20}/></span><div><h3 id="energy-title">Perfil energético</h3><p>El consumo de la boleta es la base del estudio.</p></div><span className="energy-badge">{energy.billReviewed && consumption ? 'Boleta revisada' : 'Por completar'}</span></div>
     <div className="field-grid energy-fields">
-      <label>Consumo de la boleta (kWh)<Input type="number" min={0} max={1e8} step="any" value={energy.consumptionKwh ?? ''} placeholder="Ej. 350" onChange={e => edit({consumptionKwh: e.target.value === '' ? null : Math.max(0, Number(e.target.value))})}/></label>
+      <label>Consumo de la boleta (kWh)<Input aria-describedby={missingConsumption?consumptionHintId:undefined} type="number" min={0} max={1e8} step="any" value={energy.consumptionKwh ?? ''} placeholder="Ej. 350" onChange={e => edit({consumptionKwh: e.target.value === '' ? null : Math.max(0, Number(e.target.value))})}/></label>
       <label>Días del período facturado<Input type="number" min={1} max={366} step={1} value={energy.billingDays ?? ''} placeholder="Ej. 30" onChange={e => edit({billingDays: e.target.value === '' ? null : Math.min(366, Math.max(1, Math.round(Number(e.target.value))))})}/></label>
       <DistributorInput value={energy.distributor} onChange={distributor=>edit({distributor})}/>
       <label>Tarifa eléctrica<Input maxLength={50} value={energy.tariff} placeholder="Ej. BT1" onChange={e => edit({tariff: e.target.value})}/></label>
     </div>
+    {missingConsumption&&<div className="bill-read-warnings" id={consumptionHintId} role="status"><p><strong>Falta el consumo de la boleta (kWh).</strong></p><p>{missingBillConsumptionMessage}</p></div>}
     {consumption && <div className="consumption-result" role="status"><div><span>Consumo diario</span><strong>{number(consumption.dailyKwh)} <small>kWh/día</small></strong></div><div><span>Equivalente a 30 días</span><strong>{number(consumption.equivalent30DaysKwh)} <small>kWh</small></strong></div><p>Normalizado desde {energy.billingDays} días. Una boleta no representa todo el año; solicita 12 meses para revisar la estacionalidad.</p></div>}
     <label className="bill-review"><Checkbox disabled={!consumption} checked={energy.billReviewed} onCheckedChange={v => edit({billReviewed: v === true})}/>Verifiqué estos datos en la boleta del cliente.</label>
     </>}
