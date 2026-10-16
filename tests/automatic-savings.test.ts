@@ -8,7 +8,8 @@ const input={...newQuote(),customer:{...newQuote().customer,bill:120000},energy}
 const settings={...initialSettings,taxMode:'included' as const};
 const q:SavedQuote={id:'qa',date:'2026-10-03',folio:'qa',input,settings,calculation:calculate(input,initialProducts,settings)};
 q.input.energy={...energy,solarGeneration:{annualKwh:6000,context:solarGenerationContext(energy,q.calculation.kwp),retrievedAt:'2026-10-03T12:00:00Z',source:'PVGIS · ejemplo de prueba'}};
-const p=newProjection();
+const p={...newProjection(),generationMethod:undefined};
+q.input.projection=p;
 let a=automaticSavings(q,p).result!;
 assert.equal(a.monthlyGeneration,500);assert.equal(a.selfConsumed,350);assert.equal(a.monthlySavings,105000);assert.equal(a.exportCredit,0);
 assert.equal(automaticSavings(q,{...p,exportRate:50}).result?.monthlySavings,112500);
@@ -16,9 +17,9 @@ assert.equal(automaticSavings(q,{...p,energyRate:200}).result?.monthlySavings,70
 assert.equal(automaticSavings(q,{...p,nonEnergyCharges:20000}).result?.monthlySavings,87500);
 assert.equal(automaticSavings(q,{...p,selfConsumptionPercent:0}).result?.monthlySavings,0);
 a=automaticSavings(q,{...p,selfConsumptionPercent:100}).result!;
-assert.equal(a.selfConsumed,a.monthlyConsumption);assert.ok(a.selfConsumed<500);
+assert.equal(a.selfConsumed,a.monthlyConsumption);assert.ok(a.selfConsumed!<500);
 const longBill={...q,input:{...q.input,energy:{...q.input.energy!,billingDays:60}}};
-assert.ok(automaticSavings(longBill,p).result!.selfConsumed<automaticSavings(q,p).result!.selfConsumed);
+assert.ok(automaticSavings(longBill,p).result!.selfConsumed!<automaticSavings(q,p).result!.selfConsumed!);
 const offGrid={...q,input:{...q.input,system:'OFF GRID' as const}};
 assert.equal(automaticSavings(offGrid,p).result,null);
 assert.equal(automaticSavings(offGrid,{...p,energyRate:200,exportRate:100}).result?.monthlySavings,70000);

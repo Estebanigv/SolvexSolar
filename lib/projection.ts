@@ -4,7 +4,7 @@ import {z} from 'zod';
 import type {SavedQuote} from './quote';
 
 export const projectionSchema=z.object({
- generationMethod:z.enum(['pvgis','hsp']).optional(),
+ generationMethod:z.enum(['pvgis','hsp','panels']).optional(),
  peakSunHours:z.number().finite().positive().max(12).optional(),
  referenceDays:z.number().int().min(1).max(31).optional(),
  referenceLossPercent:z.number().finite().min(0).max(50).optional(),
@@ -25,9 +25,30 @@ export const projectionSchema=z.object({
 });
 export type ProjectionInput=z.infer<typeof projectionSchema>;
 export const DEFAULT_TARIFF_GROWTH=5;
-export const newProjection=(tariffGrowth=DEFAULT_TARIFF_GROWTH):ProjectionInput=>({savingsMode:'automatic',selfConsumptionPercent:70,energyRate:null,exportRate:0,monthlySavings:null,savingsSource:'',years:25,tariffGrowth,degradation:0.5,annualMaintenance:0,replacementYear:null,replacementCost:0,avoidedKwh:null,emissionFactor:null,emissionSource:'',reviewedFor:''});
+export const newProjection=(tariffGrowth=DEFAULT_TARIFF_GROWTH):ProjectionInput=>({generationMethod:'panels',savingsMode:'automatic',selfConsumptionPercent:70,energyRate:null,exportRate:0,monthlySavings:null,savingsSource:'',years:25,tariffGrowth,degradation:0.5,annualMaintenance:0,replacementYear:null,replacementCost:0,avoidedKwh:null,emissionFactor:null,emissionSource:'',reviewedFor:''});
 
+// Fixed version of the team's 16-10-2026 workbook: N × W × 205 × 4.1 × 30 / 1000.
+// Keep separate from the consumption model so existing saved scenarios retain their method.
+export const PANEL_SAVINGS_REFERENCE={energyRate:205,peakSunHours:4.1,days:30} as const;
 export function automaticSavings(q:SavedQuote,p:ProjectionInput){
+ if(p.generationMethod==='panels'){
+  const {kwp,panels,panelWatts}=q.calculation;
+  if(!Number.isFinite(kwp)||kwp<=0||!Number.isInteger(panels)||panels<=0||panelWatts?.some(w=>!Number.isFinite(w)||w<=0))
+   return {issues:['Selecciona la cantidad y potencia de los paneles en Equipos.'],result:null};
+  const {energyRate,peakSunHours,days}=PANEL_SAVINGS_REFERENCE;
+  const monthlyGeneration=kwp*peakSunHours*days;
+  const potentialValue=monthlyGeneration*energyRate;
+  // Only round the final CLP amount, including exact half-peso values despite IEEE-754 drift.
+  const monthlySavings=Math.round(potentialValue+Number.EPSILON*potentialValue);
+  return {issues:[],result:{method:'panels' as const,monthlyGeneration,rate:energyRate,
+   monthlySavings,potentialValue,monthly:null,
+   monthlyConsumption:null,selfConsumed:null,surplus:null,unused:null,exportRate:null,selfSavings:null,exportCredit:null,estimatedConsumption:false,billRate:false,
+   source:`Referencia por paneles: ${kwp.toLocaleString('es-CL',{maximumFractionDigits:6})} kWp × 4,1 h/día × 30 días × 205 CLP/kWh. Fórmula comercial del equipo (16-10-2026). Valoriza toda la generación estimada; no aplica límites de consumo ni valorización separada de excedentes.`}};
+ }
+ return consumptionSavings(q,p);
+}
+
+function consumptionSavings(q:SavedQuote,p:ProjectionInput){
  const energy=q.input.energy,generation=savingsGeneration(q,p),issues:string[]=[];
  if(!generation)issues.push(p.generationMethod==='hsp'?'Completa potencia, horas solares y días del mes de referencia.':'Completa la ubicación y consulta la generación solar del sistema actual, o selecciona la referencia por paneles.');
  const offGrid=q.input.system==='OFF GRID',fromAmount=p.consumptionMethod==='amount';
@@ -53,7 +74,7 @@ export function automaticSavings(q:SavedQuote,p:ProjectionInput){
  const selfConsumed=monthly?monthly.reduce((sum,row)=>sum+row.selfConsumed,0)/12:Math.min(monthlyConsumption,monthlyGeneration*(p.selfConsumptionPercent??70)/100);
  const unused=Math.max(0,monthlyGeneration-selfConsumed),surplus=offGrid?0:unused,exportRate=offGrid?0:p.exportRate??0;
  const selfSavings=selfConsumed*rate!,exportCredit=surplus*exportRate;
- return {issues,result:{monthlyGeneration,monthlyConsumption,selfConsumed,surplus,unused,rate:rate!,exportRate,selfSavings,exportCredit,monthly,
+ return {issues,result:{method:'consumption' as const,monthlyGeneration,monthlyConsumption,selfConsumed,surplus,unused,rate:rate!,exportRate,selfSavings,exportCredit,monthly,
   potentialValue:monthlyGeneration*rate!,estimatedConsumption:fromAmount,
   monthlySavings:Math.round(selfSavings+exportCredit),billRate:p.energyRate==null&&!offGrid,
   source:!p.generationMethod&&!p.consumptionMethod&&!generation.monthly?`${generation.source}; generación ${generation.annualKwh.toFixed(1)} kWh/año. Autoconsumo supuesto ${p.selfConsumptionPercent??70}%: ${selfConsumed.toFixed(1)} kWh/mes × ${rate!.toFixed(2)} CLP/kWh${p.energyRate==null?' (promedio boleta)':''}. Excedentes ${surplus.toFixed(1)} kWh/mes × ${exportRate.toFixed(2)} CLP/kWh. Promedio anual; validar perfil horario${offGrid?' y pérdidas/autonomía Off Grid':''}.`:`${generation.source}. Autoconsumo supuesto ${p.selfConsumptionPercent??70}%: ${selfConsumed.toFixed(1)} kWh/mes × ${rate!.toFixed(2)} CLP/kWh${p.energyRate==null?' (boleta)':''}. Excedentes ${surplus.toFixed(1)} × ${exportRate.toFixed(2)} CLP/kWh. ${fromAmount?'Consumo estimado desde monto; validar kWh. ':''}${p.rateSource?p.rateSource+'. ':''}${monthly?'Balance mensual; ':''}Validar perfil horario${offGrid?' y autonomía Off Grid':''}.`.slice(0,500)}};
@@ -72,7 +93,7 @@ export function resolvedProjection(q:SavedQuote):ProjectionInput{
 export function savingsBillComparison(q:SavedQuote,p=resolvedProjection(q)){
  const bill=q.input.customer.bill,days=q.input.energy?.billingDays??(p.consumptionMethod==='amount'?p.referenceDays:undefined),savings=p.monthlySavings;
  if(q.input.system==='OFF GRID'||!days||days<=0||!Number.isFinite(days)||!Number.isFinite(bill)||bill<=0||savings==null||!Number.isFinite(savings)||savings<0)return null;
- const referenceDays=p.generationMethod==='hsp'?(p.referenceDays??30):365/12;
+ const referenceDays=p.generationMethod==='panels'?PANEL_SAVINGS_REFERENCE.days:p.generationMethod==='hsp'?(p.referenceDays??30):365/12;
  const monthlyBill=bill/days*referenceDays;
  return {monthlyBill,monthlySavings:savings,percent:savings/monthlyBill*100,
   barPercent:Math.min(100,savings/monthlyBill*100),billingDays:days,referenceDays};

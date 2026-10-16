@@ -22,7 +22,7 @@ const offgrid={...q,input:{...input,system:'OFF GRID' as const}};
 assert.equal(automaticSavings(offgrid,{...p,consumptionMethod:'amount'}).result,null);
 assert.equal(automaticSavings(offgrid,{...p,exportRate:500}).result?.exportCredit,0);
 const seasonal={...q,input:{...input,energy:{...input.energy,consumptionKwh:300,solarGeneration:{annualKwh:6000,context:solarGenerationContext(input.energy,q.calculation.kwp),retrievedAt:'2026-10-13T12:00:00Z',source:'Synthetic seasonal case',monthly:Array.from({length:12},(_,i)=>({month:i+1,kwh:i<6?0:1000}))}}}};
-const seasonalResult=automaticSavings(seasonal,{...newProjection(),selfConsumptionPercent:100,energyRate:200}).result!;
+const seasonalResult=automaticSavings(seasonal,{...newProjection(),generationMethod:'pvgis',selfConsumptionPercent:100,energyRate:200}).result!;
 assert.ok(seasonalResult.monthlySavings<61000);assert.equal(seasonalResult.monthly?.length,12);
 for(const row of seasonalResult.monthly!)assert.ok(Math.abs(row.generation-row.selfConsumed-row.surplus)<1e-9);
 const draft:SavedQuote={...q,input:{...q.input,projection:p}};
