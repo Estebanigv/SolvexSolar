@@ -135,3 +135,6 @@ export function publishedProjection(q:SavedQuote){
  return result?{...result,input:p}:null;
 }
 export const projectionAssumptions=(p:ProjectionInput)=>`Horizonte: ${p.years} años. Variación anual de tarifa: ${p.tariffGrowth}%. Degradación anual: ${p.degradation}%. Mantención anual: ${Math.round(p.annualMaintenance).toLocaleString('es-CL')} CLP. Reposición: ${p.replacementCost>0?`${Math.round(p.replacementCost).toLocaleString('es-CL')} CLP en año ${p.replacementYear}`:'no contemplada'}. Valores nominales, sin descuento financiero ni financiamiento. No garantiza resultados; depende del consumo, recurso solar y condiciones de operación.`;
+
+// Customer documents show the financial assumptions, not the internal calculation source.
+export const customerProjectionAssumptions=(p:ProjectionInput)=>`${p.savingsMode==='automatic'?'':'Ajuste manual del equipo.\n'}${projectionAssumptions(p)}`;

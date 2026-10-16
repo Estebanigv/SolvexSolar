@@ -7,7 +7,7 @@ import {consumptionSummary} from './energy';
 import {proposalDiscount,proposalEquipment,proposalWarranties,proposalReadingSections,type ProposalTextBlock} from './proposal-document';
 import type {SavedQuote} from './quote';
 import {money,systemNames} from './quote';
-import {publishedProjection,savingsBillComparison} from './projection';
+import {publishedProjection,customerProjectionAssumptions,savingsBillComparison} from './projection';
 
 type ProposalPhotos={roof?:ArrayBuffer;home?:ArrayBuffer};
 export async function quotePdf(q:SavedQuote,logoBytes?:ArrayBuffer,photos:ProposalPhotos={}){
@@ -115,6 +115,7 @@ export async function quotePdf(q:SavedQuote,logoBytes?:ArrayBuffer,photos:Propos
    space(29);draw('Año '+row.year,M,y-14,10,true);box(M+60,y-3,285,17,pale);if(row.cumulative>0)box(M+60,y-3,285*row.cumulative/max,17,teal);right(money(row.cumulative),R,y-15,10,true);y-=26;
   }
   y-=8;text('Ahorro acumulado: '+money(forecast.cumulative)+'. Balance después de inversión: '+money(forecast.net)+'.',10,true);
+  heading('Supuestos del escenario');text(customerProjectionAssumptions(forecast.input),9);
   if(forecast.co2Tonnes!==null){heading('Impacto ambiental estimado');text(forecast.co2Tonnes.toLocaleString('es-CL',{maximumFractionDigits:2})+' t CO2 evitadas en el primer año',15,true,teal);text(forecast.input.avoidedKwh?.toLocaleString('es-CL')+' kWh sustituidos x '+forecast.input.emissionFactor+' kg CO2/kWh. Fuente: '+forecast.input.emissionSource,9)}
  }
  const reading=proposalReadingSections(q);

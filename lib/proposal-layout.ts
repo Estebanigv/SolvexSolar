@@ -2,7 +2,7 @@ import type {SavedQuote} from './quote';
 import {money,systemNames} from './quote';
 import {customerDocumentSettings,assignedAdviser,paymentBreakdown,netbillingScope,preliminaryNote} from './commercial';
 import {proposalEquipment,proposalDiscount} from './proposal-document';
-import {publishedProjection} from './projection';
+import {publishedProjection,customerProjectionAssumptions} from './projection';
 import {newProposalContent} from './proposal-content';
 
 export type ProposalBlock={id:string;kind:'text'|'metric'|'equipment'|'chart'|'diagram';title:string;body:string;value?:string;binding?:'total'|'payment'|'savings'|'discount';visual?:'panels'|'inverter'|'battery';share?:number;baseline?:number;points?:{label:string;value:number;year?:number}[]};
@@ -34,6 +34,7 @@ export function proposalLayout(original:SavedQuote,includeHidden=false):Proposal
    {id:'saving',kind:'metric' as const,title:'Ahorro mensual inicial',value:money(projection.input.monthlySavings!),binding:'savings' as const,body:'Antes de costos de mantención y reposición'},
    {id:'payback',kind:'metric' as const,title:'Recuperación estimada',value:projection.payback===null?'Fuera del horizonte':`${projection.payback.toLocaleString('es-CL',{maximumFractionDigits:1})} años`,body:`Inversión ${money(c.total)}`},
    {id:'chart',kind:'chart' as const,title:'Ahorro acumulado',body:'Después de mantención y reposiciones, antes de descontar la inversión.',baseline:c.total,points:[{label:'Año 0',year:0,value:0},...projection.rows.map(r=>({label:`Año ${r.year}`,year:r.year,value:Math.round(r.cumulative)}))]},
+   {id:'assumptions',kind:'text' as const,binding:'savings' as const,title:'Supuestos del escenario',body:customerProjectionAssumptions(projection.input)},
    ...(projection.co2Tonnes!==null?[{id:'environment',kind:'text' as const,title:'Impacto ambiental estimado',body:`${projection.co2Tonnes.toLocaleString('es-CL',{maximumFractionDigits:2})} toneladas de CO₂ evitadas en el primer año. ${projection.input.avoidedKwh?.toLocaleString('es-CL')} kWh sustituidos × ${projection.input.emissionFactor} kg CO₂/kWh. Fuente: ${projection.input.emissionSource}`}]:[]),
   ]}]:[]),
   {id:'investment-page',title:'Inversión y respaldo.',subtitle:'Tu propuesta, en detalle',blocks:[

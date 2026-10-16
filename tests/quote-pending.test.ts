@@ -37,7 +37,7 @@ async function run(){
   assert.equal(renderToStaticMarkup(createElement(Proposal,{q:document})),renderToStaticMarkup(createElement(Proposal,{q:clean})),'El documento del cliente no depende de los pendientes internos');
   assert.deepEqual(await pdfContents(document),await pdfContents(clean),'El PDF no contiene avisos internos, tampoco en el formato antiguo');
  }
- // Savings explanations stay internal, including already saved overrides of the removed block.
+ // Customer assumptions remain visible, while internal sources and old body overrides stay internal.
  for(const legacy of [false,true]){
   const scenario={...newProjection(),savingsMode:'manual' as const,monthlySavings:100000,savingsSource:'INTERNAL-SAVINGS-NOTE'};
   const document={...issued,input:{...input,projection:scenario,proposalContent:legacy?undefined:{...input.proposalContent!,text:{'assumptions:body':'OLD-INTERNAL-OVERRIDE'}}}};
@@ -45,7 +45,9 @@ async function run(){
   const forecast=publishedProjection(document)!;
   assert.ok(forecast);assert.equal(forecast.input.monthlySavings,100000);
   const html=renderToStaticMarkup(createElement(Proposal,{q:document}));
-  assert.doesNotMatch(html,/INTERNAL-SAVINGS-NOTE|OLD-INTERNAL-OVERRIDE|Supuestos del escenario|Cómo se calculó/);
+  assert.doesNotMatch(html,/INTERNAL-SAVINGS-NOTE|OLD-INTERNAL-OVERRIDE|Cómo se calculó/);
+  assert.match(html,/Supuestos del escenario/);assert.match(html,/Ajuste manual del equipo/);
+  assert.match(html,/Horizonte: 25 años/);assert.match(html,/Variación anual de tarifa: 5%/);
   const changedScenario={...scenario,savingsSource:'DIFFERENT-INTERNAL-NOTE'};
   const changed={...document,input:{...document.input,projection:changedScenario}};
   changedScenario.reviewedFor=projectionContext(changed,changedScenario);
