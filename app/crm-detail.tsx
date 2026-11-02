@@ -1,6 +1,6 @@
 'use client';
 import {useEffect,useState} from 'react';
-import {Check,FileText,Mail,MessageCircle,Phone,Plus} from 'lucide-react';
+import {Check,FileText,Mail,MessageCircle,Phone,Plus,Trash2} from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {Dialog,DialogContent,DialogDescription,DialogHeader,DialogTitle} from '@/components/ui/dialog';
 import {crmStages,leadStages,projectStages,type CrmEntry,type CrmStage,type CrmNote} from '@/lib/crm';
@@ -15,7 +15,7 @@ import {CrmReassign} from './crm-reassign';
 import {CrmActivity} from './crm-activity';
 import {CrmOwnerBadge,CrmOwnershipNotice} from './crm-ownership';
 
-export function CrmDetail({entry,related,source,onClose,onSave,onQuote,onPreview,onProfile,onAssigned,quoteDisabled,currentUserId=''}:{currentUserId?:string;entry:CrmEntry;related:CrmEntry[];source:CrmSource;onClose:()=>void;onSave:(entry:CrmEntry,stage:CrmStage,date:string|null,closing?:ClosingFields)=>Promise<void>;onQuote?:(client:ClientRecord)=>void;onPreview?:(quote:SavedQuote)=>void;onProfile:(profile:ContactProfile)=>void;onAssigned:()=>Promise<void>;quoteDisabled:boolean}){
+export function CrmDetail({entry,related,source,onClose,onSave,onQuote,onPreview,onProfile,onAssigned,onDelete,quoteDisabled,currentUserId=''}:{onDelete?:()=>void;currentUserId?:string;entry:CrmEntry;related:CrmEntry[];source:CrmSource;onClose:()=>void;onSave:(entry:CrmEntry,stage:CrmStage,date:string|null,closing?:ClosingFields)=>Promise<void>;onQuote?:(client:ClientRecord)=>void;onPreview?:(quote:SavedQuote)=>void;onProfile:(profile:ContactProfile)=>void;onAssigned:()=>Promise<void>;quoteDisabled:boolean}){
  const [assigning,setAssigning]=useState(false);
  const [panel,setPanel]=useState<'overview'|'tasks'|'notes'|'activity'>('overview');
  const [stage,setStage]=useState(entry.stage),[date,setDate]=useState(entry.nextContact??''),[busy,setBusy]=useState(false),[error,setError]=useState('');
@@ -35,6 +35,7 @@ export function CrmDetail({entry,related,source,onClose,onSave,onQuote,onPreview
    <section className="crm-detail-section"><h3>Contacto</h3><p>{customer.email||'Sin correo electrónico'}</p><p>{customer.phone||'Sin teléfono'}</p><p>{customer.address||'Dirección por completar'}</p><CrmOwnerBadge client={entry.client}/><div className="crm-contact-links">{customer.email&&<a href={`mailto:${customer.email}`}><Mail size={16}/>Correo</a>}{phone&&<a href={`tel:${phone}`}><Phone size={16}/>Llamar</a>}{whatsapp.length>=8&&<a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noreferrer"><MessageCircle size={16}/>WhatsApp</a>}</div></section>
    <CrmReassign entry={entry} source={source} disabled={busy||noteBusy} onAssigned={onAssigned} onBusy={setAssigning}/>
    <CrmContactProfile clientId={entry.client.id} profile={entry.contactProfile??null} source={source} onSaved={onProfile}/>
+   {onDelete&&<Button variant="outline" className="crm-delete-lead" disabled={busy||noteBusy||assigning} onClick={onDelete}><Trash2 size={16}/>Eliminar lead</Button>}
   </aside><div className="crm-profile-content">
    <nav className="crm-detail-tabs" aria-label="Ficha del cliente">{([['overview','Seguimiento'],['tasks','Tareas'],['notes','Notas'],['activity','Actividad']] as const).map(([id,label])=><button key={id} aria-current={panel===id?'page':undefined} onClick={()=>setPanel(id)}>{label}{id==='notes'&&<span>{total}</span>}</button>)}</nav>
    {error&&<p className="crm-error" role="alert">{error}</p>}

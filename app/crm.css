@@ -96,3 +96,12 @@
  .crm-task-buttons button{min-height:44px}.crm-task-buttons{flex-wrap:wrap}.crm-task-tabs{width:100%;overflow-x:auto}
  .crm-task-tabs button{min-height:44px;flex-shrink:0}.crm-task-filters select{max-width:100%}
 }
+
+.crm-card-shell{position:relative;min-width:0}
+.crm-card-shell[data-can-trash=true] .crm-card-top{padding-right:38px;min-height:24px}
+.crm-delete-lead{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;color:#974331;border-radius:8px;cursor:pointer}
+.crm-delete-lead:hover{background:#fff0ea;color:#7f2e20}
+.crm-delete-lead:focus-visible{outline:2px solid #974331;outline-offset:2px}
+.crm-card-delete{position:absolute;top:7px;right:7px;width:44px;height:44px;border:0;background:transparent}
+.crm-table .crm-delete-lead{margin-top:6px;color:#974331;font-size:12px}
+.crm-confirm-delete{background:#a53825;color:#fff}.crm-confirm-delete:hover{background:#862a1b}
