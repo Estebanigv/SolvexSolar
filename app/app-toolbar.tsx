@@ -3,6 +3,7 @@ import {ChevronDown,ChevronRight,ShieldCheck} from 'lucide-react';
 import {SidebarTrigger,useSidebar} from '@/components/ui/sidebar';
 import {Popover,PopoverContent,PopoverTrigger} from '@/components/ui/popover';
 import {memberColorStyle} from '@/lib/member-color';
+import {NotificationCenter} from './notifications';
 import {InstallAppButton} from './install-app';
 import {SignOutButton,type MemberProfile} from './workspace-access';
 import {ChangePasswordButton} from './change-password';
@@ -22,6 +23,7 @@ export function AppToolbar({profile,status,preview=false}:{profile?:MemberProfil
   <div className="toolbar-utilities">
    <span className="toolbar-connection" title={status} aria-label={status} data-offline={status==='Sin conexión'}><i aria-hidden="true"/><span>{status}</span></span>
    <InstallAppButton compact/>
+   {(profile||preview)&&<NotificationCenter userId={profile?.id??'preview'} preview={preview}/>}
    <Popover><PopoverTrigger asChild><button type="button" className="toolbar-account" aria-label={'Mi cuenta: '+name+', '+role} title="Mi cuenta">
     <span className="toolbar-avatar team-person-color" style={memberColorStyle(profile?.identification_color,profile?.id||'workspace')} aria-hidden="true">{initials}</span>
     <span className="toolbar-account-copy"><strong>{name}</strong><small>{role}</small></span><ChevronDown size={14} aria-hidden="true"/>

@@ -29,13 +29,13 @@ export type CrmEntry = {
 };
 export type CrmNote = {id:string;body:string;created_at:string;author_id:string;author?:{full_name:string}|null};
 
-export type CrmTarget = {projectId:string};
+export type CrmTarget = {projectId?:string;clientId?:string;area?:'tasks'|'opportunities';pending?:boolean};
 export function quoteCrmTarget(quote:Pick<SavedQuote,'id'|'projectId'|'isTest'|'input'>):CrmTarget|null{
   if(quote.id==='draft'||(quote.isTest??quote.input.isTest))return null;
   return {projectId:quote.projectId||quote.id};
 }
 export function findCrmTarget(entries:CrmEntry[],target:CrmTarget){
-  return entries.find(entry=>entry.kind==='project'&&entry.id===target.projectId)??null;
+  return entries.find(entry=>target.projectId?entry.kind==='project'&&entry.id===target.projectId:!!target.clientId&&entry.client.id===target.clientId)??null;
 }
 
 // Projects, not quote revisions, are sales opportunities. Unquoted clients remain leads.

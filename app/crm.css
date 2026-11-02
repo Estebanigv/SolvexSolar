@@ -57,3 +57,42 @@
 .crm-owner-badge>svg,.crm-ownership-notice>svg{flex-shrink:0}.crm-owner-badge strong{font-weight:650}
 .crm-ownership-notice{display:flex;align-items:flex-start;gap:10px;padding:14px 16px;margin:0 0 18px;border:1px solid #e6ce91;border-radius:10px;background:#fff8e9;color:#76521d;font-size:14px;line-height:1.6}
 @media(max-width:700px){.crm-portfolio-controls{padding:16px;gap:14px}.crm-portfolio-controls .crm-owner{margin-left:0;flex-wrap:wrap;width:100%}.crm-portfolio-controls select{width:100%}.crm-portfolio-controls .crm-view{width:100%}.crm-portfolio-controls .crm-view button{flex:1}}
+
+/* Touch-friendly CRM: one selected stage rather than clipped adjacent columns. */
+.crm-mobile-filter-toggle,.crm-mobile-stage{display:none}
+@media(max-width:700px){
+ .crm-workspace{border-radius:14px}
+ .crm-intro{padding:18px 16px;gap:16px;align-items:flex-start;flex-wrap:wrap}
+ .crm-intro-copy{gap:10px;min-width:0}.crm-intro h2{font-size:21px}.crm-intro p{font-size:14px;line-height:1.5}
+ .crm-intro .crm-actions{width:100%}.crm-intro .crm-actions button{min-height:44px}.crm-intro .crm-actions button:last-child{flex:1}
+ .crm-portfolio-controls{margin:0;padding:14px 16px;border:0;border-bottom:1px solid #d4e0e4;border-radius:0;gap:10px}
+ .crm-view button{min-height:44px;font-size:13px;justify-content:center}
+ .crm-area-nav{padding-inline:16px;gap:20px}.crm-area-nav button{min-height:48px}
+ .crm-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .crm-metrics>div,.crm-metrics>button{padding:14px 12px;min-width:0;border-bottom:1px solid #d4e0e4}
+ .crm-metrics strong{font-size:23px;overflow-wrap:anywhere}.crm-metrics span{font-size:12px;line-height:1.5}.crm-metrics small{font-size:11px}
+ .crm-controls{padding:16px 16px 12px;flex-wrap:wrap}.crm-search{flex-basis:100%;min-width:0}
+ .crm-controls .crm-view{width:100%}.crm-controls .crm-view button{flex:1}
+ .crm-search input,.crm-workspace select,.crm-form input,.crm-form textarea{font-size:16px!important;min-height:44px}
+ .crm-mobile-filter-toggle{display:flex;align-items:center;justify-content:center;min-height:44px;width:calc(100% - 32px);margin:0 16px 12px;border:1px solid #b9cdd5;border-radius:8px;background:#fff;color:#28594f;font-size:14px;font-weight:650}
+ .crm-extra-filters{display:none;padding:4px 16px 16px;gap:14px}
+ .crm-extra-filters[data-open=true]{display:grid;grid-template-columns:minmax(0,1fr)}
+ .crm-extra-filters label{display:flex;align-items:stretch;flex-direction:column;gap:6px;font-size:13px}
+ .crm-extra-filters select{width:100%;max-width:none;padding:10px}
+ .crm-board-tools{padding-inline:16px}.crm-board-tools label,.crm-board-tools button{min-height:44px;font-size:13px}
+ .crm-mobile-stage{display:flex;flex-direction:column;gap:8px;padding:16px;margin:0;border-top:1px solid #d4e0e4;font-size:13px;font-weight:650;background:#f4f7f8}
+ .crm-mobile-stage select{width:100%;border:1px solid #b9cdd5;border-radius:8px;padding:10px;background:white;color:#153b48}
+ .crm-board{display:block;overflow:visible;min-height:0;padding:0 16px 20px;border-top:0}
+ .crm-column{display:none;width:100%;padding-top:0}.crm-column[data-mobile-active=true]{display:block}
+ .crm-card{padding:18px;width:100%;touch-action:pan-y}.crm-card h4{font-size:18px}.crm-card p{font-size:14px}
+ .crm-column-body{min-height:0}.crm-column-empty{padding:24px 16px}
+ .crm-view-caption{padding-inline:16px;line-height:1.6;font-size:12px;flex-direction:column;gap:4px}
+ .crm-table-wrap{overflow:visible}.crm-table{min-width:0!important;width:100%}
+ .crm-table thead{display:none}.crm-table tbody{display:grid;gap:12px;padding:0 16px 16px}
+ .crm-table tr{display:grid;padding:16px;gap:9px;border:1px solid #d4e0e4;border-radius:10px}
+ .crm-table td{padding:0;border:0;white-space:normal;overflow-wrap:anywhere}.crm-table td button{min-height:44px;text-align:left}
+ .crm-detail-dialog,.crm-dialog{width:calc(100vw - 24px)!important;max-height:calc(100dvh - 24px)!important;overflow-y:auto;padding:20px!important}
+ .crm-form fieldset,.crm-task-form-grid{grid-template-columns:minmax(0,1fr)}
+ .crm-task-buttons button{min-height:44px}.crm-task-buttons{flex-wrap:wrap}.crm-task-tabs{width:100%;overflow-x:auto}
+ .crm-task-tabs button{min-height:44px;flex-shrink:0}.crm-task-filters select{max-width:100%}
+}

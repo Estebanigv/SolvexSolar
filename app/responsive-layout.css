@@ -261,3 +261,5 @@
   .workspace .stage-navigation { margin-bottom: 18px; }
   .workspace .stage-navigation [role=tab] { height: 66px; }
 }
+
+@media(display-mode:standalone){.app-root .workspace-toolbar{padding-top:env(safe-area-inset-top);height:calc(64px + env(safe-area-inset-top));min-height:calc(64px + env(safe-area-inset-top))}.workspace{padding-bottom:max(24px,env(safe-area-inset-bottom))}.app-main{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}}
