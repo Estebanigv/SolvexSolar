@@ -8,7 +8,8 @@
 .grouped-navigation .nav-brand [data-slot=sidebar-trigger]:hover,.grouped-navigation .nav-close:hover {background:#ffffff20;color:#fff}
 .grouped-navigation .nav-brand [data-slot=sidebar-trigger] svg {width:18px;height:18px}
 .grouped-navigation .sidebar-trigger-label,.workspace-toolbar .sidebar-trigger-label {display:none}
-.grouped-navigation .nav-content {flex:1 1 0%;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-gutter:stable;padding:16px 10px 28px 14px!important;gap:0!important;scrollbar-width:thin;scrollbar-color:#71969e66 transparent}
+.grouped-navigation .nav-content {flex:1 1 0%;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-gutter:auto;padding:16px 14px 28px!important;gap:0!important;scrollbar-width:none}
+.grouped-navigation .nav-content::-webkit-scrollbar{display:none;width:0;height:0}
 .side-tabs.grouped-tabs {flex-shrink:0;padding-bottom:8px!important}
 .grouped-tabs .nav-section+.nav-section {margin-top:18px;padding-top:16px;border-top:1px solid #ffffff24}
 .grouped-tabs .nav-section-heading {padding:0 12px 10px;text-align:left;white-space:normal}
