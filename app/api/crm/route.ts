@@ -6,7 +6,7 @@ import type {ContactProfile} from '@/lib/crm-work';
 import {requireCrmClient,requireCrmMember} from '@/lib/supabase/crm-access';
 
 export async function GET(){return protectedApi(async()=>{
-  const {db,user,canViewAll}=await requireCrmMember();
+  const {db,user,profile,canViewAll}=await requireCrmMember();
   // Read every page, rather than silently omitting older leads or quote revisions.
   async function read<T>(table:string,columns:string,active=false,projectIds?:string[]):Promise<T[]>{
     const rows:T[]=[];
@@ -39,7 +39,7 @@ export async function GET(){return protectedApi(async()=>{
   }
   const tracking=new Map(followups.map(f=>[f.project_id,f]));
   const commercialProfiles=new Map(profiles.map(p=>[p.client_id,p]));
-  return Response.json({canViewAll,currentUserId:user.id,entries:buildCrmEntries(clients,quotes.map(q=>({...q,followup:tracking.get(q.project_id)})),leads).map(entry=>({...entry,contactProfile:commercialProfiles.get(entry.client.id)??null}))},{headers:privateHeaders});
+  return Response.json({canViewAll,canTrashLeads:profile.role==='admin',currentUserId:user.id,entries:buildCrmEntries(clients,quotes.map(q=>({...q,followup:tracking.get(q.project_id)})),leads).map(entry=>({...entry,contactProfile:commercialProfiles.get(entry.client.id)??null}))},{headers:privateHeaders});
 })}
 
 export async function PUT(request:Request){return protectedApi(async()=>{

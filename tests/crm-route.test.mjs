@@ -12,7 +12,7 @@ for(const [name,path] of [['crm','app/api/crm/route.ts'],['notes','app/api/crm/n
         export const privateHeaders={'Cache-Control':'private, no-store'};
         export function databaseError(error){throw new AccessError('Database error',error.code==='42501'?403:503)}
         export function checkOrigin(request){if(request.headers.get('origin')!=='https://crm.test')throw new AccessError('Origin',403)}
-        export async function requireMember(){if(globalThis.__crmRoute.denied)throw new AccessError('Access',401);return {db:globalThis.__crmRoute.db,user:{id:globalThis.__crmRoute.userId},profile:{role:globalThis.__crmRoute.supervisor?'admin':'sales'}}}
+        export async function requireMember(){if(globalThis.__crmRoute.denied)throw new AccessError('Access',401);return {db:globalThis.__crmRoute.db,user:{id:globalThis.__crmRoute.userId},profile:{role:globalThis.__crmRoute.role??(globalThis.__crmRoute.supervisor?'admin':'sales')}}}
       `}));
     }
   }]});
@@ -73,6 +73,7 @@ const request=(method,body,origin='https://crm.test')=>new Request('https://crm.
 try{
   const response=await route.GET();assert.equal(response.status,200);assert.match(response.headers.get('cache-control'),/no-store/);
   const initial=await response.json();assert.equal(initial.entries.length,501,'Read older client pages');assert.equal(initial.currentUserId,userId,'Identity for My leads comes from the server');
+  assert.equal(initial.canTrashLeads,false,'Sales cannot delete leads');
   const edit={client_id:id,status:'qualified',next_contact:null,expected:'2026-10-26T12:00:00Z'};
   assert.equal((await route.PUT(request('PUT',edit))).status,409);
   const closing={expected_close:'2026-11-20',lost_reason:'  Proyecto postergado  '};
@@ -118,7 +119,10 @@ try{
   assert.ok(requests.slice(start).every(r=>r.method==='GET'||r.url.pathname.endsWith('/rpc/crm_can_view_all')));
   globalThis.__crmRoute.foreign=false;
   globalThis.__crmRoute.supervisor=true;
-  const supervised=await route.GET();assert.equal(supervised.status,200);assert.equal((await supervised.json()).canViewAll,true);
+  const supervised=await route.GET();assert.equal(supervised.status,200);const admin=await supervised.json();assert.equal(admin.canViewAll,true);assert.equal(admin.canTrashLeads,true);
+  globalThis.__crmRoute.role='sales';
+  const salesSupervisor=await (await route.GET()).json();assert.equal(salesSupervisor.canViewAll,true);assert.equal(salesSupervisor.canTrashLeads,false,'Supervision does not grant admin deletion');
+  delete globalThis.__crmRoute.role;
   assert.equal((await notes.GET(new Request(`https://crm.test/api/crm/notes?client_id=${id}&offset=50`))).status,200);
   assert.equal((await tasks.GET(new Request(`https://crm.test/api/crm/tasks?client_id=${id}&status=completed&offset=100`))).status,200);
   assert.equal((await route.PUT(request('PUT',edit))).status,409);
