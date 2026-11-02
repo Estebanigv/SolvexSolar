@@ -14,4 +14,3 @@ self.addEventListener('notificationclick',event=>{
  // A new window preserves any quotation currently being edited in another window.
  event.waitUntil(self.clients.openWindow(new URL(event.notification.data?.url||'/crm',self.location.origin).href));
 });
-

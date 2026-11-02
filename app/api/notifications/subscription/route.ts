@@ -14,4 +14,3 @@ export async function DELETE(request:Request){return protectedApi(async()=>{
  const {error}=await db.rpc('crm_push_device',{p_endpoint:endpoint,p_remove:true});
  if(error)databaseError(error);return Response.json({ok:true},{headers:privateHeaders});
 })}
-

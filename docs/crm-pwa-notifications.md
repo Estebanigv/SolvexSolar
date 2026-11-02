@@ -22,4 +22,3 @@ npm run build
 node tests/crm-assignment-db.mjs
 
 La última prueba usa PostgreSQL aislado en Docker y no modifica producción. Cubre carteras, RLS, reasignaciones, avisos personales, endpoints, cambios de usuario en el dispositivo, leases, reintentos y resumen diario en hora chilena.
-

@@ -29,4 +29,3 @@ export async function GET(request:Request){
  }));
  return Response.json({claimed:rows.length,sent,failed,ackFailed},{status:ackFailed?503:200,headers:{'Cache-Control':'no-store'}});
 }
-

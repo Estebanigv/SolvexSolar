@@ -140,4 +140,3 @@ begin
 end $$;
 revoke all on function public.crm_push_claim(text),public.crm_push_finish(text,uuid,uuid,int) from public,anon,authenticated;
 grant execute on function public.crm_push_claim(text),public.crm_push_finish(text,uuid,uuid,int) to anon;
-

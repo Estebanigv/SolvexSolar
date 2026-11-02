@@ -9,4 +9,3 @@ export async function disconnectPushDevice(){
  }
  try{localStorage.removeItem('solvex-push-owner')}catch{/* Storage may be unavailable. */}
 }
-

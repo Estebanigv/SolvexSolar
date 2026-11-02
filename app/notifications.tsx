@@ -94,4 +94,3 @@ export function NotificationCenter({userId,preview=false}:{userId:string;preview
  <div className="notification-list">{items.length?items.map(n=><article key={n.id} data-unread={!n.read_at}><strong>{n.title}</strong><p>{n.body}</p><time>{new Date(n.created_at).toLocaleString('es-CL',{timeZone:'America/Santiago',dateStyle:'short',timeStyle:'short'})}</time><div className="notification-links"><button type="button" onClick={()=>void openNotice(n)}>{n.kind==='reminder'?'Ver contactos':'Abrir lead'} →</button>{n.kind==='reminder'&&<button type="button" onClick={()=>void openNotice(n,'tasks')}>Ver tareas →</button>}</div></article>):<p className="notification-empty">Aún no tienes avisos. Las nuevas asignaciones y los próximos recordatorios aparecerán aquí.</p>}</div>
  </DialogContent></Dialog></>;
 }
-

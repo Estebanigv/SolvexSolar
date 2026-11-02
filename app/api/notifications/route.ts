@@ -16,4 +16,3 @@ export async function PATCH(request:Request){return protectedApi(async()=>{
  if(id)query=query.eq('id',id);const result=await query;if(result.error)databaseError(result.error);
  return Response.json({ok:true},{headers:privateHeaders});
 })}
-

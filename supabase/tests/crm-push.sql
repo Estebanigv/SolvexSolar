@@ -77,4 +77,3 @@ do $$ begin
 end $$;
 rollback;
 select 'PASS: own inbox, assignment, disabled accounts, endpoint validation, leases, retries, deduplication and shared-device isolation' as result;
-
