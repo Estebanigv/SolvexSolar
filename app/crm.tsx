@@ -14,10 +14,13 @@ import {chileDate} from '@/lib/quote-history';
 import {money,newQuote,quoteSchema,type SavedQuote,type QuoteInput} from '@/lib/quote';
 import type {ClientRecord} from './clients';
 import type {ClosingFields} from '@/lib/followup';
+import type {CrmTeamMember,CrmAssignment} from '@/lib/crm-assignment';
 import './crm.css';
 
 export type CrmSource=CrmWorkSource&{
-  load:()=>Promise<{entries:CrmEntry[]}>;
+  load:()=>Promise<{entries:CrmEntry[];canViewAll?:boolean}>;
+  team:()=>Promise<{members:CrmTeamMember[]}>;
+  reassign:(values:CrmAssignment)=>Promise<unknown>;
   save:(entry:CrmEntry,stage:CrmStage,date:string|null,closing?:ClosingFields)=>Promise<unknown>;
   create:(details:QuoteInput['customer'])=>Promise<unknown>;
   notes:(clientId:string,offset:number)=>Promise<{notes:CrmNote[];total:number}>;
@@ -33,6 +36,8 @@ async function api<T>(url:string,init?:RequestInit):Promise<T>{
 const json=(method:string,body:unknown)=>({method,headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
 const source:CrmSource={
   load:()=>api('/api/crm'),
+  team:()=>api('/api/crm/assignment'),
+  reassign:values=>api('/api/crm/assignment',json('POST',values)),
   tasks:(id,status,offset)=>api(`/api/crm/tasks?status=${status}&offset=${offset}${id?'&client_id='+id:''}`),
   createTask:values=>api('/api/crm/tasks',json('POST',values)),
   updateTask:values=>api('/api/crm/tasks',json('PATCH',values)),
@@ -48,6 +53,7 @@ const initials=(name:string)=>name.trim().split(/\s+/).slice(0,2).map(s=>s[0]).j
 
 export function CrmWorkspace({dataSource=source,onQuote,onPreview,onChange,quoteDisabled=false,visible=true,openRequest}:{dataSource?:CrmSource;onQuote?:(client:ClientRecord)=>void;onPreview?:(quote:SavedQuote)=>void;onChange?:()=>void;quoteDisabled?:boolean;visible?:boolean;openRequest?:(CrmTarget&{token:number})|null}){
   const [entries,setEntries]=useState<CrmEntry[]>([]),[loading,setLoading]=useState(true),[error,setError]=useState(''),[notice,setNotice]=useState('');
+  const [canViewAll,setCanViewAll]=useState(false),[owner,setOwner]=useState('');
   const [area,setArea]=useState<'opportunities'|'tasks'|'contacts'>('opportunities');
   const [originFilter,setOriginFilter]=useState(''),[priorityFilter,setPriorityFilter]=useState(''),[statusFilter,setStatusFilter]=useState('all');
   const [search,setSearch]=useState(''),[view,setView]=useState<'board'|'list'>('board');
@@ -55,14 +61,14 @@ export function CrmWorkspace({dataSource=source,onQuote,onPreview,onChange,quote
   const [kind,setKind]=useState<'all'|'lead'|'project'>('all'),[hideEmpty,setHideEmpty]=useState(false);
   const [closing,setClosing]=useState<{entry:CrmEntry;stage:'accepted'|'rejected'}|null>(null);
   const [selected,setSelected]=useState<CrmEntry|null>(null),[creating,setCreating]=useState(false),[busy,setBusy]=useState(false),[dragId,setDragId]=useState<string|null>(null);
-  const load=useCallback(async()=>{setLoading(true);setError('');try{const result=await dataSource.load();setEntries(result.entries);return true}catch(e){setError((e as Error).message);return false}finally{setLoading(false)}},[dataSource]);
+  const load=useCallback(async()=>{setLoading(true);setError('');try{const result=await dataSource.load();setEntries(result.entries);setCanViewAll(result.canViewAll===true);return true}catch(e){setError((e as Error).message);return false}finally{setLoading(false)}},[dataSource]);
   const openedRequest=useRef<number|null>(null);
   useEffect(()=>{
     if(!visible)return;
     let active=true;
     dataSource.load().then(r=>{
       if(!active)return;
-      setEntries(r.entries);setError('');
+      setEntries(r.entries);setCanViewAll(r.canViewAll===true);setError('');
       if(openRequest&&openedRequest.current!==openRequest.token){
         openedRequest.current=openRequest.token;
         const target=findCrmTarget(r.entries,openRequest);
@@ -72,14 +78,15 @@ export function CrmWorkspace({dataSource=source,onQuote,onPreview,onChange,quote
     }).catch(e=>{if(active)setError(e.message)}).finally(()=>{if(active)setLoading(false)});
     return()=>{active=false};
   },[dataSource,visible,openRequest]);
-  const today=chileDate(),baseFiltered=useMemo(()=>filterCrmEntries(entries,search,'',false,today).filter(e=>(kind==='all'||e.kind===kind)&&(!originFilter||(e.contactProfile?.source??'unknown')===originFilter)&&(!priorityFilter||(e.contactProfile?.priority??'normal')===priorityFilter)&&(statusFilter==='all'||statusFilter==='open'&&!closedCrmEntry(e)||e.stage===statusFilter)),[entries,search,today,kind,originFilter,priorityFilter,statusFilter]);
+  const today=chileDate(),baseFiltered=useMemo(()=>filterCrmEntries(entries,search,canViewAll?owner:'',false,today).filter(e=>(kind==='all'||e.kind===kind)&&(!originFilter||(e.contactProfile?.source??'unknown')===originFilter)&&(!priorityFilter||(e.contactProfile?.priority??'normal')===priorityFilter)&&(statusFilter==='all'||statusFilter==='open'&&!closedCrmEntry(e)||e.stage===statusFilter)),[entries,search,canViewAll,owner,today,kind,originFilter,priorityFilter,statusFilter]);
   const filtered=useMemo(()=>sortCrmEntries(baseFiltered.filter(e=>matchesSmartView(e,smartView,today)),sort,today),[baseFiltered,smartView,sort,today]);
   const allowedStages:readonly string[]=kind==='lead'?leadStages:projectStages;
   const visibleStages=Object.entries(crmStages).filter(([stage])=>(kind==='all'||allowedStages.includes(stage))&&(!hideEmpty||filtered.some(e=>e.stage===stage)));
-  function resetFilters(){setSearch('');setOriginFilter('');setPriorityFilter('');setStatusFilter('all');setKind('all');setSmartView('all');setHideEmpty(false)}
-  const hasFilters=!!search||!!originFilter||!!priorityFilter||statusFilter!=='all'||kind!=='all'||smartView!=='all'||hideEmpty;
+  function resetFilters(){setSearch('');setOwner('');setOriginFilter('');setPriorityFilter('');setStatusFilter('all');setKind('all');setSmartView('all');setHideEmpty(false)}
+  const hasFilters=!!search||!!owner||!!originFilter||!!priorityFilter||statusFilter!=='all'||kind!=='all'||smartView!=='all'||hideEmpty;
   const contacts=[...new Map(filterCrmEntries(entries,search,'',false).map(e=>[e.client.id,e])).values()];
   const clients=[...new Map(entries.map(e=>[e.client.id,e.client])).values()];
+  const owners=[...new Map(entries.map(e=>[e.client.owner_id,e.client.owner?.full_name||'Sin nombre'])).entries()];
   const active=filtered.filter(e=>!closedCrmEntry(e)),pending=entries.filter(e=>contactDue(e,today));
   async function save(entry:CrmEntry,stage:CrmStage,date:string|null,closing?:ClosingFields){
     await dataSource.save(entry,stage,date,closing);
@@ -102,14 +109,14 @@ export function CrmWorkspace({dataSource=source,onQuote,onPreview,onChange,quote
     setBusy(true);setError('');try{await save(entry,stage,entry.nextContact)}catch(e){setError((e as Error).message)}finally{setBusy(false)}
   }
   return <section className="crm-workspace" aria-label="CRM comercial">
-    <div className="crm-intro"><div className="crm-intro-copy"><span className="crm-sun" aria-hidden="true"><Users size={24}/></span><div><h2>Mi cartera comercial</h2><p>Tus leads, cotizaciones y próximos contactos.</p></div></div><div className="crm-actions"><Button variant="outline" disabled={loading||busy} aria-label="Actualizar CRM" onClick={()=>void load()}><RefreshCw size={17}/></Button><Button onClick={()=>setCreating(true)}><Plus size={17}/>Nuevo lead</Button></div></div>
+    <div className="crm-intro"><div className="crm-intro-copy"><span className="crm-sun" aria-hidden="true"><Users size={24}/></span><div><h2>{canViewAll?'Cartera del equipo':'Mi cartera comercial'}</h2><p>{canViewAll?'Todos los leads, responsables y próximos contactos.':'Tus leads, cotizaciones y próximos contactos.'}</p></div></div><div className="crm-actions"><Button variant="outline" disabled={loading||busy} aria-label="Actualizar CRM" onClick={()=>void load()}><RefreshCw size={17}/></Button><Button onClick={()=>setCreating(true)}><Plus size={17}/>Nuevo lead</Button></div></div>
     <nav className="crm-area-nav" aria-label="Secciones del CRM">{([['opportunities','Oportunidades'],['tasks','Agenda y tareas'],['contacts','Contactos']] as const).map(([id,label])=><button key={id} aria-current={area===id?'page':undefined} onClick={()=>setArea(id)}>{label}{id==='contacts'&&<span>{clients.length}</span>}</button>)}</nav>
     {error&&<div className="crm-feedback crm-error" role="alert">{error}<Button variant="outline" disabled={loading} onClick={()=>void load()}>Actualizar</Button></div>}
     {notice&&<p className="crm-feedback" role="status">{notice}</p>}
     {area==='tasks'?<CrmTasks source={dataSource} clients={clients}/>:area==='contacts'?<div className="crm-contacts"><div className="crm-controls"><label className="crm-search"><Search size={18}/><input aria-label="Buscar contactos del CRM" placeholder="Nombre, correo, comuna o etiqueta…" value={search} onChange={e=>setSearch(e.target.value)}/></label></div><div className="crm-table-wrap"><table className="crm-table"><thead><tr><th>Contacto</th><th>Correo y teléfono</th><th>Origen</th><th>Etiquetas</th><th>Proyectos</th></tr></thead><tbody>{contacts.map(entry=><tr key={entry.client.id}><td><button onClick={()=>setSelected(entry)}>{entry.client.details.name}<ArrowUpRight size={15}/></button><small>{entry.client.details.commune||'Comuna pendiente'}</small></td><td>{entry.client.details.email||'Sin correo'}<small>{entry.client.details.phone||'Sin teléfono'}</small></td><td>{contactSources[entry.contactProfile?.source??'unknown']}</td><td>{entry.contactProfile?.tags.join(', ')||'Sin etiquetas'}</td><td>{entries.filter(e=>e.client.id===entry.client.id&&e.kind==='project').length}</td></tr>)}</tbody></table></div>{!contacts.length&&<p className="crm-empty">{loading?'Cargando contactos…':clients.length?'No hay contactos que coincidan con la búsqueda.':'Crea tu primer lead para comenzar la cartera.'}</p>}</div>:<>
     <div className="crm-metrics" aria-label="Resumen de la vista filtrada"><div><span>Oportunidades abiertas</span><strong>{loading?'—':active.length}</strong></div><div><span>Valor en gestión</span><strong>{loading?'—':money(active.reduce((sum,e)=>sum+(e.amount??0),0))}</strong><small>Última cotización por proyecto</small></div><div><span>Proyectos ganados</span><strong>{loading?'—':filtered.filter(e=>e.stage==='accepted').length}</strong></div><button type="button" aria-pressed={smartView==='due'} onClick={()=>{const next=smartView==='due'?'all':'due';resetFilters();setSmartView(next)}}><span><CalendarDays size={16}/>Contactos para hoy o vencidos</span><strong>{loading?'—':pending.length}</strong><small>{smartView==='due'?'Quitar filtro':'Ver mis pendientes'}</small></button></div>
     <CrmSmartViews entries={baseFiltered} value={smartView} today={today} onChange={setSmartView}/>
-    <div className="crm-controls"><label className="crm-search"><Search size={18}/><input aria-label="Buscar oportunidades" placeholder="Buscar cliente, comuna o folio…" value={search} onChange={e=>setSearch(e.target.value)}/></label><div className="crm-view" role="group" aria-label="Vista del CRM"><button aria-pressed={view==='board'} onClick={()=>setView('board')}><LayoutGrid size={17}/>Tablero</button><button aria-pressed={view==='list'} onClick={()=>setView('list')}><List size={17}/>Lista</button></div></div>
+    <div className="crm-controls"><label className="crm-search"><Search size={18}/><input aria-label="Buscar oportunidades" placeholder="Buscar cliente, comuna o folio…" value={search} onChange={e=>setSearch(e.target.value)}/></label>{canViewAll&&<label className="crm-owner"><span className="sr-only">Responsable</span><select aria-label="Responsable" value={owner} onChange={e=>setOwner(e.target.value)}><option value="">Todo el equipo</option>{owners.map(([id,name])=><option key={id} value={id}>{name}</option>)}</select></label>}<div className="crm-view" role="group" aria-label="Vista del CRM"><button aria-pressed={view==='board'} onClick={()=>setView('board')}><LayoutGrid size={17}/>Tablero</button><button aria-pressed={view==='list'} onClick={()=>setView('list')}><List size={17}/>Lista</button></div></div>
     <div className="crm-extra-filters"><label>Cartera<select value={kind} onChange={e=>setKind(e.target.value as typeof kind)}><option value="all">Leads y proyectos</option><option value="lead">Solo leads</option><option value="project">Solo proyectos</option></select></label><label>Ordenar<select value={sort} onChange={e=>setSort(e.target.value as CrmSort)}>{Object.entries(crmSorts).map(([id,label])=><option key={id} value={id}>{label}</option>)}</select></label><label>Estado<select value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}><option value="all">Todas las oportunidades</option><option value="open">Abiertas</option><option value="accepted">Ganadas</option><option value="rejected">Perdidas</option></select></label><label>Origen<select value={originFilter} onChange={e=>setOriginFilter(e.target.value)}><option value="">Todos los orígenes</option>{Object.entries(contactSources).map(([id,label])=><option key={id} value={id}>{label}</option>)}</select></label><label>Prioridad<select value={priorityFilter} onChange={e=>setPriorityFilter(e.target.value)}><option value="">Todas las prioridades</option>{Object.entries(priorities).map(([id,label])=><option key={id} value={id}>{label}</option>)}</select></label></div><div className="crm-board-tools">{view==='board'&&<label><input type="checkbox" checked={hideEmpty} onChange={e=>setHideEmpty(e.target.checked)}/>Ocultar etapas vacías</label>}{hasFilters&&<button type="button" onClick={resetFilters}>Limpiar filtros</button>}</div><div className="crm-view-caption"><span>{filtered.length} oportunidades · {smartViews[smartView]}</span><span>{view==='board'?'Desliza para ver las etapas. Arrastra una tarjeta o edita su ficha.':'Abre una oportunidad para registrar su próximo contacto.'}</span></div>
     {loading?<div className="crm-empty" role="status">Cargando tu cartera comercial…</div>:view==='board'?<div className="crm-board" aria-label="Etapas comerciales" tabIndex={0}>{visibleStages.map(([key,label])=>{
       const stage=key as CrmStage,rows=filtered.filter(e=>e.stage===stage),total=rows.reduce((sum,e)=>sum+(e.amount??0),0);
@@ -118,7 +125,7 @@ export function CrmWorkspace({dataSource=source,onQuote,onPreview,onChange,quote
     {!loading&&!filtered.length&&<div className="crm-empty"><Users size={30}/><h3>{entries.length?'No hay coincidencias':'Tu próxima oportunidad empieza aquí'}</h3><p>{entries.length?'Cambia la búsqueda o los filtros para ver más oportunidades.':'Crea un lead. Los clientes y las cotizaciones guardadas aparecerán automáticamente.'}</p>{entries.length?<Button variant="outline" onClick={resetFilters}>Limpiar filtros</Button>:<Button onClick={()=>setCreating(true)}>Crear primer lead</Button>}</div>}
     </>}
     <p className="crm-footnote">Las etapas registran el avance comercial. Un cambio de etapa no envía mensajes ni confirma pagos. Se excluyen cotizaciones de prueba y registros en papelera.</p>
-    {selected&&<CrmDetail key={selected.id} entry={selected} related={entries.filter(e=>e.client.id===selected.client.id)} source={dataSource} onProfile={profile=>{setEntries(rows=>rows.map(e=>e.client.id===profile.client_id?{...e,contactProfile:profile}:e));setSelected(e=>e?{...e,contactProfile:profile}:e)}} onClose={()=>setSelected(null)} onSave={saveDetail} onQuote={onQuote} onPreview={onPreview} quoteDisabled={quoteDisabled}/>}
+    {selected&&<CrmDetail key={selected.id} entry={selected} related={entries.filter(e=>e.client.id===selected.client.id)} source={dataSource} onAssigned={async()=>{setEntries(rows=>rows.filter(e=>e.client.id!==selected.client.id));setSelected(null);await load();onChange?.();setNotice('Responsable actualizado. El cliente conserva sus proyectos, notas y tareas.')}} onProfile={profile=>{setEntries(rows=>rows.map(e=>e.client.id===profile.client_id?{...e,contactProfile:profile}:e));setSelected(e=>e?{...e,contactProfile:profile}:e)}} onClose={()=>setSelected(null)} onSave={saveDetail} onQuote={onQuote} onPreview={onPreview} quoteDisabled={quoteDisabled}/>}
     {closing&&<CloseOpportunity entry={closing.entry} stage={closing.stage} onClose={()=>setClosing(null)} onSave={save}/>}
     {creating&&<NewLead source={dataSource} onClose={()=>setCreating(false)} onCreated={async()=>{setCreating(false);await load();onChange?.();setNotice('Lead creado. Ya puedes registrar su seguimiento o preparar una cotización.')}}/>}
   </section>;

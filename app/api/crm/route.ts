@@ -1,20 +1,23 @@
 import {protectedApi} from '@/lib/supabase/api';
-import {requireMember,checkOrigin,privateHeaders,AccessError,databaseError} from '@/lib/supabase/server';
+import {checkOrigin,privateHeaders,AccessError,databaseError} from '@/lib/supabase/server';
 import {buildCrmEntries,leadFollowupSchema,type CrmClient,type CrmQuote,type CrmLead} from '@/lib/crm';
 import type {Followup} from '@/lib/followup';
 import type {ContactProfile} from '@/lib/crm-work';
-import {requireCrmClient} from '@/lib/supabase/crm-access';
+import {requireCrmClient,requireCrmMember} from '@/lib/supabase/crm-access';
 
 export async function GET(){return protectedApi(async()=>{
-  const {db,user}=await requireMember();
+  const {db,user,canViewAll}=await requireCrmMember();
   // Read every page, rather than silently omitting older leads or quote revisions.
   async function read<T>(table:string,columns:string,active=false,projectIds?:string[]):Promise<T[]>{
     const rows:T[]=[];
     for(let offset=0;offset<20000;offset+=500){
       let query=db.from(table).select(columns).order(['crm_leads','crm_contact_profiles'].includes(table)?'client_id':table==='quote_followups'?'project_id':'id').range(offset,offset+499);
       if(active)query=query.is('deleted_at',null);
-      if(table==='clients')query=query.eq('owner_id',user.id);
-      if(['quotes','crm_leads','crm_contact_profiles'].includes(table))query=query.eq('client.owner_id',user.id).is('client.deleted_at',null);
+      if(table==='clients'&&!canViewAll)query=query.eq('owner_id',user.id);
+      if(['quotes','crm_leads','crm_contact_profiles'].includes(table)){
+        query=query.is('client.deleted_at',null);
+        if(!canViewAll)query=query.eq('client.owner_id',user.id);
+      }
       if(projectIds)query=query.in('project_id',projectIds);
       const {data,error}=await query;
       if(error)databaseError(error);
@@ -36,14 +39,14 @@ export async function GET(){return protectedApi(async()=>{
   }
   const tracking=new Map(followups.map(f=>[f.project_id,f]));
   const commercialProfiles=new Map(profiles.map(p=>[p.client_id,p]));
-  return Response.json({entries:buildCrmEntries(clients,quotes.map(q=>({...q,followup:tracking.get(q.project_id)})),leads).map(entry=>({...entry,contactProfile:commercialProfiles.get(entry.client.id)??null}))},{headers:privateHeaders});
+  return Response.json({canViewAll,entries:buildCrmEntries(clients,quotes.map(q=>({...q,followup:tracking.get(q.project_id)})),leads).map(entry=>({...entry,contactProfile:commercialProfiles.get(entry.client.id)??null}))},{headers:privateHeaders});
 })}
 
 export async function PUT(request:Request){return protectedApi(async()=>{
-  checkOrigin(request);const {db,user}=await requireMember();
+  checkOrigin(request);const {db,user,canViewAll}=await requireCrmMember();
   const body=leadFollowupSchema.parse(await request.json());
   const {client_id,expected,...values}=body;
-  await requireCrmClient(db,user.id,client_id);
+  await requireCrmClient(db,user.id,client_id,canViewAll);
   const result=expected
     ?await db.from('crm_leads').update(values).eq('client_id',client_id).eq('updated_at',expected).select().maybeSingle()
     :await db.from('crm_leads').insert({client_id,...values}).select().single();
