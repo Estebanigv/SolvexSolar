@@ -1,5 +1,5 @@
 import {AppInstallProvider} from "./install-app";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import "./workspace.css";
 import "./responsive.css";
@@ -21,6 +21,8 @@ import "./proposal.css";
 import "./cne-reference.css";
 import "./projection.css";
 import "./responsive-layout.css";
+
+export const viewport: Viewport = {width:'device-width',initialScale:1,viewportFit:'cover',themeColor:'#042d3b'};
 
 export const metadata: Metadata = {
   title: "Solvex Solar | Cotizador",

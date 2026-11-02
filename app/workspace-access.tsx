@@ -6,6 +6,7 @@ import type {SearchableClient} from '@/lib/client-search';
 import {ClientCreateDialog} from './client-create-dialog';
 import {Button} from '@/components/ui/button';
 import {toast} from 'sonner';
+import {disconnectPushDevice} from '@/lib/push-device';
 import {LogOut,FileText,ExternalLink} from 'lucide-react';
 import type {QuoteInput,SavedQuote} from '@/lib/quote';
 import {browserDatabase} from '@/lib/supabase/client';
@@ -14,7 +15,7 @@ export type MemberProfile={id:string;email:string;full_name:string;role:'admin'|
 async function api<T=Record<string,unknown>>(path:string,init?:RequestInit):Promise<T>{const response=await fetch(path,init);const body=await response.json() as T&{error?:string};if(!response.ok)throw Error(body.error||'No se pudo completar la operación.');return body}
 export function SignOutButton({compact=false,preview=false}:{compact?:boolean;preview?:boolean}){
   const [busy,setBusy]=useState(false);
-  async function logout(){setBusy(true);try{await api('/auth/signout',{method:'POST'});window.location.assign('/acceso')}catch(e){toast.error((e as Error).message);setBusy(false)}}
+  async function logout(){setBusy(true);try{await disconnectPushDevice();await api('/auth/signout',{method:'POST'});window.location.assign('/acceso')}catch(e){toast.error((e as Error).message);setBusy(false)}}
   return <Button type="button" variant="ghost" className={compact?"toolbar-icon toolbar-signout":"nav-signout"} title="Cerrar sesión" aria-label={busy?"Cerrando sesión…":"Cerrar sesión"} disabled={busy||preview} onClick={logout}><LogOut size={16} aria-hidden="true"/><span className={compact?'sr-only':undefined}>{busy?'Cerrando sesión…':'Cerrar sesión'}</span></Button>;
 }
 type Client=SearchableClient;

@@ -91,6 +91,11 @@ function QuoteWorkspace({initialPanel,previewSource}:QuoteAppProps){
  const [products,setProducts]=useState<Product[]>(initialProducts),[settings,setSettings]=useState<Settings>(initialSettings),[quote,setQuote]=useState<QuoteInput>(newQuote),[tab,setActiveTab]=useState<string>(usesSupabase||localPreview?initialPanel??'quote':'quote');
  const [crmRequest,setCrmRequest]=useState<(CrmTarget&{token:number})|null>(null);
  function openQuoteCrm(q:SavedQuote){const target=quoteCrmTarget(q);if(!target)return;setCrmRequest(previous=>({...target,token:(previous?.token??0)+1}));setTab('crm')}
+ useEffect(()=>{
+  function receive(event:Event){const detail=(event as CustomEvent<CrmTarget>).detail;setCrmRequest(previous=>({...detail,token:(previous?.token??0)+1}));setTab('crm')}
+  window.addEventListener('solvex:crm-notification',receive);
+  return()=>window.removeEventListener('solvex:crm-notification',receive);
+ },[]);
  const [crmVisited,setCrmVisited]=useState(initialPanel==='crm');
  function setTab(next:string){
   if(next==='crm')setCrmVisited(true);
