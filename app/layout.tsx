@@ -42,7 +42,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es">
+    // Browser extensions may add root attributes before hydration (for example, analytics opt-out).
+    <html lang="es" suppressHydrationWarning>
       <body className="antialiased"><AppInstallProvider>{children}</AppInstallProvider></body>
     </html>
   );

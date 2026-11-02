@@ -54,6 +54,24 @@ Las migraciones versionadas están en `supabase/migrations/`. No incluyen el cat
 
 ## Clientes, cotizaciones y boletas
 
+### CRM comercial
+
+El botón **CRM comercial** en la cabecera del cotizador y la opción del menú abren un panel del mismo espacio de trabajo. **Volver al cotizador** conserva la propuesta y los archivos en curso. `/crm` permite entrar directamente con la misma sesión; si falta iniciar sesión, regresa al CRM tras el acceso. Comparte Supabase, permisos, clientes y cotizaciones con el cotizador; no crea otra cuenta ni una base separada.
+
+El menú **CRM comercial** reúne los clientes activos sin propuesta (leads) y los proyectos cotizados. El tablero permite arrastrar tarjetas entre etapas compatibles o editar la etapa desde la ficha; la vista de lista permite revisar toda la cartera. Incluye búsqueda por cliente, comuna, correo, teléfono o folio, filtro por responsable del cliente y contactos pendientes según la fecha de Santiago.
+
+Los leads pasan por Nuevo lead, No contesta, Contactado, Calificado y Visita técnica, o se cierran como Perdidos. **Cotizar** abre el cotizador con su ficha; al guardar la propuesta aparece el proyecto en En cotización. Los proyectos usan el seguimiento existente, ampliado con Visita técnica y Negociación. Cada proyecto cuenta una sola vez y usa el importe de su última revisión activa. Se excluyen cotizaciones de prueba y registros en papelera. Los importes son propuestas comerciales, no ingresos cobrados. El responsable mostrado es el propietario de la ficha del cliente.
+
+La ficha incluye fecha estimada de cierre y motivo de pérdida, independientes del próximo contacto. El motivo se conserva al reabrir y puede borrarse explícitamente. Los guardados desde el historial anterior no borran estos campos. La migración `crm_sales_stages` y `supabase/tests/crm-sales.sql` cubren esta ampliación. Ver [referencia y alcance](docs/crm-reference.md).
+
+Las secciones **Oportunidades**, **Agenda y tareas** y **Contactos** comparten la cartera. Cada contacto tiene origen, prioridad y hasta 12 etiquetas. La agenda permite crear llamadas, visitas técnicas, preparación de propuestas y seguimientos, filtrarlos por responsable y vencimiento, editarlos, completarlos, cancelarlos o reabrirlos. Las tareas pertenecen al cliente y siguen disponibles cuando comienza a cotizar.
+
+Las notas se guardan en `client_notes` y se comparten con Clientes y entre los proyectos del contacto. El autor y la fecha los asigna la base de datos; las notas guardadas son inmutables. Los próximos contactos y las tareas son recordatorios dentro del CRM: no envían notificaciones ni mensajes automáticos. Los enlaces de correo, teléfono y WhatsApp abren la aplicación correspondiente. La etapa comercial tampoco acredita envío ni pago. No hay sincronización ni importación de GoHighLevel.
+
+La migración `crm_leads_and_notes` agrega el seguimiento inicial. `crm_tasks_and_contacts` agrega tareas y fichas comerciales y copia las notas iniciales de `crm_notes` al historial compartido. Ambas usan RLS vinculada a los permisos existentes de clientes. No alteran las propuestas guardadas. Las ediciones comprueban la versión para evitar sobrescrituras entre sesiones. Las lecturas paginan y rechazan explícitamente carteras que exceden 20.000 filas por origen, en lugar de mostrar totales parciales. `supabase/tests/crm.sql` y `supabase/tests/crm-work.sql` verifican aislamiento, autoría, concurrencia, papelera y cuentas deshabilitadas en transacciones con `ROLLBACK`.
+
+La vista local `/dev/crm` usa únicamente datos ficticios en memoria y está bloqueada en producción. Para probar la aplicación nativa, usar `SOLVEX_RUNTIME=nextjs` y la compilación predeterminada con Turbopack; el adaptador Sites conserva su entorno aparte.
+
 En el primer paso se puede seleccionar un cliente existente o registrar uno nuevo. **Guardar cliente** conserva la ficha sin exigir una propuesta completa. **Guardar en historial** conserva una versión de la cotización y su cliente; los cambios sin guardar siguen siendo temporales.
 
 La cámara del celular (si el navegador es compatible) y la carga de PDF/JPG/PNG permiten adjuntar frente y reverso. PDF.js lee texto; Tesseract.js lee fotos y páginas escaneadas en español, ajustando orientación y revisando hasta seis páginas por PDF. El OCR se realiza en el dispositivo. La revisión permite corregir y seleccionar campos sin sobrescribir automáticamente datos existentes. No se toman contactos de atención o pagos de la distribuidora como contactos del cliente. No se garantiza extracción completa de todos los formatos.

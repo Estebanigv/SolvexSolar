@@ -10,5 +10,5 @@ export async function GET(request:Request,{params}:{params:Promise<{id:string}>}
  return Response.json({client:client.data,quotes:(quotes.data??[]).map(q=>({...q.payload,projectId:q.project_id,parentQuoteId:q.parent_quote_id,date:q.created_at,sentOn:q.sent_on,sentChannel:q.sent_channel,followup:tracking.data?.find(f=>f.project_id===q.project_id)??null})),notes:notes.data,quoteCount:quotes.count,noteCount:notes.count},{headers:privateHeaders});
 })}
 export async function POST(request:Request,{params}:{params:Promise<{id:string}>}){return protectedApi(async()=>{
- checkOrigin(request);const {db}=await requireMember();const client_id=z.string().uuid().parse((await params).id),{body}=z.object({body:z.string().trim().min(1).max(3000)}).parse(await request.json());const result=await db.from('client_notes').insert({client_id,body});if(result.error)databaseError(result.error);return Response.json({ok:true},{headers:privateHeaders});
+ checkOrigin(request);const {db}=await requireMember();const client_id=z.string().uuid().parse((await params).id),{body}=z.object({body:z.string().trim().min(1).max(4000)}).parse(await request.json());const result=await db.from('client_notes').insert({client_id,body});if(result.error)databaseError(result.error);return Response.json({ok:true},{headers:privateHeaders});
 })}

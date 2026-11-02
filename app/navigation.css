@@ -46,3 +46,5 @@
 @media(min-width:1024px) and (max-height:800px){.grouped-navigation .nav-brand {padding-block:12px!important}.grouped-navigation .nav-brand img {height:50px;width:80px}.grouped-tabs .nav-section+.nav-section {margin-top:12px;padding-top:12px}.grouped-tabs .nav-section-heading p {display:none}}
 @media screen and (min-width:1024px){[data-slot=sidebar-wrapper]:has(>[data-state=collapsed]) .mobile-quote-bar {left:0}}
 @media(prefers-reduced-motion:reduce){[data-slot=sidebar-container],[data-slot=sidebar-gap] {transition:none!important}}
+.workspace .quote-heading-actions{flex-wrap:wrap;justify-content:flex-end}.workspace .workspace-panel-button{min-height:42px;white-space:nowrap;gap:8px}
+@media(max-width:600px){.workspace .quote-heading-actions{justify-content:flex-start}.workspace .workspace-panel-button{flex:1 1 160px}}
