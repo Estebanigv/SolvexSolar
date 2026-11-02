@@ -26,4 +26,7 @@ try{
  docker(['exec',name,'createdb','-U','postgres','solvex_crm_test']);
  docker(['exec','-i',name,'psql','-U','postgres','-d','solvex_crm_test','-v','ON_ERROR_STOP=1'],setup);
  console.log(docker(['exec','-i',name,'psql','-U','postgres','-d','solvex_crm_test','-v','ON_ERROR_STOP=1'],sql('supabase/tests/crm-assignment.sql')));
+ const admin=migrations.find(f=>f.endsWith('_crm_admin_shared_portfolio.sql'));
+ if(!admin)throw Error('Admin portfolio migration missing');
+ console.log(docker(['exec','-i',name,'psql','-U','postgres','-d','solvex_crm_test','-v','ON_ERROR_STOP=1'],sql(`supabase/migrations/${admin}`)+'\n'+sql('supabase/tests/crm-admin-portfolio.sql')));
 }finally{docker(['stop',name])}

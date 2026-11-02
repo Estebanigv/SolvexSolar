@@ -39,7 +39,7 @@ export async function GET(){return protectedApi(async()=>{
   }
   const tracking=new Map(followups.map(f=>[f.project_id,f]));
   const commercialProfiles=new Map(profiles.map(p=>[p.client_id,p]));
-  return Response.json({canViewAll,entries:buildCrmEntries(clients,quotes.map(q=>({...q,followup:tracking.get(q.project_id)})),leads).map(entry=>({...entry,contactProfile:commercialProfiles.get(entry.client.id)??null}))},{headers:privateHeaders});
+  return Response.json({canViewAll,currentUserId:user.id,entries:buildCrmEntries(clients,quotes.map(q=>({...q,followup:tracking.get(q.project_id)})),leads).map(entry=>({...entry,contactProfile:commercialProfiles.get(entry.client.id)??null}))},{headers:privateHeaders});
 })}
 
 export async function PUT(request:Request){return protectedApi(async()=>{
