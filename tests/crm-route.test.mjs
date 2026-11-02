@@ -12,7 +12,7 @@ for(const [name,path] of [['crm','app/api/crm/route.ts'],['notes','app/api/crm/n
         export const privateHeaders={'Cache-Control':'private, no-store'};
         export function databaseError(error){throw new AccessError('Database error',error.code==='42501'?403:503)}
         export function checkOrigin(request){if(request.headers.get('origin')!=='https://crm.test')throw new AccessError('Origin',403)}
-        export async function requireMember(){if(globalThis.__crmRoute.denied)throw new AccessError('Access',401);return {db:globalThis.__crmRoute.db,user:{id:globalThis.__crmRoute.userId},profile:{role:'admin'}}}
+        export async function requireMember(){if(globalThis.__crmRoute.denied)throw new AccessError('Access',401);return {db:globalThis.__crmRoute.db,user:{id:globalThis.__crmRoute.userId},profile:{role:globalThis.__crmRoute.supervisor?'admin':'sales'}}}
       `}));
     }
   }]});
@@ -72,7 +72,7 @@ globalThis.__crmRoute={db,userId};
 const request=(method,body,origin='https://crm.test')=>new Request('https://crm.test/api/crm',{method,headers:{origin,'content-type':'application/json'},body:JSON.stringify(body)});
 try{
   const response=await route.GET();assert.equal(response.status,200);assert.match(response.headers.get('cache-control'),/no-store/);
-  assert.equal((await response.json()).entries.length,501,'Read older client pages');
+  const initial=await response.json();assert.equal(initial.entries.length,501,'Read older client pages');assert.equal(initial.currentUserId,userId,'Identity for My leads comes from the server');
   const edit={client_id:id,status:'qualified',next_contact:null,expected:'2026-10-26T12:00:00Z'};
   assert.equal((await route.PUT(request('PUT',edit))).status,409);
   const closing={expected_close:'2026-11-20',lost_reason:'  Proyecto postergado  '};
@@ -103,7 +103,7 @@ try{
   assert.equal((await contact.PUT(request('PUT',{...profile,expected:null}))).status,409);
   assert.equal((await contact.PUT(request('PUT',{...profile,tags:['x'.repeat(31)]}))).status,400);
   assert.equal((await crmFollowup.PUT(request('PUT',{...edit,status:'visit'}),context)).status,409);
-  // A guessed ID must never permit a read or write outside an admin's own CRM.
+  // Sales users without supervision cannot read or write another owner's CRM.
   globalThis.__crmRoute.foreign=true;
   for(const [handler,method,body] of [[route.PUT,'PUT',edit],[notes.POST,'POST',{client_id:id,body:'note'}],[tasks.POST,'POST',task],[tasks.PATCH,'PATCH',taskEdit],[contact.PUT,'PUT',profile]]){
     const start=requests.length;

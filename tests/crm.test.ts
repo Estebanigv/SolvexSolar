@@ -1,3 +1,4 @@
+import {crmOwnershipNotice} from '../lib/crm-ownership';
 import assert from 'node:assert/strict';
 import {buildCrmEntries,quoteCrmTarget,findCrmTarget,contactDue,filterCrmEntries,leadFollowupSchema,crmNoteSchema,type CrmClient,type CrmQuote} from '../lib/crm';
 import {newQuote,calculate,initialProducts,initialSettings} from '../lib/quote';
@@ -50,3 +51,10 @@ assert.equal(quoteCrmTarget({...stored,input:{...stored.input,isTest:true}}),nul
 assert.deepEqual(quoteCrmTarget({...stored,isTest:false,input:{...stored.input,isTest:true}}),{projectId:'project-a'},'Current persisted test flag takes precedence');
 assert.deepEqual(quoteCrmTarget({...stored,id:'legacy',projectId:undefined}),{projectId:'legacy'});
 console.log('CRM links: quote revisions resolve the same project, with test and missing-record guards.');
+
+
+assert.equal(crmOwnershipNotice({...clients[0],owner:{full_name:'Owner A'}},'sales-a'),null,'Own prospect has no foreign-owner warning');
+assert.match(crmOwnershipNotice({...clients[0],owner:{full_name:'Owner A'}},'sales-b')??'',/Owner A/,'Foreign-owner warning identifies the responsible person');
+assert.equal(crmOwnershipNotice(clients[0],''),null,'Unknown identity never guesses ownership');
+assert.equal(filterCrmEntries(entries,'','sales-a',false).every(e=>e.client.owner_id==='sales-a'),true,'My leads uses the assigned client owner');
+assert.equal(filterCrmEntries(entries,'','admin-without-leads',false).length,0,'Admin without personal leads gets an empty personal portfolio');

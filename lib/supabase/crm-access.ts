@@ -9,7 +9,7 @@ export async function requireCrmMember(){
   return {...member,canViewAll:data===true};
 }
 
-// Global CRM access is a database permission, never the generic admin role.
+// The database grants global CRM access to active admins and explicit supervisors.
 export async function requireCrmClient(db:Member['db'],userId:string,clientId:string,canViewAll=false){
   let query=db.from('clients').select('id').eq('id',clientId).is('deleted_at',null);
   if(!canViewAll)query=query.eq('owner_id',userId);

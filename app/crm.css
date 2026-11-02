@@ -49,3 +49,11 @@
 .crm-activity-list time{font-size:11px;color:#657983}.crm-activity-list p{white-space:pre-wrap;overflow-wrap:anywhere;margin:8px 0;font-size:13px;line-height:1.6}
 .crm-activity-list small{font-size:11px;color:#526b75}
 @media(max-width:640px){.crm-smart-views{padding:14px 12px 0;gap:6px}.crm-smart-views button{font-size:11px;padding:8px 10px}.crm-board-tools{padding:0 12px 12px}.crm-extra-filters label{flex:1 1 145px;justify-content:space-between}.crm-extra-filters select{min-width:0;max-width:175px}.crm-detail-tabs{gap:14px}.crm-detail-tabs button{font-size:12px}}
+
+.crm-portfolio-controls{display:flex;align-items:center;flex-wrap:wrap;gap:16px;margin:0 0 22px;padding:18px 20px;border:1px solid #c6d9df;border-radius:12px;background:#f4f8f9}
+.crm-portfolio-controls .crm-owner{display:flex;align-items:center;gap:10px;margin-left:auto;color:#315663;font-size:14px}
+.crm-portfolio-controls select{min-height:44px;max-width:100%;border:1px solid #b9cdd5;border-radius:8px;padding:8px 12px;background:white;color:#163f4c;font:inherit}
+.crm-owner-badge{display:inline-flex;align-items:center;gap:6px;max-width:100%;padding:6px 9px;border:1px solid #c6dcdf;border-radius:8px;background:#edf5f4;color:#28594f;font-size:12px;line-height:1.5;white-space:normal;overflow-wrap:anywhere}
+.crm-owner-badge>svg,.crm-ownership-notice>svg{flex-shrink:0}.crm-owner-badge strong{font-weight:650}
+.crm-ownership-notice{display:flex;align-items:flex-start;gap:10px;padding:14px 16px;margin:0 0 18px;border:1px solid #e6ce91;border-radius:10px;background:#fff8e9;color:#76521d;font-size:14px;line-height:1.6}
+@media(max-width:700px){.crm-portfolio-controls{padding:16px;gap:14px}.crm-portfolio-controls .crm-owner{margin-left:0;flex-wrap:wrap;width:100%}.crm-portfolio-controls select{width:100%}.crm-portfolio-controls .crm-view{width:100%}.crm-portfolio-controls .crm-view button{flex:1}}
