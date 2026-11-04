@@ -13,8 +13,9 @@ export type HistoryQuote=SavedQuote&{
   purgeStartedAt?:string|null;
 };
 export const channelNames={whatsapp:'WhatsApp',email:'Correo',other:'Otro canal'};
+const chileCalendar=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Santiago',year:'numeric',month:'2-digit',day:'2-digit'});
 export function chileDate(value:Date|string=new Date()){
-  return new Intl.DateTimeFormat('en-CA',{timeZone:'America/Santiago',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(value));
+  return chileCalendar.format(new Date(value));
 }
 export const dateSchema=z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(s=>/^\d{4}-\d{2}-\d{2}$/.test(s)&&!Number.isNaN(Date.parse(s+'T12:00:00Z'))&&new Date(s+'T12:00:00Z').toISOString().slice(0,10)===s,'Fecha inválida');
 export const historyActionSchema=z.discriminatedUnion('action',[

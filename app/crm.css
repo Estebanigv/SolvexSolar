@@ -107,3 +107,30 @@
 .crm-card-delete{position:absolute;top:7px;right:7px;width:44px;height:44px;border:0;background:transparent}
 .crm-table .crm-delete-lead{margin-top:6px;color:#974331;font-size:12px}
 .crm-confirm-delete{background:#a53825;color:#fff}.crm-confirm-delete:hover{background:#862a1b}
+
+.crm-timing {display:grid;gap:4px;font-size:.8rem;color:#476271;margin:.5rem 0;line-height:1.45}
+.crm-timing .crm-attention {color:#8b4013;background:#fff1d9;padding:.25rem .5rem;border-radius:5px;justify-self:start}
+.crm-operations {display:grid;gap:14px}
+.crm-operations article,.crm-operations fieldset {display:grid;gap:8px}
+.crm-operations fieldset {border:1px solid #cbdad7;padding:14px;border-radius:8px}
+.crm-operations legend {font-weight:650;padding:0 .3em}
+.crm-operations a {color:#075960;text-decoration:underline}
+.crm-area-nav {flex-wrap:wrap}
+
+.crm-operations {padding:clamp(14px,2.2vw,28px)}
+.crm-operations>header h3,.crm-job h4 {margin:0;color:#123e49}
+.crm-operations>header h3 {font-size:1.32rem}
+.crm-operations>header p,.crm-job p,.crm-job small {color:#486774}
+.crm-job-filters {display:flex;flex-wrap:wrap;gap:7px}
+.crm-job-filters button,.crm-job header>span {padding:6px 10px;border:1px solid #c5d8d4;border-radius:6px;font-size:.8rem;background:#f5faf8;color:#285661}
+.crm-job-filters button[aria-pressed=true] {background:#123e49;color:white}
+.crm-job-filters b {margin-left:3px}
+.crm-jobs {display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:14px}
+.crm-operations .crm-job {align-content:start;gap:12px;border:1px solid #cedcdb;border-radius:9px;padding:18px;background:#fff}
+.crm-job header,.crm-job dl {display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:start}
+.crm-job header>span {background:#eaf4e8;color:#295b3c}
+.crm-job header>span[data-late=true],.crm-late {color:#953f14}
+.crm-job dl {background:#f0f6f5;padding:12px;justify-content:start;gap:22px;border-radius:6px}
+.crm-job dt {font-size:.78rem;color:#46616c}
+.crm-job dd {font-weight:650;margin:3px 0 0}
+.crm-job button {justify-self:start}

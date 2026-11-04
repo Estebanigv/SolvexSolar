@@ -33,3 +33,11 @@ assert.equal(input[0],future,'Sorting must not mutate the shared source');
 assert.deepEqual(sortCrmEntries([base,{...base,id:'zero',amount:0},{...base,id:'priced',amount:10}],'value',today).map(e=>e.id),['priced','zero','a']);
 assert.deepEqual(sortCrmEntries([base,{...base,id:'later',expectedClose:'2026-11-01'},{...base,id:'sooner',expectedClose:today}],'closing',today).map(e=>e.id),['sooner','later','a']);
 console.log('CRM views: work queues, closed exclusions, Santiago date boundaries and stable non-mutating sort passed.');
+
+const email={quoteId:'old-version',folio:'SVX-2026-000002',sentOn:'2026-10-23',recordedAt:'2026-10-23T12:00:00Z',replyOn:null};
+const waiting={...base,kind:'project' as const,stage:'sent' as const,lastEmail:email,lastSentOn:email.sentOn};
+assert.equal(matchesSmartView(waiting,'attention','2026-10-25'),false);
+assert.equal(matchesSmartView(waiting,'attention',today),true);
+assert.equal(matchesSmartView({...waiting,lastEmail:{...email,replyOn:today}},'attention',today),false);
+assert.equal(matchesSmartView({...waiting,stage:'accepted'},'attention',today),false);
+assert.equal(matchesSmartView({...base,kind:'project',firstQuotedAt:'2026-10-24T02:00:00Z'},'attention',today),true);

@@ -1,7 +1,8 @@
+import {attentionReason} from './crm-pipeline';
 import {closedCrmEntry,contactDue,type CrmEntry} from './crm';
 import {chileDate} from './quote-history';
 
-export const smartViews={all:'Toda la cartera',due:'Hoy y vencidos',overdue:'Vencidos',unplanned:'Sin próximo contacto',closing:'Cierre este mes',stale:'Sin cambios en 7 días'} as const;
+export const smartViews={all:'Toda la cartera',attention:'Requiere atención',due:'Hoy y vencidos',overdue:'Vencidos',unplanned:'Sin próximo contacto',closing:'Cierre este mes',stale:'Sin cambios en 7 días'} as const;
 export type SmartView=keyof typeof smartViews;
 export const crmSorts={attention:'Prioridad de atención',recent:'Últimos cambios',value:'Mayor monto',closing:'Fecha de cierre'} as const;
 export type CrmSort=keyof typeof crmSorts;
@@ -13,6 +14,7 @@ export function matchesSmartView(entry:CrmEntry,view:SmartView,today:string){
  if(view==='all')return true;
  if(closedCrmEntry(entry))return false;
  switch(view){
+  case 'attention':return !!attentionReason(entry,today);
   case 'due':return contactDue(entry,today);
   case 'overdue':return !!entry.nextContact&&entry.nextContact<today;
   case 'unplanned':return !entry.nextContact;
@@ -30,7 +32,7 @@ export function contactIndicator(entry:CrmEntry,today:string){
 }
 export function sortCrmEntries(entries:CrmEntry[],sort:CrmSort,today:string){
  const priority={high:0,normal:1,low:2};
- const urgency=(e:CrmEntry)=>closedCrmEntry(e)?4:contactDue(e,today)?0:!e.nextContact?1:2;
+ const urgency=(e:CrmEntry)=>closedCrmEntry(e)?4:attentionReason(e,today)?0:!e.nextContact?1:2;
  const date=(s:string|null|undefined)=>s||'9999-12-31';
  return [...entries].sort((a,b)=>{
   let order=0;

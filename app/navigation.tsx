@@ -1,7 +1,7 @@
 "use client";
 import {useEffect} from 'react';
 import Image from 'next/image';
-import {FileText,Package,History,Settings,ClipboardList,ChevronRight,X,Users,ChartNoAxesCombined,BookOpen,Kanban} from 'lucide-react';
+import {FileText,Package,History,Settings,ClipboardList,ChevronRight,X,Users,ChartNoAxesCombined,BookOpen,Kanban,Truck} from 'lucide-react';
 import {TabsList,TabsTrigger} from '@/components/ui/tabs';
 import {Sidebar,SidebarHeader,SidebarContent,SidebarTrigger,SidebarMenu,SidebarMenuItem,SidebarMenuButton,useSidebar} from '@/components/ui/sidebar';
 import './navigation.css';
@@ -13,7 +13,7 @@ export function AppNavigation({tab,isAdmin=true,usesSupabase=false,preview=false
   {id:'commercial',name:'Cotizador',description:'Proyectos y clientes',items:[
    {id:'quote',name:'Cotizador',icon:FileText},
    {id:'history',name:'Cotizaciones',icon:History},
-   ...(usesSupabase?[{id:'crm',name:'CRM comercial',icon:Kanban},{id:'clients',name:'Clientes',icon:Users}]:[]),
+   ...(usesSupabase?[{id:'crm',name:'CRM comercial',icon:Kanban},{id:'logistics',name:'Logística CRM',icon:Truck},{id:'clients',name:'Clientes',icon:Users}]:[]),
   ]},
   {id:'company',name:'Empresa',description:'Gestión interna',items:[
    ...(usesSupabase&&isAdmin?[{id:'dashboard',name:'Resumen de gestión',icon:ChartNoAxesCombined}]:[]),
@@ -32,7 +32,7 @@ export function AppNavigation({tab,isAdmin=true,usesSupabase=false,preview=false
   </SidebarHeader>
   <SidebarContent className="nav-content">
    <TabsList className="side-tabs grouped-tabs" aria-label="Navegación principal">
-    {groups.map(group=>({...group,items:group.items.filter(item=>!preview||['quote','crm','guide'].includes(item.id))})).filter(group=>group.items.length>0).map(group=><div className="nav-section" key={group.id} role="group" aria-labelledby={`nav-${group.id}`}>
+    {groups.map(group=>({...group,items:group.items.filter(item=>!preview||['quote','crm','logistics','guide'].includes(item.id))})).filter(group=>group.items.length>0).map(group=><div className="nav-section" key={group.id} role="group" aria-labelledby={`nav-${group.id}`}>
      <div className="nav-section-heading"><h2 id={`nav-${group.id}`}>{group.name}</h2><p>{group.description}</p></div>
      <SidebarMenu>{group.items.map(({id,name,icon:Icon})=><SidebarMenuItem key={id}>
       <SidebarMenuButton asChild isActive={tab===id}><TabsTrigger value={id} onClick={()=>{if(tab===id)setOpenMobile(false)}}><Icon/><span>{name}</span>{tab===id&&<ChevronRight className="nav-arrow"/>}</TabsTrigger></SidebarMenuButton>
